@@ -59,8 +59,6 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
-Conflicts:
- librem5-base
 Description: OSK stub to fulfil session dependencies
  Phosh's session wants a sm.puri.OSK0. For testing on non-phone's
  this stub fulfills the necessary dependencies.
