@@ -1,0 +1,38 @@
+From 828d6be294310e953d4cd55fd835cdffa7dc0e66 Mon Sep 17 00:00:00 2001
+From: Arnaud Ferraris <arnaud.ferraris@collabora.com>
+Date: Wed, 15 Apr 2020 15:06:47 +0200
+Subject: [PATCH] data: add 'System' category to desktop entries
+
+---
+ data/sm.puri.OSK0.desktop.in.in  | 2 +-
+ data/sm.puri.Phosh.desktop.in.in | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/data/sm.puri.OSK0.desktop.in.in b/data/sm.puri.OSK0.desktop.in.in
+index a0cafa1..da76430 100644
+--- a/data/sm.puri.OSK0.desktop.in.in
++++ b/data/sm.puri.OSK0.desktop.in.in
+@@ -3,7 +3,7 @@ Type=Application
+ Name=On-screen keyboard stub
+ Comment=On-screen keyboard stub
+ Exec=@bindir@/phosh-osk-stub
+-Categories=GNOME;Core;
++Categories=System;GNOME;Core;
+ OnlyShowIn=GNOME;
+ NoDisplay=true
+ X-GNOME-Autostart-Phase=Panel
+diff --git a/data/sm.puri.Phosh.desktop.in.in b/data/sm.puri.Phosh.desktop.in.in
+index 878730b..6732847 100644
+--- a/data/sm.puri.Phosh.desktop.in.in
++++ b/data/sm.puri.Phosh.desktop.in.in
+@@ -3,7 +3,7 @@ Type=Application
+ Name=Phone Shell
+ Comment=Window management and application launching for mobile
+ Exec=@libexecdir@/phosh
+-Categories=GNOME;GTK;Core;
++Categories=System;GNOME;GTK;Core;
+ OnlyShowIn=GNOME;
+ NoDisplay=true
+ X-GNOME-Autostart-Phase=DisplayServer
+-- 
+2.25.1
