@@ -51,7 +51,7 @@ Description: Pure Wayland shell for mobile devices
   * acting as a polkit auth agent
   * enough of org.gnome.Mutter.DisplayConfig to make gnome-settings-daemon happy
   * a homebutton that toggles a simple favorites menu
-  * status icons for battery, wwan and wifi
+  * status icons for battery, WWAN and Wi-Fi
  .
  If you're not working on a Wayland compositor then this package is likely not
  very useful for you.
@@ -61,6 +61,6 @@ Architecture: any
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
-Description: OSK stub to fulfil session dependencies
+Description: OSK stub to fulfill session dependencies
  Phosh's session wants a sm.puri.OSK0. For testing on non-phone's
  this stub fulfills the necessary dependencies.
