@@ -3,7 +3,7 @@ Section: x11
 Priority: optional
 Maintainer: Arnaud Ferraris <arnaud.ferraris@gmail.com>
 Build-Depends:
- debhelper-compat (= 12),
+ debhelper-compat (= 13),
  libsecret-1-dev,
  libfeedback-dev,
  libgcr-3-dev,
