@@ -1,7 +1,8 @@
 Source: phosh
 Section: x11
 Priority: optional
-Maintainer: Arnaud Ferraris <arnaud.ferraris@gmail.com>
+Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-lists.debian.net>
+Uploaders: Arnaud Ferraris <arnaud.ferraris@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
  gtk-doc-tools,
