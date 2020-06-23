@@ -3,12 +3,9 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <requires lib="libhandy" version="0.0"/>
-  <template class="PhoshSettings" parent="GtkWindow">
+  <template class="PhoshSettings" parent="GtkBin">
     <property name="width_request">250</property>
     <property name="can_focus">False</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="HdyColumn">
         <property name="visible">True</property>
@@ -24,7 +21,7 @@
             <property name="margin_bottom">10</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkFlowBox" id="quick_setting">
+              <object class="GtkFlowBox" id="quick_settings">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="column_spacing">6</property>
@@ -36,7 +33,7 @@
                 <child>
                   <object class="PhoshQuickSetting">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <signal name="clicked" handler="batteryinfo_clicked_cb" object="PhoshSettings" swapped="yes"/>
                     <signal name="long-pressed" handler="batteryinfo_clicked_cb" object="PhoshSettings" swapped="yes"/>
                     <child>
@@ -52,7 +49,7 @@
                 <child>
                   <object class="PhoshQuickSetting">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <signal name="clicked" handler="rotation_setting_clicked_cb" object="PhoshSettings" swapped="yes"/>
                     <child>
                       <object class="PhoshRotateInfo" id="rotateinfo">
@@ -66,7 +63,7 @@
                 <child>
                   <object class="PhoshQuickSetting">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
+                    <property name="can_focus">False</property>
                     <signal name="clicked" handler="feedback_setting_clicked_cb" object="PhoshSettings" swapped="yes"/>
                     <signal name="long-pressed" handler="feedback_setting_long_pressed_cb" object="PhoshSettings" swapped="yes"/>
                     <child>
@@ -125,84 +122,22 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButtonBox">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">center</property>
-                <property name="margin_bottom">10</property>
-                <property name="layout_style">start</property>
+              <object class="GtkScrolledWindow" id="sw_notifications">
+                <property name="visible">False</property>
+                <property name="vscrollbar-policy">automatic</property>
+                <property name="hscrollbar-policy">never</property>
+                <property name="propagate-natural-height">True</property>
+                <property name="min-content-height">250</property>
                 <child>
-                  <object class="GtkButton" id="btn_settings">
-                    <property name="width_request">56</property>
-                    <property name="height_request">56</property>
+                  <object class="GtkListBox" id="list_notifications">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="margin_top">10</property>
-                    <property name="relief">none</property>
-                    <property name="always_show_image">True</property>
-                    <style>
-                      <class name="circular"/>
-                    </style>
+                    <property name="selection-mode">none</property>
                   </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
                 </child>
-                <child>
-                  <object class="GtkButton" id="btn_lock_screen">
-                    <property name="width_request">56</property>
-                    <property name="height_request">56</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="margin_top">10</property>
-                    <property name="relief">none</property>
-                    <property name="always_show_image">True</property>
-                    <style>
-                      <class name="circular"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButton" id="btn_shutdown">
-                    <property name="width_request">56</property>
-                    <property name="height_request">56</property>
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">True</property>
-                    <property name="halign">center</property>
-                    <property name="valign">center</property>
-                    <property name="margin_top">10</property>
-                    <property name="relief">none</property>
-                    <property name="always_show_image">True</property>
-                    <style>
-                      <class name="circular"/>
-                    </style>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">2</property>
-                  </packing>
-                </child>
+                <style>
+                  <class name="phosh-notification-tray"/>
+                </style>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">4</property>
-              </packing>
             </child>
           </object>
         </child>

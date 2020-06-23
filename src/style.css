@@ -41,6 +41,11 @@
     border: 2px solid @theme_bg_color;
 }
 
+.phosh-notification-tray, .phosh-notification-tray list {
+  border-radius: 6px;
+  background-color: #282828;
+}
+
 /* Favorites / Home screen */
 phosh-activity {
     background: white;
@@ -207,6 +212,9 @@ phosh-notification-frame {
   border-radius: 6px;
   background-color: #282828;
   margin: 12px;
+}
+
+phosh-notification-banner > phosh-notification-frame {
   box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.33),
               0px 5px 6px 0px rgba(0, 0, 0, 0.07),
               0px 0px 0px 1px rgba(0, 0, 0, 0.2);

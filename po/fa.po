@@ -1,173 +1,173 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Persian translation for phosh.
+# Copyright (C) 2020 phosh's COPYRIGHT HOLDER
 # This file is distributed under the same license as the phosh package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Danial Behzadi <dani.behzi@ubuntu.com>, 2020.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: phosh\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-21 15:16+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"Project-Id-Version: phosh master\n"
+"Report-Msgid-Bugs-To: https://source.puri.sm/Librem5/phosh/issues\n"
+"POT-Creation-Date: 2020-04-24 15:35+0000\n"
+"PO-Revision-Date: 2020-04-24 19:39+0000\n"
+"Language-Team: Persian <fa@li.org>\n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Last-Translator: \n"
+"X-Generator: Poedit 2.3\n"
 
 #. Translators: this is the session name, no need to translate it
 #: data/phosh.session.desktop.in.in:4
 msgid "Phosh"
-msgstr ""
+msgstr "فوش"
 
 #: data/sm.puri.Phosh.desktop.in.in:4
 msgid "Phone Shell"
-msgstr ""
+msgstr "پوستهٔ همراه"
 
 #: data/sm.puri.Phosh.desktop.in.in:5
 msgid "Window management and application launching for mobile"
-msgstr ""
+msgstr "مدیریت پنجره‌ها و اجرا کنندهٔ برنامه‌ها برای تلفن همراه"
 
 #: src/app-grid-button.c:527
 msgid "Application"
-msgstr ""
+msgstr "برنامه"
 
 #: src/feedbackinfo.c:38
 msgid "Quiet"
-msgstr ""
+msgstr "کم‌صدا"
 
 #: src/feedbackinfo.c:40
 msgid "Silent"
-msgstr ""
+msgstr "بی‌صدا"
 
 #: src/feedbackinfo.c:42
 msgid "On"
-msgstr ""
+msgstr "روشن"
 
 #: src/lockscreen.c:74 src/ui/lockscreen.ui:204
 msgid "Enter Passcode"
-msgstr ""
+msgstr "ورود رمز عبور"
 
 #: src/lockscreen.c:253
 msgid "Checking…"
-msgstr ""
+msgstr "در حال بررسی…"
 
 #. Translators: This is a time format for a date in
 #. long format
 #: src/lockscreen.c:330
 msgid "%A, %B %d"
-msgstr ""
+msgstr "%A، %Od %OB"
 
 #: src/monitor-manager.c:53
 msgid "Built-in display"
-msgstr ""
+msgstr "نمایشگر توکار"
 
 #. Translators: An unknown monitor type
 #: src/monitor-manager.c:57
 msgid "Unknown"
-msgstr ""
+msgstr "ناشناخته"
 
 #: src/network-auth-prompt.c:184
 #, c-format
 msgid "Authentication type of wifi network “%s” not supported"
-msgstr ""
+msgstr "گونهٔ تأییدیهٔ شبکهٔ وای‌فای %s پشتیبانی نمی‌شود"
 
 #: src/network-auth-prompt.c:189
 #, c-format
 msgid "Enter password for the wifi network “%s”"
-msgstr ""
+msgstr "ورود گذرواژه برای شبکهٔ وای‌فای %s"
 
 #: src/notifications/notification.c:298 src/notifications/notification.c:504
 msgid "Notification"
-msgstr ""
+msgstr "آگاهی"
 
 #: src/polkit-auth-agent.c:229
 msgid "Authentication dialog was dismissed by the user"
-msgstr ""
+msgstr "گفت‌وگوی تأیید هویت از سمت کاربر رد شد"
 
 #: src/polkit-auth-prompt.c:276 src/ui/network-auth-prompt.ui:128
 #: src/ui/polkit-auth-prompt.ui:41 src/ui/system-prompt.ui:39
 msgid "Password:"
-msgstr ""
+msgstr "گذرواژه:"
 
 #: src/polkit-auth-prompt.c:322
 msgid "Sorry, that didn’t work. Please try again."
-msgstr ""
+msgstr "متاسفانه اثری نداشت! لطفاً دوباره تلاش کنید."
 
 #: src/polkit-auth-prompt.c:488
 msgid "Authenticate"
-msgstr ""
+msgstr "تأیید هویت"
 
 #: src/system-prompt.c:371
 msgid "Passwords do not match."
-msgstr ""
+msgstr "گذرواژه‌های مطابق نیستند."
 
 #: src/system-prompt.c:378
 msgid "Password cannot be blank"
-msgstr ""
+msgstr "گذرواژه نمی‌تواند خالی باشد"
 
 #: src/ui/app-grid-button.ui:48
 msgid "App"
-msgstr ""
+msgstr "کاره"
 
 #: src/ui/app-grid-button.ui:75
 msgid "Remove from _Favorites"
-msgstr ""
+msgstr "برداشتن از _محبوب‌ها"
 
 #: src/ui/app-grid-button.ui:80
 msgid "Add to _Favorites"
-msgstr ""
+msgstr "افزودن به _محبوب‌ها"
 
 #: src/ui/app-grid.ui:21
 msgid "Search apps…"
-msgstr ""
+msgstr "جست‌وجوی کاره‌ها…"
 
 #: src/ui/lockscreen.ui:36
 msgid "Slide up to unlock"
-msgstr ""
+msgstr "برای قفل‌گشایی، بالا بکشید"
 
 #: src/ui/lockscreen.ui:250
 msgid "Emergency"
-msgstr ""
+msgstr "اضطراری"
 
 #: src/ui/lockscreen.ui:266
 msgid "Unlock"
-msgstr ""
+msgstr "قفل‌گشایی"
 
 #: src/ui/network-auth-prompt.ui:90
 msgid "_Cancel"
-msgstr ""
+msgstr "_لغو"
 
 #: src/ui/network-auth-prompt.ui:106
 msgid "C_onnect"
-msgstr ""
+msgstr "_وصل شدن"
 
 #: src/ui/polkit-auth-prompt.ui:105
 msgid "User:"
-msgstr ""
+msgstr "کاربر:"
 
 #: src/ui/system-prompt.ui:69
 msgid "Confirm:"
-msgstr ""
+msgstr "تأیید:"
 
 #: src/ui/top-panel.ui:15
 msgid "Lock Screen"
-msgstr ""
+msgstr "قفل کردن صفحه"
 
 #: src/ui/top-panel.ui:22
 msgid "Suspend"
-msgstr ""
+msgstr "تعلیق"
 
 #: src/ui/top-panel.ui:29
 msgid "Logout"
-msgstr ""
+msgstr "خروج"
 
 #: src/ui/top-panel.ui:36
 msgid "Power Off"
-msgstr ""
+msgstr "خاموش کردن"
 
 #: src/wifiinfo.c:55
 msgid "Wi-Fi"
-msgstr ""
+msgstr "وای‌فای"

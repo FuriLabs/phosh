@@ -24,6 +24,7 @@
 enum {
   PHOSH_MONITOR_PROP_0,
   PHOSH_MONITOR_PROP_WL_OUTPUT,
+  PHOSH_MONITOR_PROP_POWER_MODE,
   PHOSH_MONITOR_PROP_LAST_PROP,
 };
 static GParamSpec *props[PHOSH_MONITOR_PROP_LAST_PROP];
@@ -215,19 +216,25 @@ wlr_output_power_handle_mode(void *data,
                              enum zwlr_output_power_v1_mode mode)
 {
   PhoshMonitor *self = data;
+  PhoshMonitorPowerSaveMode m;
 
   g_return_if_fail (PHOSH_IS_MONITOR (self));
 
   switch (mode) {
   case ZWLR_OUTPUT_POWER_V1_MODE_OFF:
-    g_debug ("Monitor %s disabled\n", self->name);
+    g_debug ("Monitor %s disabled", self->name);
+    m = PHOSH_MONITOR_POWER_SAVE_MODE_OFF;
     break;
   case ZWLR_OUTPUT_POWER_V1_MODE_ON:
-    g_debug ("Monitor %p enabled\n", self->name);
+    g_debug ("Monitor %s enabled", self->name);
+    m = PHOSH_MONITOR_POWER_SAVE_MODE_ON;
     break;
   default:
     g_return_if_reached ();
   }
+
+  self->power_mode = m;
+  g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_MONITOR_PROP_POWER_MODE]);
 }
 
 static void
@@ -276,6 +283,9 @@ phosh_monitor_get_property (GObject *object,
   switch (property_id) {
   case PHOSH_MONITOR_PROP_WL_OUTPUT:
     g_value_set_pointer (value, self->wl_output);
+    break;
+  case PHOSH_MONITOR_PROP_POWER_MODE:
+    g_value_set_enum (value, self->power_mode);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -347,6 +357,14 @@ phosh_monitor_class_init (PhoshMonitorClass *klass)
                           G_PARAM_READWRITE |
                           G_PARAM_CONSTRUCT_ONLY |
                           G_PARAM_STATIC_STRINGS);
+  props[PHOSH_MONITOR_PROP_POWER_MODE] =
+    g_param_spec_enum ("power-mode",
+                       "power-mode",
+                       "The wayland power mode for this monitor",
+                       PHOSH_TYPE_MONITOR_POWER_SAVE_MODE,
+                       PHOSH_MONITOR_POWER_SAVE_MODE_OFF,
+                       G_PARAM_READABLE |
+                       G_PARAM_STATIC_STRINGS);
   g_object_class_install_properties (object_class, PHOSH_MONITOR_PROP_LAST_PROP, props);
 
   /**
@@ -369,6 +387,7 @@ phosh_monitor_init (PhoshMonitor *self)
 {
   self->scale = 1.0;
   self->modes = g_array_new (FALSE, FALSE, sizeof(PhoshMonitorMode));
+  self->power_mode = PHOSH_MONITOR_POWER_SAVE_MODE_OFF;
 }
 
 
@@ -484,4 +503,27 @@ phosh_monitor_get_rotation (PhoshMonitor *self)
     default:
       g_assert_not_reached ();
     }
+}
+
+void
+phosh_monitor_set_power_save_mode (PhoshMonitor *self, PhoshMonitorPowerSaveMode mode)
+{
+  enum zwlr_output_power_v1_mode wl_mode;
+
+  g_return_if_fail (PHOSH_IS_MONITOR (self));
+  g_return_if_fail (phosh_monitor_is_configured (self));
+  g_return_if_fail (self->wlr_output_power);
+
+  switch (mode) {
+  case PHOSH_MONITOR_POWER_SAVE_MODE_OFF:
+    wl_mode = ZWLR_OUTPUT_POWER_V1_MODE_OFF;
+    break;
+  case PHOSH_MONITOR_POWER_SAVE_MODE_ON:
+    wl_mode = ZWLR_OUTPUT_POWER_V1_MODE_ON;
+    break;
+  default:
+    g_return_if_reached ();
+  }
+
+  zwlr_output_power_v1_set_mode (self->wlr_output_power, wl_mode);
 }

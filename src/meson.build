@@ -15,6 +15,7 @@ phosh_resources = gnome.compile_resources(
 
 phosh_enum_headers = [
   'home.h',
+  'monitor/monitor.h',
   'notifications/notification.h',
   'notifications/notify-manager.h',
   'app-grid-button.h'
@@ -49,6 +50,8 @@ libphosh_sources = [
   'app-list-model.h',
   'favorite-list-model.c',
   'favorite-list-model.h',
+  'feedback-manager.c',
+  'feedback-manager.h',
   'layersurface.c',
   'layersurface.h',
   'overview.c',
@@ -79,8 +82,6 @@ phosh_sources = [
   'contrib/shell-network-agent.h',
   'fader.c',
   'fader.h',
-  'feedback-manager.c',
-  'feedback-manager.h',
   'feedbackinfo.c',
   'feedbackinfo.h',
   'home.c',

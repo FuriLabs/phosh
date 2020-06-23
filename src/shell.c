@@ -32,6 +32,7 @@
 #include "monitor-manager.h"
 #include "monitor/monitor.h"
 #include "notifications/notify-manager.h"
+#include "notifications/notification-banner.h"
 #include "osk-manager.h"
 #include "panel.h"
 #include "phosh-wayland.h"
@@ -40,7 +41,6 @@
 #include "sensor-proxy-manager.h"
 #include "screen-saver-manager.h"
 #include "session.h"
-#include "settings.h"
 #include "system-prompter.h"
 #include "util.h"
 #include "wifiinfo.h"
@@ -56,22 +56,17 @@ enum {
 };
 static GParamSpec *props[PHOSH_SHELL_PROP_LAST_PROP];
 
-
-struct popup {
-  GtkWidget *window;
-  struct wl_surface *wl_surface;
-  struct xdg_popup *popup;
-};
-
 typedef struct
 {
   PhoshLayerSurface *panel;
   PhoshLayerSurface *home;
   GPtrArray *faders;              /* for final fade out */
-  struct popup *settings;
+
+  GtkWidget *notification_banner;
 
   PhoshBackgroundManager *background_manager;
   PhoshMonitor *primary_monitor;
+  PhoshMonitor *builtin_monitor;
   PhoshMonitorManager *monitor_manager;
   PhoshLockscreenManager *lockscreen_manager;
   PhoshIdleManager *idle_manager;
@@ -86,6 +81,8 @@ typedef struct
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
   PhoshProximity *proximity;
+
+  gboolean startup_finished;
 } PhoshShellPrivate;
 
 
@@ -97,149 +94,14 @@ typedef struct _PhoshShell
 G_DEFINE_TYPE_WITH_PRIVATE (PhoshShell, phosh_shell, G_TYPE_OBJECT)
 
 
-static struct popup**
-get_popup_from_xdg_popup (PhoshShell *self, struct xdg_popup *xdg_popup)
-{
-  PhoshShellPrivate *priv;
-  struct popup **popup = NULL;
-
-  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
-
-  priv = phosh_shell_get_instance_private (self);
-
-  if (priv->settings && xdg_popup == priv->settings->popup)
-    popup = &priv->settings;
-
-  g_return_val_if_fail (popup, NULL);
-  return popup;
-}
-
-
-static void
-close_menu (struct popup **popup)
-{
-  if (*popup == NULL)
-    return;
-
-  gtk_window_close (GTK_WINDOW ((*popup)->window));
-  gtk_widget_destroy (GTK_WIDGET ((*popup)->window));
-  free (*popup);
-  *popup = NULL;
-}
-
-
-static void
-xdg_surface_handle_configure(void *data,
-                             struct xdg_surface *xdg_surface,
-                             uint32_t serial)
-{
-  xdg_surface_ack_configure(xdg_surface, serial);
-  // Whatever
-}
-
-static const struct xdg_surface_listener xdg_surface_listener = {
-	.configure = xdg_surface_handle_configure,
-};
-
-
-static void
-xdg_popup_configure(void *data, struct xdg_popup *xdg_popup,
-                    int32_t x, int32_t y, int32_t w, int32_t h)
-{
-  PhoshShell *self = data;
-  struct popup *popup = *get_popup_from_xdg_popup(self, xdg_popup);
-
-  g_return_if_fail (popup);
-  g_debug("Popup configured %dx%d@%d,%d\n", w, h, x, y);
-  gtk_window_resize (GTK_WINDOW (popup->window), w, h);
-  gtk_widget_show (popup->window);
-}
-
-static void xdg_popup_done(void *data, struct xdg_popup *xdg_popup) {
-  PhoshShell *self = data;
-  struct popup **popup = get_popup_from_xdg_popup(self, xdg_popup);
-
-  g_return_if_fail (popup);
-  xdg_popup_destroy((*popup)->popup);
-  gtk_widget_destroy ((*popup)->window);
-  *popup = NULL;
-}
-
-static const struct xdg_popup_listener xdg_popup_listener = {
-	.configure = xdg_popup_configure,
-	.popup_done = xdg_popup_done,
-};
-
-
-static void
-setting_done_cb (PhoshShell *self,
-                 PhoshSettings *settings)
-{
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
-
-  g_return_if_fail (priv->settings);
-  close_menu (&priv->settings);
-}
-
-
 static void
 settings_activated_cb (PhoshShell *self,
                        PhoshPanel *window)
 {
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
-  GdkWindow *gdk_window;
-  struct popup *settings;
-  struct xdg_surface *xdg_surface;
-  struct xdg_positioner *xdg_positioner;
-  gint width, height, panel_width;
-  PhoshWayland *wl = phosh_wayland_get_default ();
-  gpointer xdg_wm_base = phosh_wayland_get_xdg_wm_base(wl);
-  struct zwlr_layer_surface_v1 *panel_surface;
 
-  if (priv->settings) {
-    close_menu (&priv->settings);
-    return;
-  }
-
-  phosh_osk_manager_set_visible (priv->osk_manager, FALSE);
-  phosh_home_set_state (PHOSH_HOME (priv->home), PHOSH_HOME_STATE_FOLDED);
-
-  settings = calloc (1, sizeof *settings);
-  settings->window = phosh_settings_new ();
-
-  gdk_window = gtk_widget_get_window (settings->window);
-  gdk_wayland_window_set_use_custom_surface (gdk_window);
-  settings->wl_surface = gdk_wayland_window_get_wl_surface (gdk_window);
-
-  xdg_surface = xdg_wm_base_get_xdg_surface(xdg_wm_base, settings->wl_surface);
-  g_return_if_fail (xdg_surface);
-  xdg_positioner = xdg_wm_base_create_positioner(xdg_wm_base);
-  gtk_window_get_size (GTK_WINDOW (settings->window), &width, &height);
-  xdg_positioner_set_size(xdg_positioner, width, height);
-  phosh_shell_get_usable_area (self, NULL, NULL, &panel_width, NULL);
-  xdg_positioner_set_offset(xdg_positioner, -width+1, PHOSH_PANEL_HEIGHT-1);
-  xdg_positioner_set_anchor_rect(xdg_positioner, panel_width-1, 0, panel_width-2, 1);
-  xdg_positioner_set_anchor(xdg_positioner, XDG_POSITIONER_ANCHOR_BOTTOM_LEFT);
-  xdg_positioner_set_gravity(xdg_positioner, XDG_POSITIONER_GRAVITY_BOTTOM_RIGHT);
-
-  settings->popup = xdg_surface_get_popup(xdg_surface, NULL, xdg_positioner);
-  g_return_if_fail (settings->popup);
-  priv->settings = settings;
-
-  panel_surface = phosh_layer_surface_get_layer_surface(priv->panel);
-  /* TODO: how to get meaningful serial from GDK? */
-  xdg_popup_grab(settings->popup, phosh_wayland_get_wl_seat (wl), 1);
-  zwlr_layer_surface_v1_get_popup(panel_surface, settings->popup);
-  xdg_surface_add_listener(xdg_surface, &xdg_surface_listener, NULL);
-  xdg_popup_add_listener(settings->popup, &xdg_popup_listener, self);
-
-  wl_surface_commit(settings->wl_surface);
-  xdg_positioner_destroy(xdg_positioner);
-
-  g_signal_connect_swapped (priv->settings->window,
-                            "setting-done",
-                            G_CALLBACK(setting_done_cb),
-                            self);
+  g_return_if_fail (PHOSH_IS_PANEL (priv->panel));
+  phosh_panel_toggle_fold (PHOSH_PANEL(priv->panel));
 }
 
 
@@ -256,16 +118,27 @@ phosh_shell_unlock (PhoshShell *self)
   phosh_shell_set_locked (self, FALSE);
 }
 
-
+/**
+ * phosh_shell_set_locked:
+ *
+ * Lock the shell. We proxy to lockscreen-manager to avoid
+ * that other parts of the shell need to care about this
+ * abstraction.
+ */
 void
 phosh_shell_set_locked (PhoshShell *self, gboolean state)
 {
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  gboolean current;
+
+  current = phosh_lockscreen_manager_get_locked (priv->lockscreen_manager);
+
+  if (current == state)
+    return;
 
   phosh_lockscreen_manager_set_locked (priv->lockscreen_manager, state);
   g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_SHELL_PROP_LOCKED]);
 }
-
 
 static void
 on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
@@ -279,8 +152,10 @@ on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
   priv = phosh_shell_get_instance_private (self);
 
   g_object_get (priv->home, "state", &state, NULL);
-  if (state == PHOSH_HOME_STATE_UNFOLDED)
+  if (state == PHOSH_HOME_STATE_UNFOLDED) {
+    phosh_panel_fold (PHOSH_PANEL (priv->panel));
     phosh_osk_manager_set_visible (priv->osk_manager, FALSE);
+  }
 }
 
 
@@ -422,6 +297,7 @@ phosh_shell_dispose (GObject *object)
   }
 
   panels_dispose (self);
+  g_clear_object (&priv->notification_banner);
   g_clear_object (&priv->notify_manager);
   g_clear_object (&priv->screen_saver_manager);
   g_clear_object (&priv->lockscreen_manager);
@@ -470,6 +346,34 @@ on_toplevel_added (PhoshShell *self, GParamSpec *pspec, PhoshToplevelManager *to
 }
 
 
+static void
+on_new_notification (PhoshShell         *self,
+                     PhoshNotification  *notification,
+                     PhoshNotifyManager *manager)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  g_return_if_fail (PHOSH_IS_NOTIFICATION (notification));
+  g_return_if_fail (PHOSH_IS_NOTIFY_MANAGER (manager));
+
+  priv = phosh_shell_get_instance_private (self);
+
+  /* Clear existing banner */
+  if (priv->notification_banner && GTK_IS_WIDGET (priv->notification_banner)) {
+    gtk_widget_destroy (priv->notification_banner);
+  }
+
+  if (phosh_notify_manager_get_show_banners (manager) &&
+      !phosh_lockscreen_manager_get_locked (priv->lockscreen_manager)) {
+    g_set_weak_pointer (&priv->notification_banner,
+                        phosh_notification_banner_new (notification));
+
+    gtk_widget_show (GTK_WIDGET (priv->notification_banner));
+  }
+}
+
+
 static gboolean
 on_fade_out_timeout (PhoshShell *self)
 {
@@ -512,6 +416,11 @@ setup_idle_cb (PhoshShell *self)
     priv->lockscreen_manager);
 
   priv->notify_manager = phosh_notify_manager_get_default ();
+  g_signal_connect_object (priv->notify_manager,
+                           "new-notification",
+                           G_CALLBACK (on_new_notification),
+                           self,
+                           G_CONNECT_SWAPPED);
 
   priv->sensor_proxy_manager = phosh_sensor_proxy_manager_get_default_failable ();
   if (priv->sensor_proxy_manager) {
@@ -521,6 +430,9 @@ setup_idle_cb (PhoshShell *self)
   }
 
   phosh_session_register (PHOSH_APP_ID);
+
+  priv->startup_finished = TRUE;
+
   return FALSE;
 }
 
@@ -532,6 +444,20 @@ type_setup (void)
   phosh_battery_info_get_type();
   phosh_wifi_info_get_type();
   phosh_wwan_info_get_type();
+}
+
+
+static void
+on_builtin_monitor_power_mode_changed (PhoshShell *self, GParamSpec *pspec, PhoshMonitor *monitor)
+{
+  PhoshMonitorPowerSaveMode mode;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  g_return_if_fail (PHOSH_IS_MONITOR (monitor));
+
+  g_object_get (monitor, "power-mode", &mode, NULL);
+  if (mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF)
+    phosh_shell_lock (self);
 }
 
 
@@ -548,6 +474,12 @@ phosh_shell_constructed (GObject *object)
     priv->primary_monitor = phosh_monitor_manager_get_monitor (
       priv->monitor_manager, 0);
   }
+
+  if (phosh_monitor_is_builtin(priv->primary_monitor))
+    priv->builtin_monitor = priv->primary_monitor;
+  else
+    priv->builtin_monitor = phosh_shell_get_builtin_monitor(self);
+
   gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (),
                                     "/sm/puri/phosh/icons");
   env_setup ();
@@ -564,6 +496,14 @@ phosh_shell_constructed (GObject *object)
   priv->polkit_auth_agent = phosh_polkit_auth_agent_new ();
 
   priv->feedback_manager = phosh_feedback_manager_new ();
+
+  if (priv->builtin_monitor) {
+    g_signal_connect_swapped (
+      priv->builtin_monitor,
+      "notify::power-mode",
+      G_CALLBACK(on_builtin_monitor_power_mode_changed),
+      self);
+  }
 
   g_idle_add ((GSourceFunc) setup_idle_cb, self);
 }
@@ -684,6 +624,9 @@ phosh_shell_get_builtin_monitor (PhoshShell *self)
 
   g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
   priv = phosh_shell_get_instance_private (self);
+
+  if (priv->builtin_monitor)
+    return priv->builtin_monitor;
 
   for (int i = 0; i < phosh_monitor_manager_get_num_monitors (priv->monitor_manager); i++) {
     monitor = phosh_monitor_manager_get_monitor (priv->monitor_manager, i);
@@ -886,4 +829,57 @@ phosh_shell_fade_out (PhoshShell *self, guint timeout)
     if (timeout > 0)
       g_timeout_add_seconds (timeout, (GSourceFunc) on_fade_out_timeout, self);
   }
+}
+
+/**
+ * phosh_shell_set_power_save:
+ *
+ * Enter power saving mode. This currently blanks all monitors.
+ */
+void
+phosh_shell_enable_power_save (PhoshShell *self, gboolean enable)
+{
+  g_debug ("Entering power save mode");
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+
+  /*
+   * Locking the outputs instructs g-s-d to tell us to put
+   * outputs into power save mode via org.gnome.Mutter.DisplayConfig
+   */
+  phosh_shell_set_locked(self, enable);
+
+  /* TODO: other means of power saving */
+}
+
+/**
+ * phosh_shell_started_by_display_manager:
+ *
+ * returns %TRUE if we were started from a
+ * display manager. %FALSE otherwise.
+ */
+gboolean
+phosh_shell_started_by_display_manager(PhoshShell *self)
+{
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), FALSE);
+
+  if (!g_strcmp0 (g_getenv ("GDMSESSION"), "phosh"))
+    return TRUE;
+
+  return FALSE;
+}
+
+/**
+ * phosh_shell_is_startup_finished:
+ *
+ * returns %TRUE if the shell finished startup. %FALSE otherwise.
+ */
+gboolean
+phosh_shell_is_startup_finished(PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), FALSE);
+  priv = phosh_shell_get_instance_private (self);
+
+  return priv->startup_finished;
 }

@@ -11,6 +11,8 @@
 #include "config.h"
 #include "notification-content.h"
 #include "notification-frame.h"
+#include "notification-source.h"
+#include "util.h"
 
 /**
  * SECTION:phosh-notification-frame
@@ -23,6 +25,7 @@ struct _PhoshNotificationFrame {
   GtkBox parent;
 
   GListModel *model;
+  gulong      model_watch;
 
   GBinding *bind_name;
   GBinding *bind_icon;
@@ -51,6 +54,8 @@ phosh_notification_frame_finalize (GObject *object)
 
   // Don't clear bindings, they're already unref'd before here
 
+  phosh_clear_handler (&self->model_watch, self->model);
+
   g_clear_object (&self->model);
 
   G_OBJECT_CLASS (phosh_notification_frame_parent_class)->finalize (object);
@@ -61,7 +66,7 @@ phosh_notification_frame_finalize (GObject *object)
 static gboolean
 header_activated (PhoshNotificationFrame *self, GdkEventButton *event)
 {
-  PhoshNotification *notification;
+  g_autoptr (PhoshNotification) notification = NULL;
 
   g_return_val_if_fail (PHOSH_IS_NOTIFICATION_FRAME (self), FALSE);
 
@@ -155,7 +160,7 @@ items_changed (GListModel             *list,
                guint                   added,
                PhoshNotificationFrame *self)
 {
-  PhoshNotification *notification;
+  g_autoptr (PhoshNotification) notification = NULL;
 
   g_return_if_fail (PHOSH_IS_NOTIFICATION_FRAME (self));
 
@@ -203,22 +208,9 @@ phosh_notification_frame_bind_model (PhoshNotificationFrame *self,
                            self,
                            NULL);
 
-  g_signal_connect (model, "items-changed",
-                    G_CALLBACK (items_changed), self);
+  self->model_watch = g_signal_connect (model, "items-changed",
+                                        G_CALLBACK (items_changed), self);
   items_changed (model, 0, 0, 0, self);
-}
-
-
-static void
-closed (PhoshNotificationFrame  *self,
-        PhoshNotificationReason  reason,
-        PhoshNotification       *notification)
-{
-  g_return_if_fail (PHOSH_IS_NOTIFICATION_FRAME (self));
-  g_return_if_fail (G_IS_LIST_STORE (self->model));
-
-  // Since we created this model we know it's a GListStore
-  g_list_store_remove (G_LIST_STORE (self->model), 0);
 }
 
 
@@ -230,21 +222,20 @@ closed (PhoshNotificationFrame  *self,
  * Helper function for frames that only need to contain a single notification
  *
  * Wraps phosh_notification_frame_bind_model() by placing @notification in
- * a #GListStore
+ * a #PhoshNotificationSource
  */
 void
 phosh_notification_frame_bind_notification (PhoshNotificationFrame *self,
                                             PhoshNotification      *notification)
 {
-  g_autoptr (GListStore) store = g_list_store_new (PHOSH_TYPE_NOTIFICATION);
+  g_autoptr (PhoshNotificationSource) store = NULL;
 
   g_return_if_fail (PHOSH_IS_NOTIFICATION_FRAME (self));
   g_return_if_fail (PHOSH_IS_NOTIFICATION (notification));
 
-  g_list_store_append (store, notification);
+  store = phosh_notification_source_new ("dummy");
 
-  g_signal_connect_swapped (notification, "closed",
-                            G_CALLBACK (closed), self);
+  phosh_notification_source_add (store, notification);
 
   phosh_notification_frame_bind_model (self, G_LIST_MODEL (store));
 }

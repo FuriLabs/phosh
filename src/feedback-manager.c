@@ -40,6 +40,19 @@ struct _PhoshFeedbackManager {
 G_DEFINE_TYPE (PhoshFeedbackManager, phosh_feedback_manager, G_TYPE_OBJECT);
 
 static void
+on_event_triggered (LfbEvent      *event,
+                    GAsyncResult  *res,
+                    LfbEvent     **cmp)
+{
+  g_autoptr (GError) err = NULL;
+
+  if (!lfb_event_trigger_feedback_finish (event, res, &err)) {
+    g_warning ("Failed to trigger feedback for '%s': %s",
+               lfb_event_get_event (event), err->message);
+  }
+}
+
+static void
 phosh_feedback_manager_get_property (GObject *object,
                                      guint property_id,
                                      GValue *value,
@@ -69,7 +82,7 @@ phosh_feedback_manager_update (PhoshFeedbackManager *self)
   else
     self->icon_name = PHOSH_FEEDBACK_ICON_SILENT;
 
-  g_debug("Feedback profile set to: '%s', icon '%s'\n", self->profile,  self->icon_name);
+  g_debug("Feedback profile set to: '%s', icon '%s'", self->profile,  self->icon_name);
   if (old != self->icon_name)
     g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_FEEDBACK_MANAGER_PROP_ICON_NAME]);
 }
@@ -172,4 +185,21 @@ phosh_feedback_manager_toggle (PhoshFeedbackManager *self)
 
   g_debug ("Setting feedback profile to %s", profile);
   lfb_set_feedback_profile (profile);
+}
+
+/**
+ * phosh_trigger_feedback:
+ *
+ * Trigger feedback for the given event asynchronously
+ */
+void
+phosh_trigger_feedback (const char *name)
+{
+  g_autoptr(LfbEvent) event = NULL;
+
+  event = lfb_event_new(name);
+  lfb_event_trigger_feedback_async (event,
+                                    NULL,
+                                    (GAsyncReadyCallback)on_event_triggered,
+                                    NULL);
 }

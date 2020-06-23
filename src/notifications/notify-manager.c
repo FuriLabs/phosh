@@ -11,6 +11,7 @@
 #include <gio/gdesktopappinfo.h>
 
 #include "notification-banner.h"
+#include "notification-list.h"
 #include "notify-manager.h"
 #include "shell.h"
 #include "phosh-enums.h"
@@ -39,10 +40,12 @@ typedef struct _PhoshNotifyManager
 
   int dbus_name_id;
   guint next_id;
+  guint unknown_source;
   gboolean show_banners;
 
-  GHashTable *notifications;
   GSettings *settings;
+
+  PhoshNotificationList *list;
 } PhoshNotifyManager;
 
 G_DEFINE_TYPE_WITH_CODE (PhoshNotifyManager,
@@ -52,32 +55,12 @@ G_DEFINE_TYPE_WITH_CODE (PhoshNotifyManager,
                            PHOSH_NOTIFY_DBUS_TYPE_NOTIFICATIONS,
                            phosh_notify_manager_notify_iface_init));
 
-static void
-phosh_notify_manager_set_property (GObject *object,
-                                         guint property_id,
-                                         const GValue *value,
-                                         GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
-  }
-}
 
-
-static void
-phosh_notify_manager_get_property (GObject *object,
-                                         guint property_id,
-                                         GValue *value,
-                                         GParamSpec *pspec)
-{
-  switch (property_id) {
-  default:
-    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
-    break;
-  }
-}
+enum {
+  SIGNAL_NEW_NOTIFICATION,
+  N_SIGNALS
+};
+static guint signals[N_SIGNALS] = { 0 };
 
 
 static gboolean
@@ -91,8 +74,7 @@ handle_close_notification (PhoshNotifyDbusNotifications *skeleton,
   g_return_val_if_fail (PHOSH_IS_NOTIFY_MANAGER (self), FALSE);
   g_debug ("DBus call CloseNotification %u", arg_id);
 
-  notification = g_hash_table_lookup (self->notifications,
-                                      GUINT_TO_POINTER (arg_id));
+  notification = phosh_notification_list_get_by_id (self->list, arg_id);
 
   /*
    * ignore errors when closing non-existent notifcation, at least qt 5.11 is not
@@ -153,8 +135,11 @@ on_notification_expired (PhoshNotifyManager *self,
 
   g_debug ("Notification %u expired", id);
 
-  phosh_notification_close (notification,
-                            PHOSH_NOTIFICATION_REASON_EXPIRED);
+  /* Transient notifications are closed rather than staying in the tray */
+  if (phosh_notification_get_transient (notification)) {
+    phosh_notification_close (notification,
+                              PHOSH_NOTIFICATION_REASON_EXPIRED);
+  }
 }
 
 
@@ -176,6 +161,12 @@ on_notification_actioned (PhoshNotifyManager *self,
 
   phosh_notify_dbus_notifications_emit_action_invoked (
     PHOSH_NOTIFY_DBUS_NOTIFICATIONS (self), id, action);
+
+  /* Resident notifications stay after being actioned */
+  if (!phosh_notification_get_resident (notification)) {
+    phosh_notification_close (notification,
+                              PHOSH_NOTIFICATION_REASON_DISMISSED);
+  }
 }
 
 
@@ -190,9 +181,6 @@ on_notification_closed (PhoshNotifyManager      *self,
   g_return_if_fail (PHOSH_IS_NOTIFICATION (notification));
 
   id = phosh_notification_get_id (notification);
-
-  if (!g_hash_table_remove (self->notifications, GUINT_TO_POINTER (id)))
-    return;
 
   g_debug ("Emitting NotificationClosed: %d, %d", id, reason);
 
@@ -295,6 +283,7 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
   GVariantIter iter;
   guint id;
   g_autofree gchar *desktop_id = NULL;
+  g_autofree gchar *source_id = NULL;
   g_autoptr (GAppInfo) info = NULL;
   PhoshNotificationUrgency urgency = PHOSH_NOTIFICATION_URGENCY_NORMAL;
   g_autoptr (GIcon) data_gicon = NULL;
@@ -302,6 +291,9 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
   g_autoptr (GIcon) app_gicon = NULL;
   g_autoptr (GIcon) old_data_gicon = NULL;
   g_autoptr (GIcon) fallback_gicon = NULL;
+  gboolean transient = FALSE;
+  gboolean resident = FALSE;
+  g_autofree char *category = NULL;
   GIcon *icon = NULL;
   GIcon *image = NULL;
 
@@ -337,8 +329,18 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
                (g_strcmp0 (key, "desktop-entry") == 0)) {
       if (g_variant_is_of_type (value, G_VARIANT_TYPE_STRING))
         desktop_id = g_variant_dup_string (value, NULL);
+    } else if ((g_strcmp0 (key, "transient") == 0)) {
+      if (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
+        transient = g_variant_get_boolean (value);
+    } else if ((g_strcmp0 (key, "resident") == 0)) {
+      if (g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
+        resident = g_variant_get_boolean (value);
+    } else if ((g_strcmp0 (key, "category") == 0)) {
+      if (g_variant_is_of_type (value, G_VARIANT_TYPE_STRING))
+        category = g_variant_dup_string (value, NULL);
     }
-    g_variant_unref(item);
+
+    g_variant_unref (item);
   }
 
   if (data_gicon) {
@@ -358,20 +360,28 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
 
   if (desktop_id) {
     GDesktopAppInfo *desktop_info;
-    g_autofree char *full_id = g_strdup_printf ("%s.desktop", desktop_id);
+    source_id = g_strdup_printf ("%s.desktop", desktop_id);
 
-    desktop_info = g_desktop_app_info_new (full_id);
+    desktop_info = g_desktop_app_info_new (source_id);
 
     if (desktop_info) {
       info = G_APP_INFO (desktop_info);
     }
+  } else if (app_name && g_strcmp0 (app_name, "notify-send")) {
+    /* When the app name is set (and isn't notify-send) use that
+       as it's better than nothing  */
+    source_id = g_strdup_printf ("legacy-app-%s", app_name);
+  } else {
+    /* Worse case: The notification gets it's own group, we don't know
+       where it came from */
+    source_id = g_strdup_printf ("unknown-app-%i", self->unknown_source++);
   }
 
   if (expire_timeout == -1)
     expire_timeout = NOTIFICATION_DEFAULT_TIMEOUT;
 
   if (replaces_id)
-    notification = g_hash_table_lookup (self->notifications, GUINT_TO_POINTER (replaces_id));
+    notification = phosh_notification_list_get_by_id (self->list, replaces_id);
 
   if (notification) {
     id = replaces_id;
@@ -383,24 +393,26 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
                   "app-icon", icon,
                   "app-info", info,
                   "image", image,
+                  "urgency", urgency,
                   "actions", actions,
                   NULL);
   } else {
     id = self->next_id++;
 
-    notification = phosh_notification_new (app_name,
+    notification = phosh_notification_new (id,
+                                           app_name,
                                            info,
                                            summary,
                                            body,
                                            icon,
                                            image,
-                                           (GStrv) actions);
+                                           urgency,
+                                           (GStrv) actions,
+                                           transient,
+                                           resident,
+                                           category);
 
-    phosh_notification_set_id (notification, id);
-
-    g_hash_table_insert (self->notifications,
-                         GUINT_TO_POINTER (id),
-                         notification);
+    phosh_notification_list_add (self->list, source_id, notification);
 
     g_signal_connect_object (notification,
                              "expired",
@@ -422,13 +434,7 @@ handle_notify (PhoshNotifyDbusNotifications *skeleton,
       phosh_notification_expires (notification, expire_timeout);
     }
 
-    if (self->show_banners) {
-      GtkWidget *banner = NULL;
-
-      banner = phosh_notification_banner_new (notification);
-
-      gtk_widget_show (GTK_WIDGET (banner));
-    }
+    g_signal_emit (self, signals[SIGNAL_NEW_NOTIFICATION], 0, notification);
   }
 
   phosh_notify_dbus_notifications_complete_notify (
@@ -501,7 +507,8 @@ phosh_notify_manager_dispose (GObject *object)
   PhoshNotifyManager *self = PHOSH_NOTIFY_MANAGER (object);
 
   g_clear_object (&self->settings);
-  g_clear_pointer (&self->notifications, g_hash_table_destroy);
+
+  g_clear_object (&self->list);
 
   G_OBJECT_CLASS (phosh_notify_manager_parent_class)->dispose (object);
 }
@@ -537,19 +544,35 @@ phosh_notify_manager_class_init (PhoshNotifyManagerClass *klass)
 
   object_class->constructed = phosh_notify_manager_constructed;
   object_class->dispose = phosh_notify_manager_dispose;
-  object_class->set_property = phosh_notify_manager_set_property;
-  object_class->get_property = phosh_notify_manager_get_property;
+
+
+  /**
+   * PhoshNotifyManager::new-notification:
+   * @self: the #PhoshNotifyManager
+   * @notification: the new #PhoshNotification
+   *
+   * Emitted when a new notification is received and a banner should (possibly)
+   * be shown
+   */
+  signals[SIGNAL_NEW_NOTIFICATION] = g_signal_new ("new-notification",
+                                                   G_TYPE_FROM_CLASS (klass),
+                                                   G_SIGNAL_RUN_LAST,
+                                                   0,
+                                                   NULL,
+                                                   NULL,
+                                                   g_cclosure_marshal_VOID__OBJECT,
+                                                   G_TYPE_NONE,
+                                                   1,
+                                                   PHOSH_TYPE_NOTIFICATION);
 }
 
 
 static void
 phosh_notify_manager_init (PhoshNotifyManager *self)
 {
-  self->notifications = g_hash_table_new_full (g_direct_hash,
-                                               g_direct_equal,
-                                               NULL,
-                                               (GDestroyNotify) g_object_unref);
   self->next_id = 1;
+
+  self->list = phosh_notification_list_new ();
 }
 
 
@@ -564,4 +587,38 @@ phosh_notify_manager_get_default (void)
   }
 
   return instance;
+}
+
+
+/**
+ * phosh_notify_manager_get_list:
+ * @self: the #PhoshNotifyManager
+ *
+ * Get the #PhoshNotificationList of current notifications
+ *
+ * Returns: the #PhoshNotificationList
+ */
+PhoshNotificationList *
+phosh_notify_manager_get_list (PhoshNotifyManager *self)
+{
+  g_return_val_if_fail (PHOSH_IS_NOTIFY_MANAGER (self), NULL);
+
+  return self->list;
+}
+
+
+/**
+ * phosh_notify_manager_get_show_banners:
+ * @self: the #PhoshNotifyManager
+ *
+ * Are notififcation banners enabled
+ *
+ * Returns: %TRUE if banners should be shown, otherwise %FALSE
+ */
+gboolean
+phosh_notify_manager_get_show_banners (PhoshNotifyManager *self)
+{
+  g_return_val_if_fail (PHOSH_IS_NOTIFY_MANAGER (self), FALSE);
+
+  return self->show_banners;
 }
