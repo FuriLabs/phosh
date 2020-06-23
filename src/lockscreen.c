@@ -9,6 +9,7 @@
 #include "config.h"
 #include "auth.h"
 #include "lockscreen.h"
+#include "media-player.h"
 
 #include <locale.h>
 #include <string.h>
@@ -16,8 +17,6 @@
 #include <math.h>
 #include <time.h>
 
-/* Until we switched to HdyKeypad */
-#define HDY_DISABLE_DEPRECATION_WARNINGS 
 #define HANDY_USE_UNSTABLE_API
 #include <handy.h>
 
@@ -25,6 +24,15 @@
 #include <libgnome-desktop/gnome-wall-clock.h>
 
 #define LOCKSCREEN_IDLE_SECONDS 5
+
+/**
+ * SECTION:lockscreen
+ * @short_description: The main lock screen
+ * @Title: PhoshLockscreen
+ *
+ * The lock screen featuring the clock
+ * and unlock keypad.
+ */
 
 enum {
   LOCKSCREEN_UNLOCK,
@@ -44,7 +52,7 @@ typedef struct {
   GtkWidget *paginator;
 
   /* info page */
-  GtkWidget *grid_info;
+  GtkWidget *box_info;
   GtkWidget *lbl_clock;
   GtkWidget *lbl_date;
 
@@ -86,7 +94,7 @@ show_info_page (PhoshLockscreen *self)
   if (hdy_paginator_get_position (HDY_PAGINATOR (priv->paginator)) <= 0)
     return;
 
-  hdy_paginator_scroll_to (HDY_PAGINATOR (priv->paginator), priv->grid_info);
+  hdy_paginator_scroll_to (HDY_PAGINATOR (priv->paginator), priv->box_info);
 }
 
 
@@ -309,8 +317,9 @@ key_press_event_cb (PhoshLockscreen *self, GdkEventKey *event, gpointer data)
 
 
 /**
- * date_fmt: Get a date format based on LC_TIME
+ * date_fmt:
  *
+ * Get a date format based on LC_TIME.
  * This is done by temporarily swithcing LC_MESSAGES so we can look up
  * the format in our message catalog.  This will fail if LANGUAGE is
  * set to something different since LANGUAGE overrides
@@ -333,8 +342,9 @@ date_fmt (void)
 }
 
 /**
- * local_date: Get the local date as string
+ * local_date:
  *
+ * Get the local date as string
  * We honor LC_MESSAGES so we e.g. don't get a translated date when
  * the user has LC_MESSAGES=en_US.UTF-8 but LC_TIME to their local
  * time zone.
@@ -470,6 +480,8 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
   GObjectClass *object_class = (GObjectClass *)klass;
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
 
+  g_type_ensure (PHOSH_TYPE_MEDIA_PLAYER);
+
   object_class->constructed = phosh_lockscreen_constructed;
   object_class->dispose = phosh_lockscreen_dispose;
 
@@ -487,6 +499,7 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
       G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       NULL, G_TYPE_NONE, 0);
 
+  gtk_widget_class_set_css_name (widget_class, "phosh-lockscreen");
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/sm/puri/phosh/ui/lockscreen.ui");
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, paginator);
@@ -509,9 +522,10 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, input_changed_cb);
 
   /* info page */
-  gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, grid_info);
+  gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, box_info);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, lbl_clock);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, lbl_date);
+  gtk_widget_class_bind_template_callback (widget_class, show_unlock_page);
 }
 
 

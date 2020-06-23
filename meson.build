@@ -1,5 +1,5 @@
 project('phosh', 'c',
-          version: '0.2.2',
+          version: '0.3.1',
           license: 'GPLv3+',
     meson_version: '>= 0.40.1',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
@@ -136,6 +136,7 @@ subdir('protocol')
 subdir('src')
 subdir('tools')
 subdir('tests')
+subdir('docs')
 
 summary = [
   '',
@@ -143,6 +144,7 @@ summary = [
   'Phosh @0@'.format(meson.project_version()),
   '',
   'Tests: @0@'.format(get_option('tests')),
+  'Documentation: @0@'.format(get_option('gtk_doc')),
   '-----------',
 ]
 

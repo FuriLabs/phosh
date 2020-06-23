@@ -11,6 +11,7 @@ test_env.set('GSETTINGS_BACKEND', 'memory')
 test_env.set('GSETTINGS_SCHEMA_DIR', '@0@/data'.format(meson.build_root()))
 test_env.set('PYTHONDONTWRITEBYTECODE', 'yes')
 test_env.set('MALLOC_CHECK_', '2')
+test_env.set('NO_AT_BRIDGE', '1')
 test_env.set('XDG_CONFIG_HOME', '@0@/user/config/'.format(meson.current_source_dir()))
 test_env.set('XDG_CONFIG_DIRS', '@0@/system/config/'.format(meson.current_source_dir()))
 test_env.set('XDG_DATA_HOME', '@0@/user/share/'.format(meson.current_source_dir()))
@@ -37,10 +38,12 @@ tests = [
   'activity',
   'app-grid-button',
   'app-list-model',
+  'connectivity-info',
   'overview',
   'favourite-model',
   'status-icon',
   'quick-setting',
+  'media-player',
   'notification',
   'notification-banner',
   'notification-content',
@@ -56,7 +59,7 @@ foreach test : tests
                  c_args: test_cflags,
                  pie: true,
                  link_args: test_link_args,
-                 dependencies: phosh_dep)
+                 dependencies: phosh_tool_dep)
   test(test, t, env: test_env)
 endforeach
 

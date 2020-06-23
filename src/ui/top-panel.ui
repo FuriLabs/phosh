@@ -34,9 +34,6 @@
   </object>
   <template class="PhoshPanel" parent="PhoshLayerSurface">
     <property name="can_focus">False</property>
-    <child type="titlebar">
-      <placeholder/>
-    </child>
     <child>
       <object class="GtkBox" id="box">
         <property name="visible">True</property>
@@ -86,6 +83,19 @@
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="PhoshConnectivityInfo" id="connectivity_info">
+			    <property name="visible" bind-source="connectivity_info" bind-property="connectivity" bind-flags="invert-boolean|sync-create"/>
+			    <property name="can_focus">False</property>
+			    <property name="icon-size">GTK_ICON_SIZE_SMALL_TOOLBAR</property>
+			    <property name="margin_right">8</property>
+			  </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -175,6 +185,9 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
 		    <property name="popover">menu_power</property>
+                    <style>
+                      <class name="phosh-power-button"/>
+                    </style>
                     <child>
                       <object class="GtkImage">
                         <property name="visible">True</property>

@@ -12,6 +12,7 @@
 
 #include "config.h"
 
+#include "connectivity-info.h"
 #include "panel.h"
 #include "shell.h"
 #include "session.h"
@@ -23,6 +24,14 @@
 #include <libgnome-desktop/gnome-xkb-info.h>
 
 #include <glib/gi18n.h>
+
+/**
+ * SECTION:panel
+ * @short_description: The top panel
+ * @Title: PhoshPanel
+ *
+ * The top panel containing the clock and status indicators.
+ */
 
 enum {
   SETTINGS_ACTIVATED,
@@ -103,7 +112,6 @@ top_panel_clicked_cb (PhoshPanel *self, GtkButton *btn)
 {
   g_return_if_fail (PHOSH_IS_PANEL (self));
   g_return_if_fail (GTK_IS_BUTTON (btn));
-  phosh_trigger_feedback ("button-pressed");
   g_signal_emit(self, signals[SETTINGS_ACTIVATED], 0);
 }
 
@@ -261,6 +269,8 @@ phosh_panel_constructed (GObject *object)
                            self,
                            G_CONNECT_SWAPPED);
 
+  phosh_connect_button_feedback (GTK_BUTTON (priv->btn_top_panel));
+
   gtk_window_set_title (GTK_WINDOW (self), "phosh panel");
   gtk_style_context_add_class (
       gtk_widget_get_style_context (GTK_WIDGET (self)),
@@ -342,6 +352,7 @@ phosh_panel_class_init (PhoshPanelClass *klass)
       G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       NULL, G_TYPE_NONE, 0);
 
+  g_type_ensure (PHOSH_TYPE_CONNECTIVITY_INFO);
   g_type_ensure (PHOSH_TYPE_SETTINGS);
 
   gtk_widget_class_set_template_from_resource (widget_class,

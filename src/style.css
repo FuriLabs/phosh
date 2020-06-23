@@ -1,19 +1,27 @@
-/* Top bar panel */
+/*
+ * Top bar panel
+ */
 .phosh-panel {
-    font: 15px Cantarell;
+  font: 15px Cantarell;
 }
 
 .phosh-panel-btn {
-    background-image: none;
-    border-width: 0;
+  background-image: none;
+  border-width: 0;
 }
 
 .phosh-topbar-clock {
-    font-weight: bold;
+  font-weight: bold;
 }
 
-/* Home bar */
+.phosh-power-button {
+  padding-top: 0;
+  padding-bottom: 0;
+}
 
+/*
+ * Home bar
+ */
 .phosh-osk-button {
   border-radius: 50%;
   min-width: 0;
@@ -21,20 +29,22 @@
   padding: 6px;
 }
 
-/* Settings menu */
+/*
+ * Settings menu
+ */
 .phosh-settings-menu {
-    background-color: black;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
- }
+  background-color: black;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
 
 .phosh-settings-listboxrow {
-    padding: 0;
+  padding: 0;
 }
 
 .phosh-settings-row {
-    box-shadow: none;
-    background-color: black;
+  box-shadow: none;
+  background-color: black;
 }
 
 .phosh-settings-menu button.circular:not(:hover):not(:active) {
@@ -46,30 +56,43 @@
   background-color: #282828;
 }
 
-/* Favorites / Home screen */
+.phosh-quick-setting {
+  font-size: 9px;
+  padding: 9px;
+  border: 0;
+  box-shadow: 0 0;
+}
+
+.phosh-quick-setting:not(:hover):not(:active) {
+  background: none;
+}
+
+/*
+ * Overview (app grid with favories and, activities)
+ */
 phosh-activity {
-    background: white;
-    border: none;
-    border-radius: 0;
-    background: url('resource:///sm/puri/phosh/fake-app.svg');
-    background-size: cover;
-    /* box-shadow: 0 2px 2px rgba(0,0,0,0.4), 0 3px 16px rgba(0,0,0,0.3); */
+  background: white;
+  border: none;
+  border-radius: 0;
+  background: url('resource:///sm/puri/phosh/fake-app.svg');
+  background-size: cover;
+  /* box-shadow: 0 2px 2px rgba(0,0,0,0.4), 0 3px 16px rgba(0,0,0,0.3); */
 }
 
 phosh-activity box {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 6px;
-    color: white;
-    font-weight: bold;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 6px;
+  color: white;
+  font-weight: bold;
 }
 
 phosh-activity:focus box {
-    background: rgba(38, 35, 83, 0.7);
+  background: rgba(38, 35, 83, 0.7);
 }
 
 phosh-home, .phosh-panel {
-    background: black;
-    color: white;
+  background: black;
+  color: white;
 }
 
 .phosh-activity-close-button {
@@ -80,91 +103,49 @@ phosh-home, .phosh-panel {
   padding: 12px;
 }
 
-/* Overview (app switcher, favorites) */
-
 .phosh-overview {
-    background: black;
+  background: black;
 }
 
 .phosh-favorite {
-    background: none;
-    border: none;
-    box-shadow: none;
-    padding: 0;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
 }
 
 .phosh-favorite:hover {
-    -gtk-icon-effect: none;
+  -gtk-icon-effect: none;
 }
 
 .phosh-favorite:active {
-    -gtk-icon-effect: highlight;
+  -gtk-icon-effect: highlight;
 }
 
 .phosh-search-bar {
-    border-radius: 9999px;
-    padding: 3px 18px 3px 14px;
-    margin: 0 10px 6px;
-}
-
-/* Lock screen */
-.phosh-lockscreen, .phosh-lockshield {
-    background-color: black;
-}
-
-.phosh-lockscreen-clock {
-    font-size: 72px;
-    font-weight: 100;
-}
-
-.phosh-lockscreen-arrow {
-    transition: 400ms linear;
-    animation: pulsate 1.8s ease-out;
-    animation-iteration-count: 15;
-}
-
-.phosh-lockscreen-pin {
-    font-size: 20px;
-}
-
-@keyframes pulsate {
-    0% {-gtk-icon-transform: translateY(0); opacity: 0.7}
-    35% {-gtk-icon-transform: translateY(-14px); opacity: 1}
-    100% {-gtk-icon-transform: translateY(0); opacity: 0.7}
-}
-
-/* system modal dialogs (polkit, gcr) */
-.phosh-system-modal-dialog {
-    background-color: black;
-    border: solid 2px;
-    border-color: white;
-    border-radius: 10px;
-    padding: 18px;
-}
-
-/* switcher */
-phosh-overview {
-    background: black;
+  border-radius: 9999px;
+  padding: 3px 18px 3px 14px;
+  margin: 0 10px 6px;
 }
 
 phosh-app-grid {
-    background: black;
+  background: black;
 }
 
 phosh-app-grid separator {
-    background: rgba(51, 51, 51, 1);
-    min-height: 2px
+  background: rgba(51, 51, 51, 1);
+  min-height: 2px
 }
 
 phosh-app-grid-button {
-    font-size: 0.8rem;
+  font-size: 0.8rem;
 }
 
 phosh-app-grid-button button, phosh-app-grid-button button:hover {
-    background: none;
-    padding: 0;
-    margin: 0;
-    border: 1px solid transparent;
+  background: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid transparent;
 }
 
 phosh-app-grid-button button:hover,
@@ -182,8 +163,101 @@ phosh-app-grid-button image {
   /* -gtk-icon-shadow: 0 1px 2px rgba(0,0,0,0.4), 0 1px 8px rgba(0,0,0,0.2); */
 }
 
-/* notifications */
+/*
+ * Lock screen
+ */
+phosh-lockscreen, .phosh-lockshield {
+  background-color: black;
+}
 
+.phosh-lockscreen-clock {
+  font-size: 72px;
+  font-weight: 100;
+}
+
+.phosh-lockscreen-arrow {
+  transition: 400ms linear;
+  animation: pulsate 1.8s ease-out;
+  animation-iteration-count: 15;
+}
+
+.phosh-lockscreen-pin {
+  font-size: 20px;
+}
+
+@keyframes pulsate {
+  0% {-gtk-icon-transform: translateY(0); opacity: 0.7}
+  35% {-gtk-icon-transform: translateY(-14px); opacity: 1}
+  100% {-gtk-icon-transform: translateY(0); opacity: 0.7}
+}
+
+/* Lockscreen keypad */
+hdykeypad > button {
+  border-radius: 9999px;
+  -gtk-outline-radius: 9999px;
+  background-origin: padding-box, border-box;
+  background-clip: padding-box, border-box;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 16px;
+  border: 0;
+  box-shadow: none;
+  background: 0;
+  border: 0;
+}
+
+hdykeypad > button:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.text-only-button:active {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+hdykeypad > button:focus, .text-only-button:focus {
+  outline-style: none;
+}
+
+.text-only-button {
+  font-size: 16px;
+  font-weight: bold;
+  padding: 16px 36px;
+  border: 0;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.3);
+  border: 0;
+}
+
+phosh-lockscreen phosh-media-player {
+  background: none;
+  border: solid 1px;
+  border-color: rgb(51,51,51);
+  border-radius: 0;
+}
+
+phosh-lockscreen phosh-media-player button {
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+}
+
+phosh-lockscreen phosh-media-player button:not(:hover):not(:active) {
+  background: none;
+}
+
+/*
+ * System modal dialogs (polkit, gcr)
+ */
+.phosh-system-modal-dialog {
+  background-color: black;
+  border: solid 2px;
+  border-color: white;
+  border-radius: 10px;
+  padding: 18px;
+}
+
+/*
+ * Notifications
+ */
 phosh-notification-content {
   background: transparent;
 }
@@ -238,64 +312,41 @@ phosh-notification-banner {
   padding: 12px;
 }
 
-/* fader */
+/*
+ * Output fader
+ */
 @keyframes phosh-fade-in {
-    from {background:rgba(0, 0, 0, 0);}
-    to {background:rgba(0, 0, 0, 1);}
+  from {background:rgba(0, 0, 0, 0);}
+  to {background:rgba(0, 0, 0, 1);}
 }
 
 .phosh-fader-fade-in {
-    animation-name: phosh-fade-in;
-    animation-duration: 2s;
-    animation-timing-function: linear;
-    animation-iteration-count: 1;
-    animation-fill-mode: forwards;
+  animation-name: phosh-fade-in;
+  animation-duration: 2s;
+  animation-timing-function: linear;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
 }
 
-/* Style for the keypad */
-hdykeypad > button {
-  border-radius: 9999px;
-  -gtk-outline-radius: 9999px;
-  background-origin: padding-box, border-box;
-  background-clip: padding-box, border-box;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 16px;
-  border: 0;
-  box-shadow: none;
-  background: 0;
-  border: 0;
-}
-
-hdykeypad > button:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.text-only-button:active {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-hdykeypad > button:focus, .text-only-button:focus {
-  outline-style: none;
-}
-
-.text-only-button {
-  font-size: 16px;
-  font-weight: bold;
-  padding: 16px 36px;
-  border: 0;
-  box-shadow: none;
-  background: rgba(255, 255, 255, 0.3);
-  border: 0;
-}
-
-.phosh-quick-setting {
-  font-size: 9px;
+/*
+ * Media player
+ */
+phosh-media-player {
+  background: rgb(51,51,51);
+  border-radius: 5%;
   padding: 9px;
   border: 0;
   box-shadow: 0 0;
 }
 
-.phosh-quick-setting:not(:hover):not(:active) {
-  background: none;
+phosh-media-player > button {
+  border-radius: 0;
+  box-shadow: none;
+  outline-style: none;
+}
+
+/* The details button should not look inactive even when disabled */
+phosh-media-player box *:disabled {
+  color: white;
+  -gtk-icon-effect: none;
 }

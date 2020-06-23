@@ -17,8 +17,9 @@
         <property name="allow-mouse-drag">True</property>
         <signal name="notify::position" handler="paginator_position_notified_cb" swapped="yes"/>
          <child>
-          <object class="GtkGrid" id="grid_info">
+          <object class="GtkBox" id="box_info">
             <property name="visible">True</property>
+            <property name="orientation">vertical</property>
             <property name="can_focus">False</property>
             <property name="expand">True</property>
             <child>
@@ -64,11 +65,33 @@
                 </child>
               </object>
               <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">3</property>
+                <property name="pack_type">end</property>
+                <property name="position">0</property>
               </packing>
             </child>
             <child>
+              <object class="HdyColumn">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="maximum_width">350</property>
+                <property name="margin_bottom">100</property>
+                <property name="vexpand">True</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="PhoshMediaPlayer" id="media_player">
+                    <property name="visible" bind-source="media_player" bind-property="playable" bind-flags="sync-create"/>
+                    <property name="valign">center</property>
+                    <property name="can_focus">False</property>
+                    <signal name="player-raised" handler="show_unlock_page" object="PhoshLockscreen" swapped="yes"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="position">1</property>
+                <property name="pack_type">start</property>
+              </packing>
+            </child>
+            <child type="center">
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
@@ -175,16 +198,6 @@
                   </packing>
                 </child>
               </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
             </child>
           </object>
         </child>

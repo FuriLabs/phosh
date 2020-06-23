@@ -26,7 +26,7 @@
 #define OVERVIEW_ICON_SIZE 64
 
 /**
- * SECTION:phosh-overview
+ * SECTION:overview
  * @short_description: The overview shows running apps and the
  * app grid to launch new applications.
  * @Title: PhoshOverview
@@ -155,6 +155,8 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
 
   g_signal_connect_object (toplevel, "closed", G_CALLBACK (on_toplevel_closed), activity, 0);
   g_signal_connect_object (toplevel, "notify::activated", G_CALLBACK (on_toplevel_activated_changed), self, 0);
+
+  phosh_connect_button_feedback (GTK_BUTTON (activity));
 
   if (phosh_toplevel_is_activated (toplevel))
     hdy_paginator_scroll_to (HDY_PAGINATOR (priv->paginator_running_activities), activity);
