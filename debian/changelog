@@ -1,3 +1,28 @@
+phosh (0.3.1-1) unstable; urgency=medium
+
+  [ Federico Ceratto ]
+  * Trim trailing whitespace.
+    Fixes: lintian: file-contains-trailing-whitespace
+  * Set upstream metadata fields: Repository.
+    Fixes: lintian: upstream-metadata-file-is-missing
+    Fixes: lintian: upstream-metadata-missing-repository
+  * Bump debhelper compat version
+  * Add Rules-Requires-Root: no
+
+  [ Guido Günther ]
+  * debian: Add phoc-doc
+    This makes the documentation useable via devhelp.
+
+  [ Arnaud Ferraris ]
+  * debian: add salsa-ci
+  * d/patches: drop upstreamed 0001-src-fix-typos.patch
+  * d/control: Switch maintainer to team address
+  * debian: don't build phosh-doc for now
+  * d/upstream: add missing metadata fields
+    Fixes: lintian: upstream-metadata-missing-bug-tracking
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Wed, 24 Jun 2020 11:52:02 +0200
+
 phosh (0.2.2-1) unstable; urgency=medium
 
   * Initial Debian release (Closes: #907641)

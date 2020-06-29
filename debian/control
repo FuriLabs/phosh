@@ -1,7 +1,8 @@
 Source: phosh
 Section: x11
 Priority: optional
-Maintainer: Arnaud Ferraris <arnaud.ferraris@gmail.com>
+Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-lists.debian.net>
+Uploaders: Arnaud Ferraris <arnaud.ferraris@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
  gtk-doc-tools,
@@ -66,13 +67,3 @@ Depends:
 Description: OSK stub to fulfill session dependencies
  Phosh's session wants a sm.puri.OSK0. For testing on non-phone's
  this stub fulfills the necessary dependencies.
-
-Package: phosh-doc
-Architecture: all
-Depends:
- ${misc:Depends},
-Description: Pure Wayland shell for mobile devices - development documentation
- Phosh is a simple shell for Wayland compositors speaking the layer-surface
- protocol.
- .
- This package contains the development documentation.
