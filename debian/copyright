@@ -55,6 +55,16 @@ Files: src/gtk-list-models/gtkrbtree*
 Copyright: 2000 Red Hat, Inc., Jonathan Blandford <jrb@redhat.com>
 License: GPL-2+
 
+Files: subprojects/gvc/*
+Copyright: 2006-2008 Lennart Poettering
+ 2008-2009 Red Hat, Inc.
+ 2008 William Jon McCann
+ 2008 Sjoerd Simons <sjoerd@luon.net>
+ 2009 Bastien Nocera
+ 2011-2012 Conor Curran <conor.curran@canonical.com>
+ 2012 David Henningsson, Canonical Ltd. <david.henningsson@canonical.com>
+License: GPL-2+
+
 License: GPL-3+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
