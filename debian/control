@@ -22,7 +22,6 @@ Build-Depends:
 # to run the tests
  at-spi2-core,
  gnome-themes-extra-data,
- phoc,
  xvfb,
  xauth,
 Standards-Version: 4.5.0
@@ -38,12 +37,10 @@ Depends:
  ${shlibs:Depends},
  fonts-lato,
  gsettings-desktop-schemas,
- phoc (>= 0.4.0),
 Recommends:
  feedbackd,
  iio-sensor-proxy,
  gnome-session,
- phoc,
 Provides:
  notification-daemon,
  polkit-1-auth-agent,

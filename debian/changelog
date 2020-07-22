@@ -1,3 +1,30 @@
+phosh (0.4.1-1) unstable; urgency=medium
+
+  [ Guido Günther ]
+  * debian: Avoid clashes with other xvfb-run instances.
+    Pass '-a' to make it pick a port by itself.
+  * debian: Build-depend on phoc an gnome-themes-extra-data.
+    Phoc is needed for the layer surface tests and gtk complains about lack
+    of css without gnome-themes-extra-data.
+  * d/rules: Depend on phoc >= 0.4.0.
+    While we can run with older versions this makes sure people
+    pull in a recent enough version for all the feaures.
+  * d/rules: Turn off compositor based tests.
+    They don't run on buster and we need phoc releases
+    for newer versions so we can toggle this on later.
+
+  [ Arnaud Ferraris ]
+  * New upstream release 0.4.1
+  * d/copyright: add entries for libgnome-volume-control.
+    As we provide libgnome-volume-control's source code as a checked out
+    subproject, we must provide copyright information for its files too.
+  * d/control: drop all references to phoc
+    Phoc is not yet in Debian's main archive, so we can't depend on or
+    recommend it.
+    This will be reverted when phoc gets accepted to unstable.
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Wed, 22 Jul 2020 11:28:59 +0200
+
 phosh (0.3.1-2) unstable; urgency=medium
 
   * debian: build phosh-doc package
