@@ -45,6 +45,7 @@
 #include "util.h"
 #include "wifiinfo.h"
 #include "wwaninfo.h"
+#include "bt-manager.h"
 
 /**
  * SECTION:shell
@@ -87,12 +88,14 @@ typedef struct
   PhoshScreenSaverManager *screen_saver_manager;
   PhoshNotifyManager *notify_manager;
   PhoshFeedbackManager *feedback_manager;
+  PhoshBtManager *bt_manager;
 
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
   PhoshProximity *proximity;
 
   gboolean startup_finished;
+  gint rot; /* current rotation of primary monitor */
 } PhoshShellPrivate;
 
 
@@ -208,7 +211,6 @@ panels_dispose (PhoshShell *self)
 
   g_clear_pointer (&priv->panel, phosh_cp_widget_destroy);
   g_clear_pointer (&priv->home, phosh_cp_widget_destroy);
-  g_clear_pointer (&priv->faders, g_ptr_array_unref);
 }
 
 
@@ -307,6 +309,7 @@ phosh_shell_dispose (GObject *object)
   }
 
   panels_dispose (self);
+  g_clear_pointer (&priv->faders, g_ptr_array_unref);
   g_clear_object (&priv->notification_banner);
   g_clear_object (&priv->notify_manager);
   g_clear_object (&priv->screen_saver_manager);
@@ -320,6 +323,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->proximity);
   g_clear_object (&priv->sensor_proxy_manager);
   g_clear_object (&priv->feedback_manager);
+  g_clear_object (&priv->primary_monitor);
   phosh_system_prompter_unregister ();
   phosh_session_unregister ();
 
@@ -394,7 +398,8 @@ on_fade_out_timeout (PhoshShell *self)
   priv = phosh_shell_get_instance_private (self);
 
   /* kill all faders if we time out */
-  g_clear_pointer (&priv->faders, g_ptr_array_unref);
+  priv->faders = g_ptr_array_remove_range (priv->faders, 0, priv->faders->len);
+
   return G_SOURCE_REMOVE;
 }
 
@@ -441,6 +446,10 @@ setup_idle_cb (PhoshShell *self)
 
   phosh_session_register (PHOSH_APP_ID);
 
+  /* If we start rotated, fix this up */
+  if (phosh_shell_get_rotation (self))
+    phosh_shell_rotate_display (self, 0);
+
   priv->startup_finished = TRUE;
 
   return FALSE;
@@ -472,6 +481,27 @@ on_builtin_monitor_power_mode_changed (PhoshShell *self, GParamSpec *pspec, Phos
 
 
 static void
+on_primary_monitor_configured (PhoshShell   *self,
+                               PhoshMonitor *monitor)
+{
+  PhoshShellPrivate *priv;
+  guint rot;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  g_return_if_fail (PHOSH_IS_MONITOR (monitor));
+
+  priv = phosh_shell_get_instance_private (self);
+  rot = phosh_monitor_get_rotation (monitor);
+  if (rot == priv->rot)
+    return;
+
+  priv->rot = rot;
+  g_debug ("Primary monitor rotated to %d", rot);
+  g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_SHELL_PROP_ROTATION]);
+}
+
+
+static void
 phosh_shell_constructed (GObject *object)
 {
   PhoshShell *self = PHOSH_SHELL (object);
@@ -479,10 +509,18 @@ phosh_shell_constructed (GObject *object)
 
   G_OBJECT_CLASS (phosh_shell_parent_class)->constructed (object);
 
+  priv->rot = -1; /* force initial update */
   priv->monitor_manager = phosh_monitor_manager_new ();
   if (phosh_monitor_manager_get_num_monitors(priv->monitor_manager)) {
-    priv->primary_monitor = phosh_monitor_manager_get_monitor (
-      priv->monitor_manager, 0);
+    PhoshMonitor *monitor = phosh_monitor_manager_get_monitor (priv->monitor_manager, 0);
+    /* Can't invoke phosh_shell_set_primary_monitor () since the shell
+       object does not really exit yet but we need the primary monitor
+       early for the panels */
+    priv->primary_monitor = g_object_ref (monitor);
+    g_signal_connect_swapped (priv->primary_monitor,
+                              "configured",
+                              G_CALLBACK (on_primary_monitor_configured),
+                              self);
   }
 
   if (phosh_monitor_is_builtin(priv->primary_monitor))
@@ -587,6 +625,7 @@ phosh_shell_rotate_display (PhoshShell *self,
   PhoshWayland *wl = phosh_wayland_get_default();
   guint current;
 
+  /* TODO: Use builtin monitor once we support wlr-output-management */
   g_return_if_fail (phosh_wayland_get_phosh_private (wl));
   g_return_if_fail (priv->primary_monitor);
   current = phosh_monitor_get_rotation (priv->primary_monitor);
@@ -596,7 +635,6 @@ phosh_shell_rotate_display (PhoshShell *self,
   phosh_private_rotate_display (phosh_wayland_get_phosh_private (wl),
                                 phosh_layer_surface_get_wl_surface (priv->panel),
                                 degree);
-  g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_SHELL_PROP_ROTATION]);
 }
 
 
@@ -605,10 +643,14 @@ phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMonitor *monitor)
 {
   PhoshShellPrivate *priv;
   PhoshMonitor *m = NULL;
+  guint rot;
 
   g_return_if_fail (monitor);
   g_return_if_fail (PHOSH_IS_SHELL (self));
   priv = phosh_shell_get_instance_private (self);
+
+  if (monitor == priv->primary_monitor)
+    return;
 
   for (int i = 0; i < phosh_monitor_manager_get_num_monitors (priv->monitor_manager); i++) {
     m = phosh_monitor_manager_get_monitor (priv->monitor_manager, i);
@@ -617,8 +659,20 @@ phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMonitor *monitor)
   }
   g_return_if_fail (monitor == m);
 
-  priv->primary_monitor = monitor;
-  /* Move panels to the new monitor be recreating the layer shell surfaces */
+  if (priv->primary_monitor)
+    g_signal_handlers_disconnect_by_data (priv->primary_monitor, self);
+  g_clear_object (&priv->primary_monitor);
+  priv->primary_monitor = g_object_ref (monitor);
+  g_signal_connect_swapped (priv->primary_monitor,
+                            "configured",
+                            G_CALLBACK (on_primary_monitor_configured),
+                            self);
+  /* Catch up if old and new primary monitor's rotation are different */
+  rot = phosh_monitor_get_rotation (priv->primary_monitor);
+  if (rot != priv->rot)
+    on_primary_monitor_configured (self, priv->primary_monitor);
+
+  /* Move panels to the new monitor by recreating the layer shell surfaces */
   panels_dispose (self);
   panels_create (self);
 
@@ -713,6 +767,20 @@ phosh_shell_get_wifi_manager (PhoshShell *self)
   return priv->wifi_manager;
 }
 
+PhoshBtManager *
+phosh_shell_get_bt_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+
+  if (!priv->bt_manager)
+      priv->bt_manager = phosh_bt_manager_new ();
+
+  g_return_val_if_fail (PHOSH_IS_BT_MANAGER (priv->bt_manager), NULL);
+  return priv->bt_manager;
+}
 
 PhoshOskManager *
 phosh_shell_get_osk_manager (PhoshShell *self)

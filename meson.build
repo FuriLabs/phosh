@@ -1,7 +1,7 @@
 project('phosh', 'c',
-          version: '0.3.1',
+          version: '0.4.0',
           license: 'GPLv3+',
-    meson_version: '>= 0.40.1',
+    meson_version: '>= 0.49.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
 
@@ -103,9 +103,18 @@ configure_file(
 gnome = import('gnome')
 i18n  = import('i18n')
 
+gcr_dep = dependency('gcr-3', version: '>= 3.7.5')
 gio_dep = dependency('gio-2.0', version: '>=2.58')
 gio_unix_dep =  dependency('gio-unix-2.0', version: '>=2.58')
 glib_dep = dependency('glib-2.0', version: '>=2.58')
+gnome_desktop_dep = dependency('gnome-desktop-3.0', version: '>=3.26')
+gobject_dep =  dependency('gobject-2.0', version: '>=2.50.0')
+gtk_dep = dependency('gtk+-3.0', version: '>=3.22')
+gtk_wayland_dep = dependency('gtk+-wayland-3.0', version: '>=3.22')
+libfeedback_dep = dependency('libfeedback-0.0',
+  fallback: ['libfeedback', 'libfeedback_dep'],
+  default_options: ['introspection=disabled', 'daemon=false', 'gtk_doc=false']
+  )
 libgvc = subproject('gvc',
   default_options: [
     'package_name=' + meson.project_name(),
@@ -122,13 +131,12 @@ libhandy_dep = dependency('libhandy-0.0',
   fallback: ['libhandy', 'libhandy_dep'],
   default_options: ['introspection=disabled']
   )
-libfeedback_dep = dependency('libfeedback-0.0',
-  fallback: ['libfeedback', 'libfeedback_dep'],
-  default_options: ['introspection=disabled', 'daemon=false', 'gtk_doc=false']
-  )
 libnm_dep = dependency('libnm', version: '>= 1.14')
 libpolkit_agent_dep = dependency('polkit-agent-1', version: '>= 0.105')
 network_agent_dep = dependency('libsecret-1')
+upower_glib_dep = dependency('upower-glib', version: '>=0.99.1')
+wayland_client_dep = dependency('wayland-client', version: '>=1.14')
+wayland_protos_dep = dependency('wayland-protocols', version: '>=1.12')
 
 subdir('data')
 subdir('po')
@@ -143,7 +151,8 @@ summary = [
   '-----------',
   'Phosh @0@'.format(meson.project_version()),
   '',
-  'Tests: @0@'.format(get_option('tests')),
+  '        Tests: @0@'.format(get_option('tests')),
+  '   Phoc Tests: @0@'.format(run_phoc_tests),
   'Documentation: @0@'.format(get_option('gtk_doc')),
   '-----------',
 ]

@@ -50,6 +50,7 @@ output_handle_geometry (void             *data,
   g_debug ("handle geometry output %p, position %d %d, size %dx%d, subpixel layout %d, vendor %s, "
            "product %s, transform %d",
            self, x, y, physical_width, physical_height, subpixel, make, model, transform);
+  self->wl_output_done = FALSE;
 
   self->x = x;
   self->y = y;
@@ -59,6 +60,7 @@ output_handle_geometry (void             *data,
   self->vendor = g_strdup (make);
   self->product = g_strdup (model);
   self->transform = transform;
+  self->wl_output_done = FALSE;
 }
 
 
@@ -67,6 +69,9 @@ output_handle_done (void             *data,
                     struct wl_output *wl_output)
 {
   PhoshMonitor *self = PHOSH_MONITOR (data);
+
+  if (phosh_monitor_is_configured (self))
+    return;
 
   self->wl_output_done = TRUE;
 
@@ -82,6 +87,7 @@ output_handle_scale (void             *data,
 {
   PhoshMonitor *self = PHOSH_MONITOR (data);
 
+  self->wl_output_done = FALSE;
   self->scale = scale;
 }
 
@@ -99,6 +105,7 @@ output_handle_mode (void             *data,
 
   g_debug ("handle mode output %p: %dx%d@%d",
            self, width, height, refresh);
+  self->wl_output_done = FALSE;
 
   mode.width = width;
   mode.height = height;
@@ -136,7 +143,13 @@ xdg_output_v1_handle_logical_position (void *data,
                                        int32_t x,
                                        int32_t y)
 {
-  /* TODO: use this */
+  PhoshMonitor *self = PHOSH_MONITOR (data);
+
+  g_return_if_fail (PHOSH_IS_MONITOR (self));
+  self->xdg_output_done = FALSE;
+  g_debug ("%p: Logical pos: %d,%d", self, x, y);
+  self->logical.x = x;
+  self->logical.y = y;
 }
 
 
@@ -146,7 +159,14 @@ xdg_output_v1_handle_logical_size (void *data,
                                    int32_t width,
                                    int32_t height)
 {
-  /* Nothing todo atm */
+  PhoshMonitor *self = PHOSH_MONITOR (data);
+
+  g_return_if_fail (PHOSH_IS_MONITOR (self));
+  self->xdg_output_done = FALSE;
+  g_debug ("%p: Logical size: %dx%d", self, width, height);
+  self->logical.width = width;
+  self->logical.height = height;
+
 }
 
 static void
@@ -154,6 +174,9 @@ xdg_output_v1_handle_done (void *data,
                            struct zxdg_output_v1 *zxdg_output_v1)
 {
   PhoshMonitor *self = PHOSH_MONITOR (data);
+
+  if (phosh_monitor_is_configured (self))
+    return;
 
   self->xdg_output_done = TRUE;
 
@@ -171,6 +194,7 @@ xdg_output_v1_handle_name (void *data,
   /* wlroots uses the connector's name as xdg_output name */
   g_debug("Connector name is %s", name);
 
+  self->xdg_output_done = FALSE;
   self->name = g_strdup (name);
 
   /* wlroots uses the connector's name as output name so
@@ -356,7 +380,7 @@ phosh_monitor_class_init (PhoshMonitorClass *klass)
   props[PHOSH_MONITOR_PROP_POWER_MODE] =
     g_param_spec_enum ("power-mode",
                        "power-mode",
-                       "The wayland power mode for this monitor",
+                       "The  power save mode for this monitor",
                        PHOSH_TYPE_MONITOR_POWER_SAVE_MODE,
                        PHOSH_MONITOR_POWER_SAVE_MODE_OFF,
                        G_PARAM_READABLE |
@@ -404,8 +428,10 @@ phosh_monitor_get_current_mode (PhoshMonitor *self)
 
 /**
  * phosh_monitor_is_configured:
+ * @self: A #PhoshMonitor
  *
- * Is the monitor fully configured (did we receive all data from the compositor)?
+ * Returns: %TRUE if the monitor fully configured (received all
+ * state updates from the compositor).
  */
 gboolean
 phosh_monitor_is_configured (PhoshMonitor *self)
@@ -414,11 +440,12 @@ phosh_monitor_is_configured (PhoshMonitor *self)
   return self->wl_output_done && self->xdg_output_done;
 }
 
-
 /**
  * phosh_monitor_is_builtin:
+ * @self: A #PhoshMonitor
  *
- * Is the monitor built in panel (e.g. laptop panel or phone LCD)
+ * Returns: %TRUE if the monitor built in panel (e.g. laptop panel or
+ * phone LCD)
  */
 gboolean
 phosh_monitor_is_builtin (PhoshMonitor *self)
@@ -452,8 +479,9 @@ phosh_monitor_is_builtin (PhoshMonitor *self)
 
 /**
  * phosh_monitor_is_flipped:
+ * @self: A #PhoshMonitor
  *
- * Is the monitor's output flipped
+ * Returns: %TRUE if the monitor's output is flipped
  */
 gboolean
 phosh_monitor_is_flipped (PhoshMonitor *self)
@@ -477,8 +505,9 @@ phosh_monitor_is_flipped (PhoshMonitor *self)
 
 /**
  * phosh_monitor_get_rotation:
+ * @self: A #PhoshMonitor
  *
- * Get the monitor's rotation in degrees
+ * Returns: The monitor's rotation in degrees.
  */
 guint
 phosh_monitor_get_rotation (PhoshMonitor *self)
@@ -501,6 +530,13 @@ phosh_monitor_get_rotation (PhoshMonitor *self)
     }
 }
 
+/**
+ * phosh_monitor_set_power_save_mode:
+ * @self: A #PhoshMonitor
+ * @mode: The #PhoshMonitorPowerSaveMode
+ *
+ * Sets monitor's power save mode.
+ */
 void
 phosh_monitor_set_power_save_mode (PhoshMonitor *self, PhoshMonitorPowerSaveMode mode)
 {

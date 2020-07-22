@@ -11,16 +11,23 @@
 #include "wwaninfo.h"
 #include "wwan/phosh-wwan-mm.h"
 
+#include <glib/gi18n.h>
+
 #define WWAN_INFO_DEFAULT_ICON_SIZE 24
 
 /**
  * SECTION:wwaninfo
  * @short_description: A widget to display the wwan status
  * @Title: PhoshWWanInfo
+ *
+ * A good indicator whether to show the icon is the
+ * #PhoshWwanInfo:present property that indicates if
+ * hardware is present.
  */
 enum {
   PROP_0,
   PROP_SHOW_DETAIL,
+  PROP_PRESENT,
   PROP_LAST_PROP,
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -31,6 +38,7 @@ struct _PhoshWWanInfo
   GtkBox parent;
 
   PhoshWWanMM *wwan;
+  gboolean present;
   gboolean show_detail;
 };
 
@@ -67,6 +75,9 @@ phosh_wwan_info_get_property (GObject *object,
   case PROP_SHOW_DETAIL:
     g_value_set_boolean (value, self->show_detail);
     break;
+  case PROP_PRESENT:
+    g_value_set_boolean (value, self->present);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -97,17 +108,21 @@ update_icon_data(PhoshWWanInfo *self, GParamSpec *psepc, PhoshWWanMM *wwan)
   guint quality;
   const gchar *icon_name = NULL;
   const char *access_tec;
-  gboolean visible;
+  gboolean present;
 
   g_return_if_fail (PHOSH_IS_WWAN_INFO (self));
-  visible = phosh_wwan_is_present (PHOSH_WWAN (self->wwan));
-  g_debug ("Updating wwan icon, shown: %d", visible);
-  gtk_widget_set_visible (GTK_WIDGET (self), visible);
+  present = phosh_wwan_is_present (PHOSH_WWAN (self->wwan));
+  g_debug ("Updating wwan present: %d", present);
+  if (present != self->present) {
+    self->present = present;
+    g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PRESENT]);
+  }
 
   access_tec_widget = phosh_status_icon_get_extra_widget (PHOSH_STATUS_ICON (self));
 
-  /* SIM missing */
-  if (!phosh_wwan_has_sim (PHOSH_WWAN (self->wwan)))
+  if (!present) {
+    icon_name = ("network-cellular-disabled-symbolic");
+  } else if (!phosh_wwan_has_sim (PHOSH_WWAN (self->wwan))) /* SIM missing */
     icon_name = "auth-sim-missing-symbolic";
   else { /* SIM unlock required */
     if (!phosh_wwan_is_unlocked (PHOSH_WWAN (self->wwan)))
@@ -141,11 +156,24 @@ update_icon_data(PhoshWWanInfo *self, GParamSpec *psepc, PhoshWWanMM *wwan)
   gtk_widget_show (access_tec_widget);
 }
 
+static void
+update_info (PhoshWWanInfo *self)
+{
+  const gchar *info;
+  g_return_if_fail (PHOSH_IS_WWAN_INFO (self));
+
+  info = phosh_wwan_get_operator (PHOSH_WWAN (self->wwan));
+  if (!info || !g_strcmp0(info, ""))
+    info = _("Cellular");
+
+  phosh_status_icon_set_info (PHOSH_STATUS_ICON (self), info);
+}
 
 static gboolean
 on_idle (PhoshWWanInfo *self)
 {
   update_icon_data (self, NULL, NULL);
+  update_info (self);
   return FALSE;
 }
 
@@ -171,9 +199,13 @@ phosh_wwan_info_constructed (GObject *object)
                               G_CALLBACK (update_icon_data),
                               self);
   }
-  g_idle_add ((GSourceFunc) on_idle, self);
 
-  phosh_status_icon_set_info (PHOSH_STATUS_ICON (self), "Cellular");
+  g_signal_connect_swapped (self->wwan,
+                            "notify::operator",
+                            G_CALLBACK (update_info),
+                            self);
+
+  g_idle_add ((GSourceFunc) on_idle, self);
 }
 
 
@@ -209,6 +241,14 @@ phosh_wwan_info_class_init (PhoshWWanInfoClass *klass)
       "Show wwan details",
       FALSE,
       G_PARAM_CONSTRUCT | G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_PRESENT] =
+    g_param_spec_boolean (
+      "present",
+      "Present",
+      "Whether WWAN hardware is present",
+      FALSE,
+      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 }

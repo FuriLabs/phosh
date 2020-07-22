@@ -59,7 +59,7 @@
                         <property name="can_focus">False</property>
                         <child>
                           <object class="PhoshWWanInfo" id="wwaninfo">
-			    <property name="visible">False</property>
+                            <property name="visible" bind-source="wwaninfo" bind-property="present" bind-flags="sync-create"/>
 			    <property name="can_focus">False</property>
 			    <property name="margin-left">0</property>
 			    <property name="margin_right">8</property>
@@ -75,6 +75,7 @@
                         <child>
                           <object class="PhoshWifiInfo" id="wifiinfo">
 			    <property name="visible">True</property>
+			    <property name="visible" bind-source="wifiinfo" bind-property="enabled" bind-flags="sync-create"/>
 			    <property name="can_focus">False</property>
 			    <property name="icon-size">GTK_ICON_SIZE_SMALL_TOOLBAR</property>
 			    <property name="margin_right">8</property>
@@ -83,6 +84,20 @@
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="PhoshBtInfo" id="btinfo">
+			    <property name="visible">True</property>
+			    <property name="visible" bind-source="btinfo" bind-property="enabled" bind-flags="sync-create"/>
+			    <property name="can_focus">False</property>
+			    <property name="icon-size">GTK_ICON_SIZE_SMALL_TOOLBAR</property>
+			    <property name="margin_right">8</property>
+			  </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
@@ -95,7 +110,7 @@
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>

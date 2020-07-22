@@ -34,6 +34,7 @@ enum {
   PHOSH_WIFI_MANAGER_PROP_ICON_NAME,
   PHOSH_WIFI_MANAGER_PROP_SSID,
   PHOSH_WIFI_MANAGER_PROP_ENABLED,
+  PHOSH_WIFI_MANAGER_PROP_PRESENT,
   PHOSH_WIFI_MANAGER_PROP_LAST_PROP
 };
 static GParamSpec *props[PHOSH_WIFI_MANAGER_PROP_LAST_PROP];
@@ -46,7 +47,7 @@ struct _PhoshWifiManager
   gboolean           enabled;
   /* Whether we have a wifi device at all (independent from the
    * connection state */
-  gboolean           have_wifi_dev;
+  gboolean           present;
 
   const gchar        *icon_name;
   gchar              *ssid;
@@ -87,10 +88,10 @@ get_icon_name (PhoshWifiManager *self)
   guint8 strength;
 
   if (!self->dev) {
-    if (self->enabled && self->have_wifi_dev) {
+    if (self->enabled && self->present) {
       return "network-wireless-offline-symbolic";
     }
-    return NULL;
+    return "network-wireless-disabled-symbolic";
   }
 
   state = nm_active_connection_get_state (self->active);
@@ -110,7 +111,7 @@ get_icon_name (PhoshWifiManager *self)
   case NM_ACTIVE_CONNECTION_STATE_DEACTIVATED:
     return "network-wireless-offline-symbolic";
   default:
-    return NULL;
+    return "network-wireless-disabled-symbolic";
   }
 }
 
@@ -137,8 +138,8 @@ update_enabled_state (PhoshWifiManager *self)
    gboolean enabled;
 
    g_return_if_fail (NM_IS_CLIENT (self->nmclient));
-   enabled = nm_client_wireless_get_enabled (self->nmclient) && self->have_wifi_dev;
-   g_debug ("NM wifi enabled: %d, wifi dev: %d", enabled, self->have_wifi_dev);
+   enabled = nm_client_wireless_get_enabled (self->nmclient) && self->present;
+   g_debug ("NM wifi enabled: %d, present: %d", enabled, self->present);
 
    if (enabled != self->enabled) {
      self->enabled = enabled;
@@ -182,6 +183,9 @@ phosh_wifi_manager_get_property (GObject *object,
     break;
   case PHOSH_WIFI_MANAGER_PROP_ENABLED:
     g_value_set_boolean (value, self->enabled);
+    break;
+  case PHOSH_WIFI_MANAGER_PROP_PRESENT:
+    g_value_set_boolean (value, self->present);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -394,18 +398,21 @@ on_nmclient_active_connections_changed (PhoshWifiManager *self, GParamSpec *pspe
 static void
 on_nmclient_devices_changed (PhoshWifiManager *self, GParamSpec *pspec, NMClient *nmclient)
 {
-  gboolean have_wifi_dev = FALSE;
+  gboolean have_wifi_dev = FALSE, present;
   const GPtrArray *devs;
   NMDevice *dev;
 
   g_return_if_fail (PHOSH_IS_WIFI_MANAGER (self));
   g_return_if_fail (NM_IS_CLIENT (nmclient));
 
-  devs = nm_client_get_devices (nmclient);
+  present = self->present;
 
+  devs = nm_client_get_devices (nmclient);
   if (!devs || !devs->len) {
     update_state (self);
-    self->have_wifi_dev = FALSE;
+    self->present = FALSE;
+    if (self->present != present)
+      g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_WIFI_MANAGER_PROP_PRESENT]);
     return;
   }
 
@@ -418,7 +425,9 @@ on_nmclient_devices_changed (PhoshWifiManager *self, GParamSpec *pspec, NMClient
     }
   }
 
-  self->have_wifi_dev = have_wifi_dev;
+  self->present = have_wifi_dev;
+  if (self->present != present)
+    g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_WIFI_MANAGER_PROP_PRESENT]);
   update_state (self);
 }
 
@@ -586,12 +595,15 @@ phosh_wifi_manager_constructed (GObject *object)
 
 
 static void
-phosh_wifi_manager_finalize (GObject *object)
+phosh_wifi_manager_dispose (GObject *object)
 {
   PhoshWifiManager *self = PHOSH_WIFI_MANAGER(object);
 
   g_clear_object (&self->network_agent);
-  g_clear_object (&self->nmclient);
+  if (self->nmclient) {
+    g_signal_handlers_disconnect_by_data (self->nmclient, self);
+    g_clear_object (&self->nmclient);
+  }
 
   cleanup_device (self);
 
@@ -600,7 +612,7 @@ phosh_wifi_manager_finalize (GObject *object)
     g_clear_object (&self->active);
   }
 
-  G_OBJECT_CLASS (phosh_wifi_manager_parent_class)->finalize (object);
+  G_OBJECT_CLASS (phosh_wifi_manager_parent_class)->dispose (object);
 }
 
 
@@ -610,7 +622,7 @@ phosh_wifi_manager_class_init (PhoshWifiManagerClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->constructed = phosh_wifi_manager_constructed;
-  object_class->finalize = phosh_wifi_manager_finalize;
+  object_class->dispose = phosh_wifi_manager_dispose;
 
   object_class->set_property = phosh_wifi_manager_set_property;
   object_class->get_property = phosh_wifi_manager_get_property;
@@ -631,12 +643,21 @@ phosh_wifi_manager_class_init (PhoshWifiManagerClass *klass)
 
   props[PHOSH_WIFI_MANAGER_PROP_ENABLED] =
     g_param_spec_boolean ("enabled",
-                         "enabled",
-                         "Whether wifi is enabled and a wifi device is available",
-                         FALSE,
-                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY);
+                          "enabled",
+                          "Whether wifi is enabled and a wifi device is available",
+                          FALSE,
+                          G_PARAM_READABLE |
+                          G_PARAM_EXPLICIT_NOTIFY |
+                          G_PARAM_STATIC_STRINGS);
 
-
+  props[PHOSH_WIFI_MANAGER_PROP_PRESENT] =
+    g_param_spec_boolean ("present",
+                          "Present",
+                          "Whether wifi hardware is present",
+                          FALSE,
+                          G_PARAM_READABLE |
+                          G_PARAM_EXPLICIT_NOTIFY |
+                          G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PHOSH_WIFI_MANAGER_PROP_LAST_PROP, props);
 }
@@ -681,4 +702,21 @@ phosh_wifi_manager_get_ssid (PhoshWifiManager *self)
   g_return_val_if_fail (PHOSH_IS_WIFI_MANAGER (self), NULL);
 
   return self->ssid;
+}
+
+gboolean
+phosh_wifi_manager_get_enabled (PhoshWifiManager *self)
+{
+  g_return_val_if_fail (PHOSH_IS_WIFI_MANAGER (self), FALSE);
+
+  return self->enabled;
+}
+
+
+gboolean
+phosh_wifi_manager_get_present (PhoshWifiManager *self)
+{
+  g_return_val_if_fail (PHOSH_IS_WIFI_MANAGER (self), FALSE);
+
+  return self->present;
 }

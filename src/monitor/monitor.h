@@ -42,6 +42,13 @@ typedef struct _PhoshMonitorMode
   guint32 flags;
 } PhoshMonitorMode;
 
+/**
+ * PhoshMonitorPowerSaveMode:
+ * @PHOSH_MONITOR_POWER_SAVE_MODE_ON: The monitor is on
+ * @PHOSH_MONITOR_POWER_SAVE_MODE_OFF: The monitor is off (saving power)
+ *
+ * The power save mode of a monitor
+ */
 typedef enum _PhoshMonitorPowerSaveMode {
   PHOSH_MONITOR_POWER_SAVE_MODE_OFF = 0,
   PHOSH_MONITOR_POWER_SAVE_MODE_ON  = 1,
@@ -60,6 +67,10 @@ struct _PhoshMonitor {
   gint x, y, width, height;
   gint subpixel;
   gint32 transform, scale;
+
+  struct {
+    gint32 x, y, width, height;
+  } logical;
 
   gint width_mm;
   gint height_mm;

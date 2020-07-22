@@ -9,6 +9,7 @@
 
 #include <glib/gi18n.h>
 
+#include "bt-info.h"
 #include "shell.h"
 #include "settings.h"
 #include "quick-setting.h"
@@ -102,6 +103,27 @@ feedback_setting_clicked_cb (PhoshSettings *self)
 }
 
 static void
+wifi_setting_clicked_cb (PhoshSettings *self)
+{
+  phosh_quick_setting_open_settings_panel ("wifi");
+  g_signal_emit (self, signals[SETTING_DONE], 0);
+}
+
+static void
+wwan_setting_clicked_cb (PhoshSettings *self)
+{
+  phosh_quick_setting_open_settings_panel ("wwan");
+  g_signal_emit (self, signals[SETTING_DONE], 0);
+}
+
+static void
+bt_setting_clicked_cb (PhoshSettings *self)
+{
+  phosh_quick_setting_open_settings_panel ("bluetooth");
+  g_signal_emit (self, signals[SETTING_DONE], 0);
+}
+
+static void
 feedback_setting_long_pressed_cb (PhoshSettings *self)
 {
   phosh_quick_setting_open_settings_panel ("notifications");
@@ -109,7 +131,7 @@ feedback_setting_long_pressed_cb (PhoshSettings *self)
 }
 
 static void
-batteryinfo_clicked_cb (PhoshSettings *self)
+battery_setting_clicked_cb (PhoshSettings *self)
 {
   phosh_quick_setting_open_settings_panel ("power");
   g_signal_emit (self, signals[SETTING_DONE], 0);
@@ -368,6 +390,7 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
       G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
       NULL, G_TYPE_NONE, 0);
 
+  g_type_ensure (PHOSH_TYPE_BT_INFO);
   g_type_ensure (PHOSH_TYPE_QUICK_SETTING);
   g_type_ensure (PHOSH_TYPE_ROTATE_INFO);
   g_type_ensure (PHOSH_TYPE_FEEDBACK_INFO);
@@ -379,10 +402,13 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, list_notifications);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, sw_notifications);
 
-  gtk_widget_class_bind_template_callback (widget_class, batteryinfo_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, battery_setting_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, rotation_setting_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, feedback_setting_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, feedback_setting_long_pressed_cb);
+  gtk_widget_class_bind_template_callback (widget_class, wifi_setting_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, wwan_setting_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, bt_setting_clicked_cb);
   gtk_widget_class_bind_template_callback (widget_class, on_media_player_raised);
 }
 

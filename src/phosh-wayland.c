@@ -42,6 +42,7 @@ typedef struct {
   struct zwlr_output_manager_v1 *zwlr_output_manager_v1;
   struct zwlr_output_power_manager_v1 *zwlr_output_power_manager_v1;
   struct zxdg_output_manager_v1 *zxdg_output_manager_v1;
+  struct wl_shm *wl_shm;
   GHashTable *wl_outputs;
 } PhoshWaylandPrivate;
 
@@ -70,7 +71,7 @@ registry_handle_global (void *data,
         registry,
         name,
         &phosh_private_interface,
-        3);
+        MIN(4, version));
   } else  if (!strcmp (interface, zwlr_layer_shell_v1_interface.name)) {
       priv->layer_shell = wl_registry_bind (
         registry,
@@ -94,6 +95,10 @@ registry_handle_global (void *data,
   } else if (!strcmp(interface, "wl_seat")) {
     priv->wl_seat = wl_registry_bind(
       registry, name, &wl_seat_interface,
+      1);
+  } else if (!strcmp(interface, "wl_shm")) {
+    priv->wl_shm = wl_registry_bind(
+      registry, name, &wl_shm_interface,
       1);
   } else if (!strcmp(interface, zwlr_input_inhibit_manager_v1_interface.name)) {
     priv->input_inhibit_manager = wl_registry_bind(
@@ -357,6 +362,18 @@ phosh_wayland_get_phosh_private (PhoshWayland *self)
 }
 
 
+struct wl_shm*
+phosh_wayland_get_wl_shm (PhoshWayland *self)
+{
+  PhoshWaylandPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_WAYLAND (self), NULL);
+  priv = phosh_wayland_get_instance_private (self);
+
+  return priv->wl_shm;
+}
+
+
 struct zxdg_output_manager_v1*
 phosh_wayland_get_zxdg_output_manager_v1 (PhoshWayland *self)
 {
@@ -390,14 +407,19 @@ phosh_wayland_get_zwlr_foreign_toplevel_manager_v1 (PhoshWayland *self)
   return priv->zwlr_foreign_toplevel_manager_v1;
 }
 
-
-GHashTable*
+/**
+ * phosh_wayland_get_wl_outputs:
+ * @self: The #PhoshWayland singleton
+ *
+ * Returns: (transfer none): A list of outputs as a #GHashTable
+ * keyed by the output's name with wl_output's as values.
+ */
+GHashTable *
 phosh_wayland_get_wl_outputs (PhoshWayland *self)
 {
   PhoshWaylandPrivate *priv = phosh_wayland_get_instance_private (self);
   return priv->wl_outputs;
 }
-
 
 gboolean
 phosh_wayland_has_wl_output (PhoshWayland *self, struct wl_output *wl_output)
