@@ -1,3 +1,15 @@
+phosh (0.4.2-1) unstable; urgency=medium
+
+  [ Arnaud Ferraris ]
+  * d/control: drop Recommends: phoc
+    Phoc is now a dependency, it shouldn't appear in the `Recommends:`
+    section anymore
+  * New upstream version 0.4.2
+  * Revert "d/control: drop all references to phoc"
+    As phoc v0.4.1 is now in unstable, we can safely depend on it.
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Sun, 26 Jul 2020 14:32:28 +0200
+
 phosh (0.4.1-1) unstable; urgency=medium
 
   [ Guido Günther ]
