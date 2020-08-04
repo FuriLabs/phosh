@@ -1,3 +1,11 @@
+phosh (0.4.3-1) unstable; urgency=medium
+
+  [ Arnaud Ferraris ]
+  * New upstream release 0.4.3
+  * d/patches: fix build on 32-bit platforms
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Tue, 04 Aug 2020 17:06:48 +0200
+
 phosh (0.4.2-1) unstable; urgency=medium
 
   [ Arnaud Ferraris ]
