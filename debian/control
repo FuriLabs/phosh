@@ -41,8 +41,10 @@ Depends:
  phoc (>= 0.4.0),
 Recommends:
  feedbackd,
- iio-sensor-proxy,
  gnome-session,
+ gnome-settings-daemon,
+ iio-sensor-proxy,
+ squeekboard | phosh-osk-stub,
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
