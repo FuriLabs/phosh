@@ -1,3 +1,14 @@
+phosh (0.4.3-2) unstable; urgency=medium
+
+  * Recommend components to run the phosh session.
+    Thanks to Bernhard Übelacker (Closes: #968106)
+  * d/control: Split gnome-session dependency.
+    Directly depend on gnome-session-common and gnome-session-bin so we
+    don't add a hard-dependency on gnome-shell and don't pull in GNOMEs
+    X11 and Wayland sessions by default.
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 17 Aug 2020 09:29:30 +0200
+
 phosh (0.4.3-1) unstable; urgency=medium
 
   [ Arnaud Ferraris ]
