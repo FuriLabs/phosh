@@ -41,7 +41,8 @@ Depends:
  phoc (>= 0.4.0),
 Recommends:
  feedbackd,
- gnome-session,
+ gnome-session-bin,
+ gnome-session-common,
  gnome-settings-daemon,
  iio-sensor-proxy,
  squeekboard | phosh-osk-stub,
