@@ -51,7 +51,6 @@ Copyright: 2018 Benjamin Otte
 License: LGPL-2.1+
 
 Files: src/gtk-list-models/gtkrbtree*
- src/gtk-list-models/gtksortlistmodel.*
 Copyright: 2000 Red Hat, Inc., Jonathan Blandford <jrb@redhat.com>
 License: GPL-2+
 
