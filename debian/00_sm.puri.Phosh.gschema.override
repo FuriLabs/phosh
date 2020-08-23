@@ -1,0 +1,7 @@
+[org.gnome.desktop.interface]
+clock-show-date=false
+clock-show-weekday=false
+
+[org.gnome.desktop.wm.preferences]
+button-layout='appmenu:'
+
