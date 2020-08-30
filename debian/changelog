@@ -1,3 +1,21 @@
+phosh (0.4.3-3) unstable; urgency=medium
+
+  * salsa-ci: Fetch submodule.
+    This makes sure we have gvc available
+  * d/copyright: Drop duplicate match
+    src/gtk-list-models/gtksortlistmodel.* is correctly covered
+    by the entry above.
+  * d/changelog: Fix src/gtk-list-models/gtkrbtree.* license.
+    The files are LGPL2+ according to their file header.
+  * d/gbp.conf: Drop 'v' from Debian version number.
+    Debian version numbers usually use the plain
+    `debian/<number>-<revision>'.
+  * Add mobile tweaks.
+    This adds GSettings overrides to properly configure phosh
+    and applictions in adaptive environments.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 30 Aug 2020 09:15:23 +0200
+
 phosh (0.4.3-2) unstable; urgency=medium
 
   * Recommend components to run the phosh session.
