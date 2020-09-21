@@ -88,7 +88,9 @@ Description: Pure Wayland shell for mobile devices - development documentation
 
 Package: phosh-mobile-tweaks
 Architecture: all
-Depends: dconf-gsettings-backend | gsettings-backend
+Depends:
+ ${misc:Depends},
+ dconf-gsettings-backend | gsettings-backend,
 Description: Pure Wayland shell for mobile devices - GSettings tweaks
  Phosh is a simple shell for Wayland compositors speaking the layer-surface
  protocol.
