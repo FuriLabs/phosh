@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2020 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxpcpu.org>
  */
 
@@ -40,6 +42,7 @@ struct _PhoshFeedbackManager {
 
 G_DEFINE_TYPE (PhoshFeedbackManager, phosh_feedback_manager, G_TYPE_OBJECT);
 
+
 static void
 on_event_triggered (LfbEvent      *event,
                     GAsyncResult  *res,
@@ -53,12 +56,14 @@ on_event_triggered (LfbEvent      *event,
   }
 }
 
+
 static void
 on_button_event_triggered (GtkButton *button,
                            const char* event)
 {
   phosh_trigger_feedback (event);
 }
+
 
 static void
 phosh_feedback_manager_get_property (GObject *object,
@@ -81,6 +86,7 @@ phosh_feedback_manager_get_property (GObject *object,
   }
 }
 
+
 static void
 phosh_feedback_manager_update (PhoshFeedbackManager *self)
 {
@@ -101,6 +107,7 @@ phosh_feedback_manager_update (PhoshFeedbackManager *self)
     g_object_notify_by_pspec (G_OBJECT (self), props[PHOSH_FEEDBACK_MANAGER_PROP_ICON_NAME]);
 }
 
+
 static void
 on_profile_changed (PhoshFeedbackManager *self, GParamSpec *psepc, LfbGdbusFeedback *proxy)
 {
@@ -108,6 +115,7 @@ on_profile_changed (PhoshFeedbackManager *self, GParamSpec *psepc, LfbGdbusFeedb
 
   phosh_feedback_manager_update (self);
 }
+
 
 static void
 phosh_feedback_manager_constructed (GObject *object)
@@ -129,6 +137,7 @@ phosh_feedback_manager_constructed (GObject *object)
   phosh_feedback_manager_update (self);
 }
 
+
 static void
 phosh_feedback_manager_finalize (GObject *object)
 {
@@ -141,6 +150,7 @@ phosh_feedback_manager_finalize (GObject *object)
   }
   G_OBJECT_CLASS (phosh_feedback_manager_parent_class)->finalize (object);
 }
+
 
 static void
 phosh_feedback_manager_class_init (PhoshFeedbackManagerClass *klass)
@@ -174,13 +184,15 @@ phosh_feedback_manager_init (PhoshFeedbackManager *self)
 {
 }
 
+
 PhoshFeedbackManager *
 phosh_feedback_manager_new (void)
 {
   return g_object_new (PHOSH_TYPE_FEEDBACK_MANAGER, NULL);
 }
 
-const gchar*
+
+const char *
 phosh_feedback_manager_get_icon_name (PhoshFeedbackManager *self)
 {
   g_return_val_if_fail (PHOSH_IS_FEEDBACK_MANAGER (self), NULL);
@@ -188,13 +200,15 @@ phosh_feedback_manager_get_icon_name (PhoshFeedbackManager *self)
   return self->icon_name;
 }
 
-const gchar*
+
+const char *
 phosh_feedback_manager_get_profile (PhoshFeedbackManager *self)
 {
   g_return_val_if_fail (PHOSH_IS_FEEDBACK_MANAGER (self), NULL);
 
   return self->profile;
 }
+
 
 void
 phosh_feedback_manager_toggle (PhoshFeedbackManager *self)
@@ -207,6 +221,7 @@ phosh_feedback_manager_toggle (PhoshFeedbackManager *self)
   g_debug ("Setting feedback profile to %s", profile);
   lfb_set_feedback_profile (profile);
 }
+
 
 /**
  * phosh_trigger_feedback:
@@ -224,6 +239,7 @@ phosh_trigger_feedback (const char *name)
                                     (GAsyncReadyCallback)on_event_triggered,
                                     NULL);
 }
+
 
 /**
  * phosh_connect_feedback:

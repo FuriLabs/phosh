@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  *
  * Once based on maynard's panel which is
@@ -9,6 +11,8 @@
  */
 
 #define G_LOG_DOMAIN "phosh-shell"
+
+#define WWAN_BACKEND_KEY "wwan-backend"
 
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +28,7 @@
 
 #include "batteryinfo.h"
 #include "background-manager.h"
+#include "bt-manager.h"
 #include "fader.h"
 #include "feedback-manager.h"
 #include "home.h"
@@ -45,7 +50,9 @@
 #include "util.h"
 #include "wifiinfo.h"
 #include "wwaninfo.h"
-#include "bt-manager.h"
+#include "wwan/phosh-wwan-ofono.h"
+#include "wwan/phosh-wwan-mm.h"
+#include "wwan/phosh-wwan-backend.h"
 
 /**
  * SECTION:shell
@@ -89,13 +96,14 @@ typedef struct
   PhoshNotifyManager *notify_manager;
   PhoshFeedbackManager *feedback_manager;
   PhoshBtManager *bt_manager;
+  PhoshWWan *wwan;
 
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
   PhoshProximity *proximity;
 
   gboolean startup_finished;
-  gint rot; /* current rotation of primary monitor */
+  int rot; /* current rotation of primary monitor */
 } PhoshShellPrivate;
 
 
@@ -326,20 +334,29 @@ phosh_shell_dispose (GObject *object)
 
   panels_dispose (self);
   g_clear_pointer (&priv->faders, g_ptr_array_unref);
+
   g_clear_object (&priv->notification_banner);
+
+  /* dispose managers in opposite order of declaration */
+  g_clear_object (&priv->wwan);
+  g_clear_object (&priv->bt_manager);
+  g_clear_object (&priv->feedback_manager);
   g_clear_object (&priv->notify_manager);
   g_clear_object (&priv->screen_saver_manager);
+  g_clear_object (&priv->polkit_auth_agent);
+  g_clear_object (&priv->wifi_manager);
+  g_clear_object (&priv->toplevel_manager);
+  g_clear_object (&priv->osk_manager);
+  g_clear_object (&priv->idle_manager);
   g_clear_object (&priv->lockscreen_manager);
   g_clear_object (&priv->monitor_manager);
-  g_clear_object (&priv->toplevel_manager);
-  g_clear_object (&priv->wifi_manager);
-  g_clear_object (&priv->osk_manager);
-  g_clear_object (&priv->polkit_auth_agent);
+  g_clear_object (&priv->builtin_monitor);
+  g_clear_object (&priv->primary_monitor);
   g_clear_object (&priv->background_manager);
+
+  /* sensors */
   g_clear_object (&priv->proximity);
   g_clear_object (&priv->sensor_proxy_manager);
-  g_clear_object (&priv->feedback_manager);
-  g_clear_object (&priv->primary_monitor);
   phosh_system_prompter_unregister ();
   phosh_session_unregister ();
 
@@ -621,7 +638,7 @@ phosh_shell_init (PhoshShell *self)
 }
 
 
-gint
+int
 phosh_shell_get_rotation (PhoshShell *self)
 {
   PhoshShellPrivate *priv;
@@ -783,6 +800,7 @@ phosh_shell_get_wifi_manager (PhoshShell *self)
   return priv->wifi_manager;
 }
 
+
 PhoshBtManager *
 phosh_shell_get_bt_manager (PhoshShell *self)
 {
@@ -797,6 +815,7 @@ phosh_shell_get_bt_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_BT_MANAGER (priv->bt_manager), NULL);
   return priv->bt_manager;
 }
+
 
 PhoshOskManager *
 phosh_shell_get_osk_manager (PhoshShell *self)
@@ -813,6 +832,7 @@ phosh_shell_get_osk_manager (PhoshShell *self)
   return priv->osk_manager;
 }
 
+
 PhoshToplevelManager *
 phosh_shell_get_toplevel_manager (PhoshShell *self)
 {
@@ -824,6 +844,7 @@ phosh_shell_get_toplevel_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_TOPLEVEL_MANAGER (priv->toplevel_manager), NULL);
   return priv->toplevel_manager;
 }
+
 
 PhoshFeedbackManager *
 phosh_shell_get_feedback_manager (PhoshShell *self)
@@ -837,17 +858,46 @@ phosh_shell_get_feedback_manager (PhoshShell *self)
   return priv->feedback_manager;
 }
 
+
+PhoshWWan *
+phosh_shell_get_wwan (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+
+  if (!priv->wwan) {
+    g_autoptr (GSettings) settings = g_settings_new ("sm.puri.phosh");
+    PhoshWWanBackend backend = g_settings_get_enum (settings, WWAN_BACKEND_KEY);
+
+    switch (backend) {
+      default:
+      case PHOSH_WWAN_BACKEND_MM:
+        priv->wwan = PHOSH_WWAN (phosh_wwan_mm_new());
+        break;
+      case PHOSH_WWAN_BACKEND_OFONO:
+        priv->wwan = PHOSH_WWAN (phosh_wwan_ofono_new());
+        break;
+    }
+  }
+
+  g_return_val_if_fail (PHOSH_IS_WWAN (priv->wwan), NULL);
+  return priv->wwan;
+}
+
+
 /**
  * Returns the usable area in pixels usable by a client on the phone
  * display
  */
 void
-phosh_shell_get_usable_area (PhoshShell *self, gint *x, gint *y, gint *width, gint *height)
+phosh_shell_get_usable_area (PhoshShell *self, int *x, int *y, int *width, int *height)
 {
   PhoshMonitor *monitor;
   PhoshMonitorMode *mode;
-  gint w, h;
-  gint scale;
+  int w, h;
+  int scale;
 
   g_return_if_fail (PHOSH_IS_SHELL (self));
 

@@ -1,7 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
  *
- * SPDX-License-Identifier: GPL-3+
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
@@ -149,10 +150,10 @@ battery_setting_clicked_cb (PhoshSettings *self)
 }
 
 static void change_volume (PhoshSettings *self,
-                           gint steps)
+                           int steps)
 {
   GtkAdjustment *adj;
-  gdouble vol, inc;
+  double vol, inc;
 
   adj = GTK_ADJUSTMENT (gvc_channel_bar_get_adjustment (GVC_CHANNEL_BAR (self->output_vol_bar)));
 
@@ -178,7 +179,7 @@ static void raise_volume (PhoshSettings *self)
 
 static void
 accelerator_grabbed_cb (PhoshSettings *self,
-                        const gchar *accelerator,
+                        const char *accelerator,
                         uint32_t action_id)
 {
   guint64 action = action_id;
@@ -289,8 +290,8 @@ static void
 vol_adjustment_value_changed_cb (GtkAdjustment *adjustment,
                                  PhoshSettings *self)
 {
-  gdouble volume, rounded;
-  g_autofree gchar *name = NULL;
+  double volume, rounded;
+  g_autofree char *name = NULL;
 
   if (!self->output_stream)
     self->output_stream = gvc_mixer_control_get_default_sink (self->mixer_control);
@@ -514,7 +515,7 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 static void
 phosh_settings_init (PhoshSettings *self)
 {
-  gchar *subscribe_accelerators[] = {
+  char *subscribe_accelerators[] = {
     "XF86AudioLowerVolume",
     "XF86AudioRaiseVolume",
     "XF86AudioMute",

@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2019 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
@@ -41,6 +43,7 @@ struct _PhoshBtInfo {
 };
 G_DEFINE_TYPE (PhoshBtInfo, phosh_bt_info, PHOSH_TYPE_STATUS_ICON);
 
+
 static void
 phosh_bt_info_get_property (GObject    *object,
                             guint       property_id,
@@ -62,10 +65,11 @@ phosh_bt_info_get_property (GObject    *object,
   }
 }
 
+
 static void
 update_icon (PhoshBtInfo *self, GParamSpec *pspec, PhoshBtManager *bt)
 {
-  const gchar *icon_name;
+  const char *icon_name;
 
   g_return_if_fail (PHOSH_IS_BT_INFO (self));
   g_return_if_fail (PHOSH_IS_BT_MANAGER (bt));
@@ -75,6 +79,7 @@ update_icon (PhoshBtInfo *self, GParamSpec *pspec, PhoshBtManager *bt)
   if (icon_name)
     phosh_status_icon_set_icon_name (PHOSH_STATUS_ICON (self), icon_name);
 }
+
 
 static void
 update_info (PhoshBtInfo *self)
@@ -90,6 +95,7 @@ update_info (PhoshBtInfo *self)
   else
     phosh_status_icon_set_info (PHOSH_STATUS_ICON (self), _("Bluetooth"));
 }
+
 
 static void
 on_bt_enabled (PhoshBtInfo *self, GParamSpec *pspec, PhoshBtManager *bt)
@@ -107,6 +113,7 @@ on_bt_enabled (PhoshBtInfo *self, GParamSpec *pspec, PhoshBtManager *bt)
   self->enabled = enabled;
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ENABLED]);
 }
+
 
 static void
 on_bt_present (PhoshBtInfo *self, GParamSpec *pspec, PhoshBtManager *bt)

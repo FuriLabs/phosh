@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
@@ -47,7 +49,7 @@ new_prompt_cb (GcrSystemPrompter *prompter,
 
 static void
 on_bus_acquired (GDBusConnection *connection,
-                 const gchar *name,
+                 const char *name,
                  gpointer user_data)
 {
   g_debug ("bus acquired for %s", name);
@@ -62,7 +64,7 @@ on_bus_acquired (GDBusConnection *connection,
 
 static void
 on_name_lost (GDBusConnection *connection,
-              const gchar *name,
+              const char *name,
               gpointer user_data)
 {
   g_debug ("lost name: %s", name);
@@ -77,7 +79,7 @@ on_name_lost (GDBusConnection *connection,
 
 static void
 on_name_acquired (GDBusConnection *connection,
-                  const gchar *name,
+                  const char *name,
                   gpointer user_data)
 {
   g_debug ("acquired name: %s", name);

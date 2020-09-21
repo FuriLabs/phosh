@@ -1,5 +1,5 @@
 project('phosh', 'c',
-          version: '0.4.3',
+          version: '0.4.4',
           license: 'GPLv3+',
     meson_version: '>= 0.49.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
@@ -126,8 +126,8 @@ libgvc = subproject('gvc',
     'alsa=false'
   ])
 libgvc_dep = libgvc.get_variable('libgvc_dep')
-libhandy_dep = dependency('libhandy-0.0',
-  version: '>=0.0.12',
+libhandy_dep = dependency('libhandy-1',
+  version: '>=1.0.0',
   fallback: ['libhandy', 'libhandy_dep'],
   default_options: ['introspection=disabled']
   )

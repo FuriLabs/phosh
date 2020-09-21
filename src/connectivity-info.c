@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2020 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
@@ -39,6 +41,7 @@ struct _PhoshConnectivityInfo {
 };
 G_DEFINE_TYPE (PhoshConnectivityInfo, phosh_connectivity_info, PHOSH_TYPE_STATUS_ICON);
 
+
 static void
 phosh_connectivity_info_get_property (GObject    *object,
                                       guint       property_id,
@@ -60,7 +63,7 @@ phosh_connectivity_info_get_property (GObject    *object,
 static void
 on_connectivity_changed (PhoshConnectivityInfo *self, GParamSpec *pspec, NMClient *nmclient)
 {
-  const gchar *icon_name;
+  const char *icon_name;
   NMConnectivityState state;
   gboolean connectivity = FALSE;
 
@@ -125,6 +128,7 @@ on_nm_client_ready (GObject *obj, GAsyncResult *res, PhoshConnectivityInfo *self
 
   g_idle_add ((GSourceFunc) on_idle, self);
 }
+
 
 static void
 phosh_connectivity_info_constructed (GObject *object)

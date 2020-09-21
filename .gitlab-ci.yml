@@ -45,7 +45,7 @@ variables:
     CI_REPO: "deb http://ci.puri.sm/ scratch librem5"
     DIST: buster
     DEPS: phoc wget gnome-session gdb weston valgrind
-          libhandy-0.0-0-dbgsym libgtk-3-0-dbgsym libglib2.0-0-dbgsym
+          libhandy-1-0-dbgsym libgtk-3-0-dbgsym libglib2.0-0-dbgsym
           dconf-gsettings-backend-dbgsym libfeedback-0.0-0-dbgsym
           xvfb imagemagick
     WANT_BUILD_DEPS: "false"
@@ -111,6 +111,33 @@ build:native-debian-bullseye:
     variables:
       - $PKG_ONLY == "1"
 
+build:cross-debian-bullseye:i386:
+  <<: *tags
+  stage: build
+  image: debian:bullseye
+  allow_failure: true
+  before_script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - echo "deb [arch=i386] http://deb.debian.org/debian/ testing main" > /etc/apt/sources.list.d/i386.list
+    - apt-get -y update
+    - apt-get -y install eatmydata
+    - dpkg --add-architecture i386
+    - eatmydata apt-get -y update
+    - eatmydata apt-get -y -a i386 -o APT::Immediate-Configure=false build-dep .
+    - eatmydata apt-get -y install $DEPS crossbuild-essential-i386
+  script:
+    - git submodule update --recursive
+    - 'echo "Build opts: ${BUILD_OPTS}"'
+    - /usr/share/meson/debcrossgen --arch i386 -o cross-i386.txt
+    - meson ${BUILD_OPTS} . _build --cross-file cross-i386.txt
+    - ninja -C _build
+  artifacts:
+    paths:
+      - _build
+  except:
+    variables:
+      - $PKG_ONLY == "1"
+
 unit-test:native-debian-bullseye:
   <<: *tags
   stage: test+docs
@@ -161,6 +188,21 @@ check-po:
     # in this case
     - cd po/
     - intltool-update -m 2>&1 | grep -qs '/.*\.c' && { intltool-update -m; exit 1; } || exit 0
+  except:
+    variables:
+      - $PKG_ONLY == "1"
+
+check-license-headers:
+  <<: *tags
+  stage: test+docs
+  image: debian:bullseye
+  dependencies:
+    - build:native-debian-bullseye
+  <<: *bullseye_vars
+  script:
+    # Checks .c and .h files begin with a license header as
+    # defined in HACKING.md
+    - ./tools/check-license-headers.py
   except:
     variables:
       - $PKG_ONLY == "1"
@@ -271,6 +313,7 @@ package:deb-pureos-amber:
     - apt-get -y install build-essential git devscripts
     - git submodule update --recursive
   extends: .l5-build-debian-package
+  allow_failure: true
 
 autopkgtest-debian-buster-package:
   dependencies:

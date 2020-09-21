@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 #pragma once
@@ -37,8 +39,8 @@ typedef enum _PhoshMonitorConnectorType
 
 typedef struct _PhoshMonitorMode
 {
-  gint width, height;
-  gint refresh;
+  int width, height;
+  int refresh;
   guint32 flags;
 } PhoshMonitorMode;
 
@@ -64,25 +66,25 @@ struct _PhoshMonitor {
   struct zwlr_output_power_v1 *wlr_output_power;
   PhoshMonitorPowerSaveMode power_mode;
 
-  gint x, y, width, height;
-  gint subpixel;
+  int x, y, width, height;
+  int subpixel;
   gint32 transform, scale;
 
   struct {
     gint32 x, y, width, height;
   } logical;
 
-  gint width_mm;
-  gint height_mm;
+  int width_mm;
+  int height_mm;
 
-  gchar *vendor;
-  gchar *product;
+  char *vendor;
+  char *product;
 
   GArray *modes;
   guint current_mode;
   guint preferred_mode;
 
-  gchar *name;
+  char *name;
   PhoshMonitorConnectorType conn_type;
 
   gboolean wl_output_done;

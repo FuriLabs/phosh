@@ -1,7 +1,7 @@
 /*
- * Copyright © 2020 Zander Brown
+ * Copyright © 2020 Zander Brown <zbrown@gnome.org>
  *
- * SPDX-License-Identifier: GPL-3.0+
+ * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Author: Zander Brown <zbrown@gnome.org>
  */
@@ -41,7 +41,7 @@ static void
 test_phosh_notify_manager_teardown_test (PhoshNotifyManagerTest *test,
                                          gconstpointer           data)
 {
-  // g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (test->obj));
+  /* g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (test->obj)); */
   g_message ("B clear %i", ((GObject *) test->obj)->ref_count);
   g_object_unref (test->obj);
   g_clear_object (&test->obj);

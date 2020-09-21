@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  *
  * Somewhat based on mutter's src/backends/meta-monitor-manager.c
@@ -134,7 +136,7 @@ phosh_monitor_manager_handle_get_resources (
     g_variant_builder_add (&output_builder, "(uxiausauaua{sv})",
                            (guint32)i, /* ID */
                            (guint64)i, /* output->winsys_id, */
-                           (gint)i,    /* crtc_index, */
+                           (int) i,    /* crtc_index, */
                            &crtcs,
                            monitor->name, /* output->name */
                            &modes,
@@ -184,7 +186,7 @@ phosh_monitor_manager_handle_change_backlight (
   GDBusMethodInvocation *invocation,
   guint                  serial,
   guint                  output_index,
-  gint                   value)
+  int                    value)
 {
   g_debug ("Unimplemented DBus call %s", __func__);
   g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
@@ -386,6 +388,7 @@ phosh_monitor_manager_handle_set_crtc_gamma (
   return TRUE;
 }
 
+
 #define MODE_FORMAT "(siiddada{sv})"
 #define MODES_FORMAT "a" MODE_FORMAT
 #define MONITOR_SPEC_FORMAT "(ssss)"
@@ -395,6 +398,7 @@ phosh_monitor_manager_handle_set_crtc_gamma (
 #define LOGICAL_MONITOR_MONITORS_FORMAT "a" MONITOR_SPEC_FORMAT
 #define LOGICAL_MONITOR_FORMAT "(iidub" LOGICAL_MONITOR_MONITORS_FORMAT "a{sv})"
 #define LOGICAL_MONITORS_FORMAT "a" LOGICAL_MONITOR_FORMAT
+
 
 static gboolean
 phosh_monitor_manager_handle_get_current_state (
@@ -415,8 +419,8 @@ phosh_monitor_manager_handle_get_current_state (
     PhoshMonitor *monitor = g_ptr_array_index (self->monitors, i);
     GVariantBuilder modes_builder, supported_scales_builder, mode_properties_builder,
       monitor_properties_builder;
-    g_autofree gchar *serial = NULL;
-    gchar *display_name;
+    g_autofree char *serial = NULL;
+    char *display_name;
     gboolean is_builtin;
 
     if (!phosh_monitor_is_configured(monitor))
@@ -426,7 +430,7 @@ phosh_monitor_manager_handle_get_current_state (
 
     for (int k = 0; k < monitor->modes->len; k++) {
       PhoshMonitorMode *mode = &g_array_index (monitor->modes, PhoshMonitorMode, k);
-      g_autofree gchar *mode_name = NULL;
+      g_autofree char *mode_name = NULL;
 
       g_variant_builder_init (&supported_scales_builder,
                               G_VARIANT_TYPE ("ad"));
@@ -482,7 +486,7 @@ phosh_monitor_manager_handle_get_current_state (
   for (int i = 0; i < self->monitors->len; i++) {
     PhoshMonitor *monitor = g_ptr_array_index (self->monitors, i);
     GVariantBuilder logical_monitor_monitors_builder;
-    g_autofree gchar *serial = NULL;
+    g_autofree char *serial = NULL;
     gboolean is_primary;
 
     if (!phosh_monitor_is_configured(monitor))
@@ -530,6 +534,8 @@ phosh_monitor_manager_handle_get_current_state (
 
   return TRUE;
 }
+
+
 #undef LOGICAL_MONITORS_FORMAT
 #undef LOGICAL_MONITOR_FORMAT
 #undef LOGICAL_MONITOR_MONITORS_FORMAT
@@ -570,7 +576,9 @@ find_monitor_from_variant(PhoshMonitorManager *self,
   return monitor;
 }
 
+
 #define LOGICAL_MONITOR_CONFIG_FORMAT "(iidub" MONITOR_CONFIGS_FORMAT ")"
+
 
 /* TODO: this can later become get-logical_monitor_config_from_variant */
 static PhoshMonitor *
@@ -614,9 +622,12 @@ check_primary_monitor_from_variant (PhoshMonitorManager *self,
   g_variant_iter_free (monitor_configs_iter);
   return monitor;
 }
+
+
 #undef LOGICAL_MONITOR_CONFIG_FORMAT
 #undef MONITOR_CONFIGS_FORMAT
 #undef MONITOR_CONFIG_FORMAT
+
 
 static gboolean
 phosh_monitor_manager_handle_apply_monitors_config (
@@ -705,7 +716,7 @@ power_save_mode_changed_cb (PhoshMonitorManager *self,
                             GParamSpec          *pspec,
                             gpointer             user_data)
 {
-  gint mode, ps_mode;
+  int mode, ps_mode;
 
   mode = phosh_display_dbus_display_config_get_power_save_mode (
     PHOSH_DISPLAY_DBUS_DISPLAY_CONFIG (self));
@@ -771,6 +782,7 @@ find_monitor_by_wl_output (PhoshMonitorManager *self, struct wl_output *output)
   }
   return NULL;
 }
+
 
 static void
 on_monitor_removed (PhoshMonitorManager *self,
@@ -910,6 +922,7 @@ phosh_monitor_manager_init (PhoshMonitorManager *self)
   self->serial = 1;
 }
 
+
 PhoshMonitorManager *
 phosh_monitor_manager_new (void)
 {
@@ -936,7 +949,7 @@ phosh_monitor_manager_get_monitor (PhoshMonitorManager *self, guint num)
 
 
 PhoshMonitor *
-phosh_monitor_manager_find_monitor (PhoshMonitorManager *self, const gchar *name)
+phosh_monitor_manager_find_monitor (PhoshMonitorManager *self, const char *name)
 {
   for (int i = 0; i < self->monitors->len; i++) {
     PhoshMonitor *monitor = g_ptr_array_index (self->monitors, i);

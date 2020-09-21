@@ -1,6 +1,8 @@
 /*
  * Copyright (C) 2018 Purism SPC
- * SPDX-License-Identifier: GPL-3.0+
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 /* Modem abstraction */
@@ -90,6 +92,7 @@ phosh_wwan_get_access_tec (PhoshWWan *self)
 
 }
 
+
 gboolean
 phosh_wwan_is_unlocked (PhoshWWan *self)
 {
@@ -101,6 +104,7 @@ phosh_wwan_is_unlocked (PhoshWWan *self)
   g_return_val_if_fail (iface->is_unlocked != NULL, FALSE);
   return iface->is_unlocked (self);
 }
+
 
 gboolean
 phosh_wwan_has_sim (PhoshWWan *self)
@@ -114,6 +118,7 @@ phosh_wwan_has_sim (PhoshWWan *self)
   return iface->has_sim (self);
 }
 
+
 gboolean
 phosh_wwan_is_present (PhoshWWan *self)
 {
@@ -126,7 +131,8 @@ phosh_wwan_is_present (PhoshWWan *self)
   return iface->is_present (self);
 }
 
-const gchar *
+
+const char *
 phosh_wwan_get_operator (PhoshWWan *self)
 {
   PhoshWWanInterface *iface;
