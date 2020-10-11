@@ -41,13 +41,13 @@ static GParamSpec *props[PROP_LAST_PROP];
 struct _PhoshBtManager {
   GObject                parent;
 
-  /* Wheter bt  radio is on */
+  /* Whether bt radio is on */
   gboolean               enabled;
   /* Whether we have a bt device is present */
   gboolean               present;
   const char            *icon_name;
 
-  PhoshRfkillDbusRfkill *proxy;
+  PhoshRfkillDBusRfkill *proxy;
 };
 G_DEFINE_TYPE (PhoshBtManager, phosh_bt_manager, G_TYPE_OBJECT);
 
@@ -80,7 +80,7 @@ phosh_bt_manager_get_property (GObject    *object,
 static void
 on_bt_airplane_mode_changed (PhoshBtManager        *self,
                              GParamSpec            *pspec,
-                             PhoshRfkillDbusRfkill *proxy)
+                             PhoshRfkillDBusRfkill *proxy)
 {
   gboolean enabled;
   const char *icon_name;
@@ -113,7 +113,7 @@ on_bt_airplane_mode_changed (PhoshBtManager        *self,
 static void
 on_bt_has_airplane_mode_changed (PhoshBtManager        *self,
                                  GParamSpec            *pspec,
-                                 PhoshRfkillDbusRfkill *proxy)
+                                 PhoshRfkillDBusRfkill *proxy)
 {
   gboolean present;
 

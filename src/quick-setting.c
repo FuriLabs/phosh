@@ -18,10 +18,10 @@
  * @short_description: A quick setting for the notification drawer
  * @Title: PhoshQuickSetting
  *
- * The #QuickSetting is a widget which is meant to be placed inside the top drawer.
- * It contains a #GtkLabel and accepts one #StatusIcon as a child. The info property
- * of the #StatusIcon is bind to the #GtkLabel.
- * A #QuickSetting has two signals long_press and clicked, where the first is emited
+ * The #PhoshQuickSetting is a widget which is meant to be placed inside the top drawer.
+ * It contains a #GtkLabel and accepts one #PhoshStatusIcon as a child. The info property
+ * of the #PhoshStatusIcon is bind to the #GtkLabel.
+ * A #PhoshQuickSetting has two signals long_press and clicked, where the first is emited
  * when the user performs a long press, the second signal is a normal single click.
  */
 
@@ -235,12 +235,13 @@ call_dbus_cb (GDBusProxy *proxy,
   if (err) {
     g_warning ("Can't open panel %s", err->message);
   }
+  g_object_unref (proxy);
 }
 
 static void
 create_dbus_proxy_cb (GObject *source_object, GAsyncResult *res, char *panel)
 {
-  g_autoptr (GDBusProxy) proxy = NULL;
+  GDBusProxy *proxy;
   g_autoptr (GError) err = NULL;
   GVariantBuilder builder;
   GVariant *params[3];
@@ -250,6 +251,7 @@ create_dbus_proxy_cb (GObject *source_object, GAsyncResult *res, char *panel)
 
   if (err != NULL) {
     g_warning ("Can't open panel %s: %s", panel, err->message);
+    g_free (panel);
     return;
   }
 

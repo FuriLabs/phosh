@@ -150,7 +150,7 @@ xdg_output_v1_handle_logical_position (void *data,
 
   g_return_if_fail (PHOSH_IS_MONITOR (self));
   self->xdg_output_done = FALSE;
-  g_debug ("%p: Logical pos: %d,%d", self, x, y);
+  g_debug ("Monitor %p: Logical pos: %d,%d", self, x, y);
   self->logical.x = x;
   self->logical.y = y;
 }
@@ -166,7 +166,7 @@ xdg_output_v1_handle_logical_size (void *data,
 
   g_return_if_fail (PHOSH_IS_MONITOR (self));
   self->xdg_output_done = FALSE;
-  g_debug ("%p: Logical size: %dx%d", self, width, height);
+  g_debug ("Monitor %p: Logical size: %dx%d", self, width, height);
   self->logical.width = width;
   self->logical.height = height;
 
@@ -196,7 +196,7 @@ xdg_output_v1_handle_name (void *data,
 {
   PhoshMonitor *self = PHOSH_MONITOR (data);
   /* wlroots uses the connector's name as xdg_output name */
-  g_debug("Connector name is %s", name);
+  g_debug("Monitor %p: Connector name is %s", self, name);
 
   self->xdg_output_done = FALSE;
   self->name = g_strdup (name);
@@ -513,27 +513,31 @@ phosh_monitor_is_flipped (PhoshMonitor *self)
 
 
 /**
- * phosh_monitor_get_rotation:
+ * phosh_monitor_get_transform:
  * @self: A #PhoshMonitor
  *
- * Returns: The monitor's rotation in degrees.
+ * Returns: The monitor's output transform
  */
 guint
-phosh_monitor_get_rotation (PhoshMonitor *self)
+phosh_monitor_get_transform (PhoshMonitor *self)
 {
     switch (self->transform) {
     case WL_OUTPUT_TRANSFORM_90:
+      return PHOSH_MONITOR_TRANSFORM_90;
     case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-      return 90;
+      return PHOSH_MONITOR_TRANSFORM_FLIPPED_90;
     case WL_OUTPUT_TRANSFORM_180:
+      return PHOSH_MONITOR_TRANSFORM_180;
     case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-      return 180;
+      return PHOSH_MONITOR_TRANSFORM_FLIPPED_180;
     case WL_OUTPUT_TRANSFORM_270:
+      return PHOSH_MONITOR_TRANSFORM_270;
     case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-      return 270;
+      return PHOSH_MONITOR_TRANSFORM_FLIPPED_270;
     case WL_OUTPUT_TRANSFORM_NORMAL:
+      return PHOSH_MONITOR_TRANSFORM_NORMAL;
     case WL_OUTPUT_TRANSFORM_FLIPPED:
-      return 0;
+      return PHOSH_MONITOR_TRANSFORM_FLIPPED;
     default:
       g_assert_not_reached ();
     }
