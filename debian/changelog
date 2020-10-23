@@ -1,3 +1,10 @@
+phosh (0.4.5-2) unstable; urgency=medium
+
+  * phosh-tweaks: Enable screen keyboard by default.
+    This is needed by squeekboard 1.10.0.
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 23 Oct 2020 16:21:50 +0200
+
 phosh (0.4.5-1) unstable; urgency=medium
 
   [ Guido Günther ]
