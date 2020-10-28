@@ -1,3 +1,14 @@
+phosh (0.5.0-1) unstable; urgency=medium
+
+  [ Guido Günther ]
+  * debian: Support nodoc build profile.
+  * d/control: Depend on phoc that doesn't crash when unbinding keyboard grabs.
+
+  [ Arnaud Ferraris ]
+  * New upstream version 0.5.0
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Wed, 28 Oct 2020 11:34:57 +0100
+
 phosh (0.4.5-2) unstable; urgency=medium
 
   * phosh-tweaks: Enable screen keyboard by default.
