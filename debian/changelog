@@ -1,3 +1,11 @@
+phosh (0.5.0-2) unstable; urgency=medium
+
+  * debian: Depend on gnome-shell-common.  We use that schema for the
+    keybindings. (Closes: #973350)
+  * schema override: Drop button-layout. Phosh toggles this automatically now.
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 29 Oct 2020 11:11:38 +0100
+
 phosh (0.5.0-1) unstable; urgency=medium
 
   [ Guido Günther ]
