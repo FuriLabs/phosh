@@ -1,3 +1,9 @@
+phosh (0.5.1-1) unstable; urgency=medium
+
+  * New upstream version 0.5.1
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Thu, 05 Nov 2020 14:47:48 +0100
+
 phosh (0.5.0-2) unstable; urgency=medium
 
   * debian: Depend on gnome-shell-common.  We use that schema for the
