@@ -57,10 +57,10 @@ Provides:
 Description: Pure Wayland shell for mobile devices
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
- based inputs and and small screens.
+ based inputs and small screens.
  .
  It's part of the Phosh Mobile Environment based on GNOME/GTK. For the full
- stack see the phosh-full and phosh-core meta packages.
+ stack see the phosh-full and phosh-core metapackages.
 
 Package: phosh-osk-stub
 Architecture: any
@@ -80,7 +80,7 @@ Depends:
 Description: Pure Wayland shell for mobile devices - development documentation
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
- based inputs and and small screens.
+ based inputs and small screens.
  .
  This package contains the development documentation.
 
@@ -92,6 +92,6 @@ Depends:
 Description: Pure Wayland shell for mobile devices - GSettings tweaks
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
- based inputs and and small screens.
+ based inputs and small screens.
  .
  This package contains settings to improve behaviour on mobile devices.
