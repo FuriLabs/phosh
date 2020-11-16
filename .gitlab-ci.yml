@@ -21,7 +21,7 @@ variables:
 
 .bullseye_vars: &bullseye_vars
   variables:
-    CI_REPO: "deb http://ci.puri.sm/ bullseyeci main"
+    CI_REPO: "deb http://deb.debian.org/debian/ sid main"
     DIST: bullseye
     BUILD_OPTS: -Dphoc_tests=enabled -Dgtk_doc=true ${COMMON_BUILD_OPTS}
 
@@ -292,6 +292,14 @@ test:smoke:two-outputs:
       - $PKG_ONLY == "1"
 
 package:deb-debian-buster:
+  extends: .l5-build-debian-package
+
+package:deb-debian-bullseye:arm64:
+  tags:
+    - librem5:arm64
+  variables:
+    L5_DOCKER_IMAGE: debian:sid
+    L5_ADD_SCRATCH_CI: 'false'
   extends: .l5-build-debian-package
 
 package:deb-debian-buster:arm64:
