@@ -1,3 +1,16 @@
+phosh (0.6.0-1) unstable; urgency=medium
+
+  [ Guido Günther ]
+  * d/control: Update package description.
+  * debian: Bump libhandy build-dependency to 1.0.2.
+    We need the fixes there for the overview.
+
+  [ Arnaud Ferraris ]
+  * New upstream version 0.6.0
+  * d/control: fix typos in descriptions
+
+ -- Arnaud Ferraris <arnaud.ferraris@gmail.com>  Mon, 16 Nov 2020 10:52:55 +0100
+
 phosh (0.5.1-1) unstable; urgency=medium
 
   * New upstream version 0.5.1
