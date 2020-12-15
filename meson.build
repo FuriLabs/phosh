@@ -1,7 +1,7 @@
 project('phosh', 'c',
-          version: '0.6.0',
+          version: '0.7.0',
           license: 'GPLv3+',
-    meson_version: '>= 0.49.0',
+    meson_version: '>= 0.50.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
 
@@ -32,7 +32,6 @@ glib_ver = 'GLIB_VERSION_2_58'
 add_project_arguments([
   '-DHAVE_CONFIG_H',
   '-DGLIB_VERSION_MIN_REQUIRED=@0@'.format(glib_ver),
-  '-DGLIB_VERSION_MAX_ALLOWED=@0@'.format(glib_ver),
   '-DG_LOG_USE_STRUCTURED',
   '-I' + meson.build_root(),
 ], language: 'c')
