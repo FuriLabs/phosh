@@ -1,3 +1,16 @@
+phosh (0.8.0-1) unstable; urgency=medium
+
+  * New upstream version 0.8.0
+  * d/gbp.conf: Include submodule automatically.
+    This makes `gbp export-orig` work out of the box when creating the
+    upstream tarball since it includes the gvc submodule.
+  * Build-depend libsystemd-dev.
+    Needed for logind support
+  * debian: Pick phosh.service from data/ for less downstream chanegs
+  * debian: Pick schema overrides from data/ for less downstream changes
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 19 Jan 2021 10:34:47 +0100
+
 phosh (0.7.1-1) unstable; urgency=medium
 
   * New upsetream version 0.7.1
