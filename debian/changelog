@@ -1,3 +1,13 @@
+phosh (0.9.0-1) experimental; urgency=medium
+
+  * New upstream version 0.9.0
+  * d/control: Require libhandy >= 1.1.90
+  * Clean d/phosh.service
+  * salsa-ci: Build against experimental.
+    We need that for newer libhandy
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 03 Mar 2021 09:53:01 +0100
+
 phosh (0.8.1-1) experimental; urgency=medium
 
   * New upstream version 0.8.1
