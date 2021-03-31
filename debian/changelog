@@ -1,3 +1,9 @@
+phosh (0.10.0-1) experimental; urgency=medium
+
+  * New upstream version 0.10.0
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 31 Mar 2021 17:00:22 +0200
+
 phosh (0.9.0-1) experimental; urgency=medium
 
   * New upstream version 0.9.0
