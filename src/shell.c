@@ -95,6 +95,12 @@ enum {
 };
 static GParamSpec *props[PHOSH_SHELL_PROP_LAST_PROP];
 
+enum {
+  READY,
+  N_SIGNALS
+};
+static guint signals[N_SIGNALS] = { 0 };
+
 typedef struct
 {
   PhoshLayerSurface *panel;
@@ -115,7 +121,7 @@ typedef struct
   PhoshWifiManager *wifi_manager;
   PhoshPolkitAuthAgent *polkit_auth_agent;
   PhoshScreenSaverManager *screen_saver_manager;
-  PhoshScreenshotManager *screenshot_manager;  
+  PhoshScreenshotManager *screenshot_manager;
   PhoshNotifyManager *notify_manager;
   PhoshFeedbackManager *feedback_manager;
   PhoshBtManager *bt_manager;
@@ -348,7 +354,6 @@ phosh_shell_dispose (GObject *object)
 
   g_clear_object (&priv->notification_banner);
 
-  g_clear_object (&priv->keyboard_events);
   /* dispose managers in opposite order of declaration */
   g_clear_object (&priv->screenshot_manager);
   g_clear_object (&priv->location_manager);
@@ -373,6 +378,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->builtin_monitor);
   g_clear_object (&priv->primary_monitor);
   g_clear_object (&priv->background_manager);
+  g_clear_object (&priv->keyboard_events);
 
   /* sensors */
   g_clear_object (&priv->proximity);
@@ -471,7 +477,7 @@ setup_idle_cb (PhoshShell *self)
 
   priv->sensor_proxy_manager = phosh_sensor_proxy_manager_new (&err);
   if (!priv->sensor_proxy_manager)
-    g_warning ("Failed to connect to sensor-proxy: %s", err->message);
+    g_message ("Failed to connect to sensor-proxy: %s", err->message);
 
   panels_create (self);
   /* Create background after panel since it needs the panel's size */
@@ -518,8 +524,9 @@ setup_idle_cb (PhoshShell *self)
 
   priv->gnome_shell_manager = phosh_gnome_shell_manager_get_default ();
   priv->screenshot_manager = phosh_screenshot_manager_new ();
-  
+
   priv->startup_finished = TRUE;
+  g_signal_emit (self, signals[READY], 0);
 
   return FALSE;
 }
@@ -788,6 +795,12 @@ phosh_shell_class_init (PhoshShellClass *klass)
                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PHOSH_SHELL_PROP_LAST_PROP, props);
+
+  signals[READY] = g_signal_new ("ready",
+                                 G_TYPE_FROM_CLASS (klass),
+                                 G_SIGNAL_RUN_LAST, 0,
+                                 NULL, NULL, NULL,
+                                 G_TYPE_NONE, 0);
 }
 
 
@@ -905,6 +918,19 @@ phosh_shell_get_monitor_manager (PhoshShell *self)
 
   g_return_val_if_fail (PHOSH_IS_MONITOR_MANAGER (priv->monitor_manager), NULL);
   return priv->monitor_manager;
+}
+
+
+PhoshBackgroundManager *
+phosh_shell_get_background_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+  g_return_val_if_fail (PHOSH_IS_BACKGROUND_MANAGER (priv->background_manager), NULL);
+
+  return priv->background_manager;
 }
 
 

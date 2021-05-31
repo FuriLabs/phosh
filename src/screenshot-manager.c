@@ -146,7 +146,7 @@ screencopy_done (PhoshScreenshotManager *self, gboolean success)
                                              success,
                                              self->frame->filename ?: "");
   /* TODO: GNOME >= 40 wants us to emit the click sound from here */
-  if (self->frame->flash)
+  if (self->frame->flash && success)
     show_fader (self);
 
   g_clear_pointer (&self->frame, screencopy_frame_dispose);
@@ -450,7 +450,7 @@ on_bus_acquired (GDBusConnection *connection,
                  const char      *name,
                  gpointer         user_data)
 {
-  PhoshScreenshotManager *self = user_data;
+  PhoshScreenshotManager *self = PHOSH_SCREENSHOT_MANAGER (user_data);
 
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self),
                                     connection,
@@ -487,10 +487,10 @@ phosh_screenshot_manager_dispose (GObject *object)
 {
   PhoshScreenshotManager *self = PHOSH_SCREENSHOT_MANAGER (object);
 
-  if (self->dbus_name_id) {
-    g_bus_unown_name (self->dbus_name_id);
-    self->dbus_name_id = 0;
-  }
+  g_clear_handle_id (&self->dbus_name_id, g_bus_unown_name);
+
+  if (g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (self)))
+    g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (self));
 
   g_clear_handle_id (&self->fader_id, g_source_remove);
   g_clear_pointer (&self->fader, phosh_cp_widget_destroy);
