@@ -1,3 +1,13 @@
+phosh (0.12.0-1) experimental; urgency=medium
+
+  * New usptream version 0.12.0
+  * d/control: Bump phoc version.
+    Recommend a version that has allows to bind all the needed keys.
+  * d/control: Add breaks on older calls.
+    We want a version that has the DBus interface
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 30 Jun 2021 11:52:38 +0200
+
 phosh (0.11.0-1) experimental; urgency=medium
 
   * New upstream version 0.11.0
