@@ -52,6 +52,8 @@ Recommends:
  iio-sensor-proxy,
  phosh-mobile-tweaks,
  squeekboard | phosh-osk-stub,
+Breaks:
+ gnome-calls (<< 0.3.4),
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
