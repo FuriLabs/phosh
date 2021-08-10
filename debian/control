@@ -23,7 +23,6 @@ Build-Depends:
  libpulse-dev,
  libupower-glib-dev,
  libwayland-dev,
- linux-libc-dev (>= 5.12) [arm64],
  meson,
  pandoc <!nodoc>,
 # to run the tests
