@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: phosh
 Upstream-Contact: Guido Günther <agx@debian.org>
-Source: https://source.puri.sm/Librem5/phosh
+Source: https://gitlab.gnome.org/World/Phosh/phosh
 
 Files: *
 Copyright: 2000 Eazel, Inc.
