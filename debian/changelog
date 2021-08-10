@@ -1,3 +1,27 @@
+phosh (0.13.0-1) UNRELEASED; urgency=medium
+
+  [ Guido Günther ]
+  * debian: Add breaks relationship on older calls.
+    This makes sure calls we don't try to run against a calls without
+    the DBus interface.
+  * d/control: Bump phoc recommends.
+    Recommend a version that allows us to bind all the interesting
+    keys.
+  * d/control: Bump breaks on gnome-calls.
+    Not strictly necessary but makes missing deps easier to detect.
+
+  [ Arnaud Ferraris ]
+  * New upstream version 0.13.0
+  * d/control: add build dependency on libgudev.
+    This is required by the new torch manager implementation.
+  * d/control: drop duplicate Homepage field
+  * d/control: drop Build-Depends on linux-libc-dev.
+    This is a downstream change, causing the arm64 build to fail on Debian
+    as our most recent kernel is 5.10.x.
+  * d/watch: update to reflect migration to GNOME infrastructure
+
+ -- Arnaud Ferraris <arnaud.ferraris@collabora.com>  Tue, 10 Aug 2021 11:17:12 +0200
+
 phosh (0.11.0-1) experimental; urgency=medium
 
   * New upstream version 0.11.0
