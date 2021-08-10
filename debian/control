@@ -39,7 +39,6 @@ Build-Depends:
 Standards-Version: 4.5.0
 Homepage: https://gitlab.gnome.org/World/Phosh/phosh/
 Rules-Requires-Root: no
-Homepage: https://source.puri.sm/Librem5/phosh
 Vcs-Browser: https://salsa.debian.org/DebianOnMobile-team/phosh
 Vcs-Git: https://salsa.debian.org/DebianOnMobile-team/phosh.git
 
