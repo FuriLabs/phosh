@@ -1,3 +1,12 @@
+phosh (0.13.1-1) unstable; urgency=medium
+
+  * New usptream version 0.13.1
+  * Upload to unstable
+  * Add Breaks: on older GTK.  With older GTK calls and phosh would block on
+    each other on startup.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 31 Aug 2021 14:52:10 +0200
+
 phosh (0.13.0-1) UNRELEASED; urgency=medium
 
   [ Guido Günther ]
