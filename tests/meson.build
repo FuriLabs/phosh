@@ -39,6 +39,7 @@ test_link_args = [
 # Deps for all tests
 test_stub_deps = [
   'stubs/phosh.c',
+  'stubs/lockscreen-manager.c',
   'stubs/toplevel.c',
   'stubs/toplevel-manager.c',
   'stubs/thumbnail.c',
@@ -46,6 +47,7 @@ test_stub_deps = [
 
 testlib_sources = [
   'testlib.c',
+  'testlib-full-shell.c',
 ]
 
 testlib = static_library('phoshtest', testlib_sources,
@@ -86,13 +88,16 @@ tests_phoc = [
 ]
 
 tests_manager = [
+  'gtk-mount-manager',
   'idle-manager',
   'monitor-manager',
   'notify-manager',
   'screenshot-manager',
-  'gtk-mount-manager',
 ]
 
+if get_option('g_tests')
+  tests_manager += ['calls-manager']
+endif
 
 # Unit tests
 foreach test : tests

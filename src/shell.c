@@ -151,6 +151,8 @@ typedef struct
 
   PhoshShellStateFlags shell_state;
 
+  char           *theme_name;
+  GtkCssProvider *css_provider;
 } PhoshShellPrivate;
 
 
@@ -172,53 +174,6 @@ settings_activated_cb (PhoshShell *self,
   phosh_panel_toggle_fold (PHOSH_PANEL(priv->panel));
 }
 
-
-void
-phosh_shell_lock (PhoshShell *self)
-{
-  phosh_shell_set_locked (self, TRUE);
-}
-
-
-void
-phosh_shell_unlock (PhoshShell *self)
-{
-  phosh_shell_set_locked (self, FALSE);
-}
-
-/**
- * phosh_shell_get_locked:
- * @self: The #PhoshShell singleton
- *
- * Returns: %TRUE if the shell is currently locked, otherwise %FALSE.
- */
-gboolean
-phosh_shell_get_locked (PhoshShell *self)
-{
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
-
-  return priv->locked;
-}
-
-/**
- * phosh_shell_set_locked:
- * @self: The #PhoshShell singleton
- * @locked: %TRUE to lock the shell
- *
- * Lock the shell. We proxy to lockscreen-manager to avoid
- * that other parts of the shell need to care about this
- * abstraction.
- */
-void
-phosh_shell_set_locked (PhoshShell *self, gboolean locked)
-{
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
-
-  if (locked == priv->locked)
-    return;
-
-  phosh_lockscreen_manager_set_locked (priv->lockscreen_manager, locked);
-}
 
 static void
 on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
@@ -290,15 +245,38 @@ panels_dispose (PhoshShell *self)
 }
 
 
+/* Select proper style sheet in case of high contrast */
 static void
-css_setup (PhoshShell *self)
+on_gtk_theme_name_changed (PhoshShell *self, GParamSpec *pspec, GtkSettings *settings)
 {
+  const char *style;
+  g_autofree char *name = NULL;
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
   g_autoptr (GtkCssProvider) provider = gtk_css_provider_new ();
 
-  gtk_css_provider_load_from_resource (provider, "/sm/puri/phosh/style.css");
+  g_object_get (settings, "gtk-theme-name", &name, NULL);
+
+  if (g_strcmp0 (priv->theme_name, name) == 0)
+    return;
+
+  priv->theme_name = g_steal_pointer (&name);
+  g_debug ("GTK theme: %s", priv->theme_name);
+
+  if (priv->css_provider) {
+    gtk_style_context_remove_provider_for_screen(gdk_screen_get_default (),
+                                                 GTK_STYLE_PROVIDER (priv->css_provider));
+  }
+
+  if (g_strcmp0 (priv->theme_name, "HighContrast") == 0)
+    style = "/sm/puri/phosh/stylesheet/adwaita-hc-light.css";
+  else
+    style = "/sm/puri/phosh/stylesheet/adwaita-dark.css";
+
+  gtk_css_provider_load_from_resource (provider, style);
   gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
                                              GTK_STYLE_PROVIDER (provider),
                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  g_set_object (&priv->css_provider, provider);
 }
 
 
@@ -401,6 +379,9 @@ phosh_shell_dispose (GObject *object)
 
   phosh_system_prompter_unregister ();
   g_clear_object (&priv->session_manager);
+
+  g_clear_pointer (&priv->theme_name, g_free);
+  g_clear_object (&priv->css_provider);
 
   G_OBJECT_CLASS (phosh_shell_parent_class)->dispose (object);
 }
@@ -574,12 +555,15 @@ static void
 on_builtin_monitor_power_mode_changed (PhoshShell *self, GParamSpec *pspec, PhoshMonitor *monitor)
 {
   PhoshMonitorPowerSaveMode mode;
+  PhoshShellPrivate *priv;
 
   g_return_if_fail (PHOSH_IS_SHELL (self));
   g_return_if_fail (PHOSH_IS_MONITOR (monitor));
+  priv = phosh_shell_get_instance_private (self);
 
   g_object_get (monitor, "power-mode", &mode, NULL);
-  if (mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF)
+  /* Might be emitted on startup before lockscreen_manager is up */
+  if (mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF && priv->lockscreen_manager)
     phosh_shell_lock (self);
 
   phosh_shell_set_state (self, PHOSH_STATE_BLANKED, mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF);
@@ -736,7 +720,6 @@ phosh_shell_constructed (GObject *object)
 
   gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (),
                                     "/sm/puri/phosh/icons");
-  css_setup (self);
 
   priv->calls_manager = phosh_calls_manager_new ();
   priv->lockscreen_manager = phosh_lockscreen_manager_new (priv->calls_manager);
@@ -828,6 +811,9 @@ phosh_shell_init (PhoshShell *self)
 
   gtk_settings = gtk_settings_get_default ();
   g_object_set (G_OBJECT (gtk_settings), "gtk-application-prefer-dark-theme", TRUE, NULL);
+
+  g_signal_connect_swapped (gtk_settings, "notify::gtk-theme-name", G_CALLBACK (on_gtk_theme_name_changed), self);
+  on_gtk_theme_name_changed (self, NULL, gtk_settings);
 
   priv->shell_state = PHOSH_STATE_NONE;
 }
@@ -1449,4 +1435,61 @@ phosh_shell_set_state (PhoshShell          *self,
            str_state, str_new_flags);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHELL_STATE]);
+}
+
+void
+phosh_shell_lock (PhoshShell *self)
+{
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+
+  phosh_shell_set_locked (self, TRUE);
+}
+
+
+void
+phosh_shell_unlock (PhoshShell *self)
+{
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+
+  phosh_shell_set_locked (self, FALSE);
+}
+
+/**
+ * phosh_shell_get_locked:
+ * @self: The #PhoshShell singleton
+ *
+ * Returns: %TRUE if the shell is currently locked, otherwise %FALSE.
+ */
+gboolean
+phosh_shell_get_locked (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), FALSE);
+  priv = phosh_shell_get_instance_private (self);
+
+  return priv->locked;
+}
+
+/**
+ * phosh_shell_set_locked:
+ * @self: The #PhoshShell singleton
+ * @locked: %TRUE to lock the shell
+ *
+ * Lock the shell. We proxy to lockscreen-manager to avoid
+ * that other parts of the shell need to care about this
+ * abstraction.
+ */
+void
+phosh_shell_set_locked (PhoshShell *self, gboolean locked)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  priv = phosh_shell_get_instance_private (self);
+
+  if (locked == priv->locked)
+    return;
+
+  phosh_lockscreen_manager_set_locked (priv->lockscreen_manager, locked);
 }

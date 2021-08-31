@@ -1,5 +1,5 @@
 project('phosh', 'c',
-          version: '0.12.0',
+          version: '0.13.0',
           license: 'GPLv3+',
     meson_version: '>= 0.50.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
@@ -94,15 +94,34 @@ configure_file(
 gnome = import('gnome')
 i18n  = import('i18n')
 
+if get_option('g_tests')
+  glib_ver = '>= 2.69'
+else
+  glib_ver = '>= 2.62'
+endif
+
 gcr_dep = dependency('gcr-3', version: '>= 3.7.5')
-gio_dep = dependency('gio-2.0', version: '>=2.62')
+glib_dep = dependency('glib-2.0',
+                      version: glib_ver,
+                      fallback: ['glib', 'libglib_dep'],
+                      default_options: ['tests=false']
+                     )
+gio_dep = dependency('gio-2.0',
+                      version: glib_ver,
+                      fallback: ['glib', 'libgio_dep'],
+                      default_options: ['tests=false']
+                     )
+gobject_dep = dependency('gobject-2.0',
+                      version: glib_ver,
+                      fallback: ['glib', 'libgobject_dep'],
+                      default_options: ['tests=false']
+                     )
 gio_unix_dep =  dependency('gio-unix-2.0', version: '>=2.62')
-glib_dep = dependency('glib-2.0', version: '>=2.62')
 gnome_desktop_dep = dependency('gnome-desktop-3.0', version: '>=3.26')
-gobject_dep =  dependency('gobject-2.0', version: '>=2.62')
 gsettings_desktop_schemas_dep = dependency('gsettings-desktop-schemas')
 gtk_dep = dependency('gtk+-3.0', version: '>=3.22')
 gtk_wayland_dep = dependency('gtk+-wayland-3.0', version: '>=3.22')
+gudev_dep = dependency('gudev-1.0')
 libfeedback_dep = dependency('libfeedback-0.0',
   fallback: ['libfeedback', 'libfeedback_dep'],
   default_options: ['introspection=disabled', 'daemon=false', 'gtk_doc=false']
@@ -123,6 +142,17 @@ libhandy_dep = dependency('libhandy-1',
   fallback: ['libhandy', 'libhandy_dep'],
   default_options: ['introspection=disabled']
   )
+libcall_ui = subproject('libcall-ui',
+  default_options: [
+    'package_name=' + meson.project_name(),
+    'package_version=' + meson.project_version(),
+    'pkgdatadir=' + pkgdatadir,
+    'pkglibdir=' + pkglibdir,
+    'examples=false',
+    'gtk_doc=false',
+    'tests=false',
+  ])
+libcall_ui_dep = libcall_ui.get_variable('libcall_ui_dep')
 libnm_dep = dependency('libnm', version: '>= 1.14')
 libpolkit_agent_dep = dependency('polkit-agent-1', version: '>= 0.105')
 # TODO: make optional for elogind?
