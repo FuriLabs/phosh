@@ -1,3 +1,13 @@
+phosh (0.14.0-1) experimental; urgency=medium
+
+  * Upload to experimental until the wlroots/phoc dust has settled
+  * d/control: Depend on phoc >= 0.9.0.
+    This one supports '-S' to wait for the shell.
+  * d/rules: Use meson to run the tests.
+    Also ignore the manual tests.
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 28 Oct 2021 14:45:20 +0200
+
 phosh (0.13.1-1) unstable; urgency=medium
 
   * New usptream version 0.13.1
