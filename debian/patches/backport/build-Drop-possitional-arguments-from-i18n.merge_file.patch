@@ -1,0 +1,36 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Tue, 26 Oct 2021 12:39:21 +0200
+Subject: build: Drop possitional arguments from i18n.merge_file
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+They trip up meson >= 60
+
+Signed-off-by: Guido Günther <guido.gunther@puri.sm>
+(cherry picked from commit 92f8387fd63a57a9d58bc8eb8f8965274eab61cf)
+---
+ data/meson.build | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/data/meson.build b/data/meson.build
+index deb3f31..b0da228 100644
+--- a/data/meson.build
++++ b/data/meson.build
+@@ -38,7 +38,7 @@ desktop_files = [
+   'sm.puri.OSK0.desktop',
+ ]
+ foreach desktop_file : desktop_files
+-  i18n.merge_file('desktop',
++  i18n.merge_file(
+     input: configure_file(
+       input: desktop_file + '.in.in',
+       output: desktop_file + '.in',
+@@ -58,7 +58,6 @@ sessions = [
+ foreach session: sessions
+   desktop = session + '.desktop'
+   i18n.merge_file(
+-    session,
+     input: configure_file(
+       input: desktop + '.in.in',
+       output: desktop + '.in',

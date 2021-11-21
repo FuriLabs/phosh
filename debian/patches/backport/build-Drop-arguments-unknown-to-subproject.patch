@@ -1,0 +1,30 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Tue, 26 Oct 2021 12:37:53 +0200
+Subject: build: Drop arguments unknown to subproject
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+meson >= 60 throws an error on unknown arguments
+
+Signed-off-by: Guido Günther <guido.gunther@puri.sm>
+(cherry picked from commit bb4af9d2225222c66499c70046d5e10194dcb59e)
+---
+ meson.build | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 59318a0..d5d1c81 100644
+--- a/meson.build
++++ b/meson.build
+@@ -144,10 +144,6 @@ libhandy_dep = dependency('libhandy-1',
+   )
+ libcall_ui = subproject('libcall-ui',
+   default_options: [
+-    'package_name=' + meson.project_name(),
+-    'package_version=' + meson.project_version(),
+-    'pkgdatadir=' + pkgdatadir,
+-    'pkglibdir=' + pkglibdir,
+     'examples=false',
+     'gtk_doc=false',
+     'tests=false',

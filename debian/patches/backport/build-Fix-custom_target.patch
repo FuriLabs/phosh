@@ -1,0 +1,38 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Tue, 26 Oct 2021 12:42:10 +0200
+Subject: build: Fix custom_target()
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+meson >= 60 wants an array there
+
+Signed-off-by: Guido Günther <guido.gunther@puri.sm>
+(cherry picked from commit 08e3b59531ef18e98fe96dbb6d6261f95999754d)
+---
+ tests/system/config/meson.build | 2 +-
+ tests/user/config/meson.build   | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/tests/system/config/meson.build b/tests/system/config/meson.build
+index a98a3c8..2cefff4 100644
+--- a/tests/system/config/meson.build
++++ b/tests/system/config/meson.build
+@@ -1,5 +1,5 @@
+ # Hack to ensure the dir actually exists
+ custom_target('dummy-config-dir',
+-              command: 'touch dummy-file',
++              command: ['touch', 'dummy-file'],
+               install: false,
+               output: 'dummy-file')
+diff --git a/tests/user/config/meson.build b/tests/user/config/meson.build
+index b21ea1c..6e155e2 100644
+--- a/tests/user/config/meson.build
++++ b/tests/user/config/meson.build
+@@ -1,5 +1,5 @@
+ # Hack to ensure the dir actually exists
+ custom_target('dummy-config-dir-user',
+-              command: 'touch dummy-file',
++              command: ['touch', 'dummy-file'],
+               install: false,
+               output: 'dummy-file')
