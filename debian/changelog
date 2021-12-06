@@ -1,3 +1,15 @@
+phosh (0.14.1-1) experimental; urgency=medium
+
+  [ Guido Günther ]
+  * Bring over HdyKeypad from libhandy 1.2.2.
+  * debian: Don't install libcallui translations.
+  * d/copyright: Flip sections.
+
+  [ Arnaud Ferraris ]
+  * New usptream version 0.14.1
+
+ -- Arnaud Ferraris <arnaud.ferraris@collabora.com>  Mon, 06 Dec 2021 12:33:05 +0100
+
 phosh (0.14.0-1) experimental; urgency=medium
 
   * Upload to experimental until the wlroots/phoc dust has settled
