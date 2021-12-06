@@ -1,3 +1,10 @@
+phosh (0.14.1-2) experimental; urgency=medium
+
+  * d/phosh.install: Avoid file conflict with calls.
+    Both embed libcall-ui but only one should ship the localization files.
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 06 Dec 2021 14:47:08 +0100
+
 phosh (0.14.1-1) experimental; urgency=medium
 
   [ Guido Günther ]
