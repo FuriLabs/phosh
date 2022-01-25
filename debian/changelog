@@ -1,6 +1,12 @@
 phosh (0.15.0-1) experimental; urgency=medium
 
   * New upstream release 0.15.0
+  * d/rules: Enable osk-stub.
+    It's useful for debugging and used as a stub on platforms
+    with Rust issues.
+  * d/not-installed: Drop, now handled via meson option.
+    This makes us fail properly if we install libcall-ui
+    translations by accident.
 
  -- Guido Günther <agx@sigxcpu.org>  Tue, 25 Jan 2022 15:18:23 +0100
 
