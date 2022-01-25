@@ -1,3 +1,9 @@
+phosh (0.15.0-1) experimental; urgency=medium
+
+  * New upstream release 0.15.0
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 25 Jan 2022 15:18:23 +0100
+
 phosh (0.14.1-2) experimental; urgency=medium
 
   * d/phosh.install: Avoid file conflict with calls.
