@@ -2,7 +2,7 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
-CONFIGURE_OPTS=-Dphoc_tests=disabled -Dsystemd=false
+CONFIGURE_OPTS=-Dphoc_tests=disabled -Dsystemd=false -Dosk-stub=true
 
 ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
   CONFIGURE_OPTS+=-Dgtk_doc=true
