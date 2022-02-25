@@ -57,7 +57,7 @@ Recommends:
  gnome-settings-daemon,
  iio-sensor-proxy,
  phosh-mobile-tweaks,
- squeekboard | phosh-osk-stub,
+ squeekboard
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
@@ -71,15 +71,6 @@ Description: Pure Wayland shell for mobile devices
  .
  It's part of the Phosh Mobile Environment based on GNOME/GTK. For the full
  stack see the phosh-full and phosh-core metapackages.
-
-Package: phosh-osk-stub
-Architecture: any
-Depends:
- ${misc:Depends},
- ${shlibs:Depends},
-Description: OSK stub to fulfill session dependencies
- Phosh's session wants a sm.puri.OSK0. For testing on non-phone's
- this stub fulfills the necessary dependencies.
 
 Package: phosh-doc
 Architecture: all
