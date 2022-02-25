@@ -1,0 +1,132 @@
+# Slovenian translation for libcall-ui.
+# Copyright (C) 2022 libcall-ui's COPYRIGHT HOLDER
+# This file is distributed under the same license as the libcall-ui package.
+#
+# Matej Urbančič <mateju@src.gnome.org>, 2022–
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libcall-ui main\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/libcall-ui/"
+"issues/\n"
+"POT-Creation-Date: 2022-01-20 06:31+0000\n"
+"PO-Revision-Date: 2022-01-24 21:18+0100\n"
+"Last-Translator: Matej Urbančič <mateju@src.gnome.org>\n"
+"Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
+"Language: sl_SI\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n"
+"%100==4 ? 3 : 0);\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Generator: Poedit 3.0\n"
+
+#: examples/cui-demo-window.ui:7 examples/cui-demo-window.ui:30
+msgid "Call-UI Demo"
+msgstr "Demonstracija klicnega uporabniškega vmesnika"
+
+#: examples/cui-demo-window.ui:138
+msgid "Back"
+msgstr "Nazaj"
+
+#: examples/cui-demo-window.ui:190
+msgid "Welcome to Call-UI Demo"
+msgstr "Dobrodošli v demonstraciji klicnega uporabniškega vmesnika"
+
+#: examples/cui-demo-window.ui:191
+msgid "This is a tour of the features the library has to offer."
+msgstr "To je sprehod po funkcijah, ki jih ponuja knjižnica."
+
+#: examples/cui-demo-window.ui:195
+msgid "Welcome"
+msgstr "Dobrodošli"
+
+#: examples/cui-demo-window.ui:210
+msgid "Call Display"
+msgstr "Prikaz klica"
+
+#: examples/cui-demo-window.ui:223 examples/cui-demo-window.ui:249
+#: src/cui-call-display.ui:294
+msgid "Dial Pad"
+msgstr "Številčnica"
+
+#: examples/cui-demo-window.ui:224
+msgid "A simple dial pad to enter phone numbers."
+msgstr "Preprosta številčnica za vnos telefonskih številk."
+
+#: examples/cui-demo-window.ui:263
+msgid "Keypad"
+msgstr "Tipkovnica"
+
+#: examples/cui-demo-window.ui:264
+msgid "A number keypad."
+msgstr "Številska tipkovnica."
+
+#: examples/cui-demo-window.ui:288
+msgid "Show letters"
+msgstr "Pokaži črke"
+
+#: examples/cui-demo-window.ui:303
+msgid "Show symbols"
+msgstr "Pokaži simbole"
+
+#: examples/cui-demo-window.ui:365
+msgid "Key pad"
+msgstr "Tipkovnica"
+
+#: src/cui-call-display.c:283
+msgid "Calling…"
+msgstr "Klicanje …"
+
+#: src/cui-call-display.c:297
+msgid "Call ended"
+msgstr "Klic končan"
+
+#: src/cui-call-display.c:319
+msgid "Unknown"
+msgstr "Neznano"
+
+#: src/cui-call-display.ui:37
+msgid "Incoming phone call"
+msgstr "Dohodni klic"
+
+#: src/cui-call-display.ui:140
+msgid "Mute"
+msgstr "Nemo"
+
+#: src/cui-call-display.ui:177
+msgid "Speaker"
+msgstr "Zvočnik"
+
+#: src/cui-call-display.ui:213
+msgid "Add call"
+msgstr "Dodaj klic"
+
+#: src/cui-call-display.ui:258
+msgid "Hold"
+msgstr "Zadrži"
+
+#: src/cui-call-display.ui:350
+msgid "Hang up"
+msgstr "Prekini"
+
+#: src/cui-call-display.ui:381
+msgid "Answer"
+msgstr "Odgovori"
+
+#: src/cui-call-display.ui:463
+msgid "Hide the dial pad"
+msgstr "Skrij številčnico"
+
+#: src/cui-dialpad.ui:19
+msgid "Enter a number"
+msgstr "Vnesite številko"
+
+#: src/cui-encryption-indicator.ui:23
+msgid "This call is not encrypted"
+msgstr "Ta klic ni šifriran"
+
+#: src/cui-encryption-indicator.ui:45
+msgid "This call is encrypted"
+msgstr "Ta klic je šifriran"
