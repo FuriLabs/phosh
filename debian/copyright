@@ -17,10 +17,6 @@ Copyright: 2018 Purism SPC
  2020 Arnaud Ferraris <arnaud.ferraris@gmail.com>
 License: GPL-3+
 
-Files: protocol/gamma-control.xml
-Copyright: 2015 Giulio camuffo
-License: MIT
-
 Files: protocol/idle.xml
 Copyright: 2015 Martin Gräßlin
 License: LGPL-2.1+
