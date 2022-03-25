@@ -1,0 +1,26 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Fri, 25 Mar 2022 11:07:14 +0100
+Subject: Revert "quick-settings: Follow g-c-c to Settings rename"
+
+Use GNOME Settings old DBus name until 42 is in unstable.
+
+This reverts commit bc26bf0827abe4d841dcf252b9f5195de4b4c691.
+---
+ src/quick-setting.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/quick-setting.c b/src/quick-setting.c
+index 2ee8092..4cf92f1 100644
+--- a/src/quick-setting.c
++++ b/src/quick-setting.c
+@@ -282,8 +282,8 @@ phosh_quick_setting_open_settings_panel (const char *panel)
+   g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+ 			    G_DBUS_PROXY_FLAGS_NONE,
+ 			    NULL,
+-			    "org.gnome.Settings",
+-			    "/org/gnome/Settings",
++			    "org.gnome.ControlCenter",
++			    "/org/gnome/ControlCenter",
+ 			    "org.gtk.Actions",
+ 			    NULL,
+ 			    (GAsyncReadyCallback) create_dbus_proxy_cb,
