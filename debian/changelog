@@ -1,3 +1,14 @@
+phosh (0.17.0-2) unstable; urgency=medium
+
+  * d/patches: Drop all patches.
+    We can use the new DBus name now that g-c-c 42 is in unstable.
+    This reverts commit b5e2f983df5113e4836943405c13b843939c1394.
+  * d/control: Add breaks on older g-c-c.
+    Version 42 changes DBus name so we want to make sure we're being
+    used with at least this version.
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 22 Apr 2022 20:50:17 +0200
+
 phosh (0.17.0-1) unstable; urgency=medium
 
   * Team upload.
