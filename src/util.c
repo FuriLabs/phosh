@@ -19,6 +19,9 @@
 #include <fcntl.h>
 
 
+static gboolean have_gnome_software = -1;
+
+
 /* Just wraps gtk_widget_destroy so we can use it with g_clear_pointer */
 void
 phosh_cp_widget_destroy (void *widget)
@@ -366,10 +369,11 @@ phosh_util_local_date (void)
   locale = setlocale (LC_MESSAGES, NULL);
   if (locale) /* make sure weekday and month use LC_MESSAGES */
     setlocale (LC_TIME, locale);
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
   /* Can't use a string literal since it needs to be translated */
   g_return_val_if_fail (strftime (date, 255, fmt, &local), NULL);
-#pragma GCC diagnostic error "-Wformat-nonliteral"
+#pragma GCC diagnostic pop
   setlocale (LC_TIME, "");
   return g_steal_pointer (&date);
 }
@@ -447,4 +451,54 @@ phosh_util_escape_markup (const char *markup, gboolean allow_markup)
  out:
   /*invalid markup or no markup allowed */
   return g_markup_escape_text (markup, -1);
+}
+
+
+gboolean
+phosh_util_gesture_is_touch (GtkGestureSingle *gesture)
+{
+  GdkEventSequence *seq;
+  const GdkEvent *event;
+  GdkDevice *device;
+
+  g_return_val_if_fail (GTK_IS_GESTURE_SINGLE (gesture), FALSE);
+
+  seq = gtk_gesture_single_get_current_sequence (GTK_GESTURE_SINGLE (gesture));
+  event = gtk_gesture_get_last_event (GTK_GESTURE (gesture), seq);
+
+  if (event == NULL)
+    return FALSE;
+
+  if (event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE)
+    return FALSE;
+
+  device = gdk_event_get_source_device (event);
+
+  if (device == NULL)
+    return FALSE;
+
+  if (gdk_device_get_source (device) != GDK_SOURCE_TOUCHSCREEN)
+    return FALSE;
+
+  return TRUE;
+}
+
+
+/**
+ * phosh_util_have_gnome_software:
+ * @scan: Whether to scan $PATH again
+ *
+ * Returns: the (cached) answer if gnome-software can be found in the path.
+ */
+gboolean
+phosh_util_have_gnome_software (gboolean scan)
+{
+  g_autofree gchar *path = NULL;
+
+  if (have_gnome_software >= 0 && !scan)
+    return have_gnome_software;
+
+  path = g_find_program_in_path ("gnome-software");
+  have_gnome_software =  !!path;
+  return have_gnome_software;
 }
