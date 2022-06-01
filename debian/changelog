@@ -1,8 +1,13 @@
-phosh (0.20.0~beta1-1) UNRELEASED; urgency=medium
+phosh (0.20.0~beta1-1) experimental; urgency=medium
 
+  * Team upload.
+  * Upload to experimental
   * New upstream release
+  * d/control: Bump phoc dependency.
+    We need at least 0.20.0 for the gesture support.
+  * Update watch and gbp.conf to handle beta versions
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 01 Jun 2022 12:32:42 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 01 Jun 2022 12:44:20 +0200
 
 phosh (0.17.0-2) unstable; urgency=medium
 
