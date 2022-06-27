@@ -231,7 +231,7 @@ request_thumbnail (PhoshActivity *activity, PhoshToplevel *toplevel)
 
 
 static void
-on_activity_size_allocated (PhoshActivity *activity, GtkAllocation *alloc, PhoshToplevel *toplevel)
+on_activity_resized (PhoshActivity *activity, GtkAllocation *alloc, PhoshToplevel *toplevel)
 {
   request_thumbnail (activity, toplevel);
 }
@@ -272,6 +272,7 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
                 "win-width", width,
                 "win-height", height,
                 "maximized", phosh_toplevel_is_maximized (toplevel),
+                "fullscreen", phosh_toplevel_is_fullscreen (toplevel),
                 NULL);
   g_object_set_data (G_OBJECT (activity), "toplevel", toplevel);
 
@@ -285,8 +286,9 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
   g_signal_connect_object (toplevel, "closed", G_CALLBACK (on_toplevel_closed), self, 0);
   g_signal_connect_object (toplevel, "notify::activated", G_CALLBACK (on_toplevel_activated_changed), self, 0);
   g_object_bind_property (toplevel, "maximized", activity, "maximized", G_BINDING_DEFAULT);
+  g_object_bind_property (toplevel, "fullscreen", activity, "fullscreen", G_BINDING_DEFAULT);
 
-  g_signal_connect (activity, "size-allocate", G_CALLBACK (on_activity_size_allocated), toplevel);
+  g_signal_connect (activity, "resized", G_CALLBACK (on_activity_resized), toplevel);
   g_signal_connect_swapped (activity, "notify::has-focus", G_CALLBACK (on_activity_has_focus_changed), self);
 
   phosh_connect_feedback (activity);
@@ -340,6 +342,9 @@ toplevel_changed_cb (PhoshOverview        *self,
   g_return_if_fail (PHOSH_IS_OVERVIEW (self));
   g_return_if_fail (PHOSH_IS_TOPLEVEL (toplevel));
   g_return_if_fail (PHOSH_IS_TOPLEVEL_MANAGER (manager));
+
+  if (phosh_shell_get_state (phosh_shell_get_default ()) & PHOSH_STATE_OVERVIEW)
+    return;
 
   activity = find_activity_by_toplevel (self, toplevel);
   g_return_if_fail (activity);
@@ -503,8 +508,10 @@ phosh_overview_reset (PhoshOverview *self)
   priv = phosh_overview_get_instance_private (self);
   phosh_app_grid_reset (PHOSH_APP_GRID (priv->app_grid));
 
-  if (priv->activity)
+  if (priv->activity) {
     gtk_widget_grab_focus (GTK_WIDGET (priv->activity));
+    request_thumbnail (priv->activity, get_toplevel_from_activity (priv->activity));
+  }
 }
 
 void

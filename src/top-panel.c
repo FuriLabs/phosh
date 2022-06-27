@@ -461,9 +461,6 @@ on_drag_state_changed (PhoshTopPanel *self)
   gtk_stack_set_visible_child_name (GTK_STACK (self->stack), visible);
   phosh_arrow_set_progress (PHOSH_ARROW (self->arrow), arrow);
 
-  if (state == self->state)
-    return;
-
   self->state = state;
   phosh_layer_surface_set_kbd_interactivity (PHOSH_LAYER_SURFACE (self), kbd_interactivity);
   phosh_layer_surface_wl_surface_commit (PHOSH_LAYER_SURFACE (self));
@@ -715,6 +712,7 @@ GtkWidget *
 phosh_top_panel_new (struct zwlr_layer_shell_v1          *layer_shell,
                      struct zphoc_layer_shell_effects_v1 *layer_shell_effects,
                      struct wl_output                    *wl_output,
+                     guint32                              layer,
                      int                                  height)
 {
   return g_object_new (PHOSH_TYPE_TOP_PANEL,
@@ -725,7 +723,7 @@ phosh_top_panel_new (struct zwlr_layer_shell_v1          *layer_shell,
                        "anchor", ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP |
                                  ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT |
                                  ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT,
-                       "layer", ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY,
+                       "layer", layer,
                        "kbd-interactivity", FALSE,
                        "namespace", "phosh top-panel",
                        /* drag-surface */
@@ -757,7 +755,6 @@ phosh_top_panel_unfold (PhoshTopPanel *self)
   if (self->state == PHOSH_TOP_PANEL_STATE_UNFOLDED)
 	return;
 
-  phosh_layer_surface_set_kbd_interactivity (PHOSH_LAYER_SURFACE (self), TRUE);
   phosh_drag_surface_set_drag_state (PHOSH_DRAG_SURFACE (self),
                                      PHOSH_DRAG_SURFACE_STATE_UNFOLDED);
 }
