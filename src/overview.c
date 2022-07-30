@@ -8,7 +8,7 @@
 
 #define G_LOG_DOMAIN "phosh-overview"
 
-#include "config.h"
+#include "phosh-config.h"
 
 #include "activity.h"
 #include "app-grid-button.h"
@@ -130,6 +130,14 @@ find_activity_by_toplevel (PhoshOverview        *self,
 
 
 static void
+scroll_to_activity (PhoshOverview *self, PhoshActivity *activity)
+{
+  PhoshOverviewPrivate *priv = phosh_overview_get_instance_private (self);
+  hdy_carousel_scroll_to (HDY_CAROUSEL (priv->carousel_running_activities), GTK_WIDGET (activity));
+  gtk_widget_grab_focus (GTK_WIDGET (activity));
+}
+
+static void
 on_activity_clicked (PhoshOverview *self, PhoshActivity *activity)
 {
   PhoshToplevel *toplevel;
@@ -200,7 +208,7 @@ on_toplevel_activated_changed (PhoshToplevel *toplevel, GParamSpec *pspec, Phosh
   if (phosh_toplevel_is_activated (toplevel)) {
     activity = find_activity_by_toplevel (overview, toplevel);
     priv->activity = activity;
-    hdy_carousel_scroll_to (HDY_CAROUSEL (priv->carousel_running_activities), GTK_WIDGET (activity));
+    scroll_to_activity (overview, activity);
   }
 }
 
@@ -294,7 +302,7 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
   phosh_connect_feedback (activity);
 
   if (phosh_toplevel_is_activated (toplevel)) {
-    hdy_carousel_scroll_to (HDY_CAROUSEL (priv->carousel_running_activities), activity);
+    scroll_to_activity (self, PHOSH_ACTIVITY (activity));
     priv->activity = PHOSH_ACTIVITY (activity);
   }
 }
@@ -412,6 +420,29 @@ app_launched_cb (PhoshOverview *self,
 
 
 static void
+page_changed_cb (PhoshOverview *self,
+                 guint          index,
+                 HdyCarousel   *carousel)
+{
+  PhoshActivity *activity;
+  PhoshToplevel *toplevel;
+  GList *list;
+  g_return_if_fail (PHOSH_IS_OVERVIEW (self));
+  g_return_if_fail (HDY_IS_CAROUSEL (carousel));
+
+  /* don't raise on scroll in docked mode */
+  if (phosh_shell_get_docked (phosh_shell_get_default ()))
+    return;
+
+  list = gtk_container_get_children (GTK_CONTAINER (carousel));
+  activity = PHOSH_ACTIVITY (g_list_nth_data (list, index));
+  toplevel = get_toplevel_from_activity (activity);
+  phosh_toplevel_activate (toplevel, phosh_wayland_get_wl_seat (phosh_wayland_get_default ()));
+  gtk_widget_grab_focus (GTK_WIDGET (activity));
+}
+
+
+static void
 phosh_overview_constructed (GObject *object)
 {
   PhoshOverview *self = PHOSH_OVERVIEW (object);
@@ -440,6 +471,9 @@ phosh_overview_constructed (GObject *object)
 
   g_signal_connect_swapped (priv->app_grid, "app-launched",
                             G_CALLBACK (app_launched_cb), self);
+
+  g_signal_connect_swapped (priv->carousel_running_activities, "page-changed",
+                            G_CALLBACK (page_changed_cb), self);
 }
 
 

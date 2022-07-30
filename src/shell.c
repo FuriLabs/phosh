@@ -23,7 +23,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkwayland.h>
 
-#include "config.h"
+#include "phosh-config.h"
 #include "drag-surface.h"
 #include "shell.h"
 #include "app-tracker.h"
@@ -262,10 +262,6 @@ on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
   priv = phosh_shell_get_instance_private (self);
 
   g_object_get (priv->home, "state", &state, NULL);
-  if (state == PHOSH_HOME_STATE_UNFOLDED) {
-    phosh_top_panel_fold (PHOSH_TOP_PANEL (priv->top_panel));
-    phosh_osk_manager_set_visible (priv->osk_manager, FALSE);
-  }
   phosh_shell_set_state (self, PHOSH_STATE_OVERVIEW, state == PHOSH_HOME_STATE_UNFOLDED);
 }
 
@@ -531,7 +527,8 @@ on_toplevel_added (PhoshShell *self, PhoshToplevel *unused, PhoshToplevelManager
   g_return_if_fail (PHOSH_IS_TOPLEVEL_MANAGER (toplevel_manager));
 
   priv = phosh_shell_get_instance_private (self);
-  phosh_home_set_state (PHOSH_HOME (priv->home), PHOSH_HOME_STATE_FOLDED);
+  if (phosh_toplevel_manager_get_num_toplevels (toplevel_manager) == 1)
+    phosh_home_set_state (PHOSH_HOME (priv->home), PHOSH_HOME_STATE_FOLDED);
 }
 
 

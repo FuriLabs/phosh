@@ -8,7 +8,7 @@
 
 #define G_LOG_DOMAIN "phosh-lockscreen"
 
-#include "config.h"
+#include "phosh-config.h"
 
 #include "auth.h"
 #include "bt-info.h"
@@ -21,6 +21,7 @@
 #include "osk-manager.h"
 #include "shell.h"
 #include "util.h"
+#include "widget-box.h"
 
 #include <string.h>
 #include <glib/gi18n.h>
@@ -102,6 +103,9 @@ typedef struct {
   gint64             last_input;
   PhoshAuth         *auth;
   GSettings         *keypad_settings;
+
+  /* wiget box */
+  GtkWidget         *widget_box;
 
   /* Call page */
   HdyDeck           *deck;
@@ -249,6 +253,18 @@ shake_label (GtkWidget     *widget,
   return TRUE;
 }
 
+static void
+focus_pin_entry (PhoshLockscreen *self, gboolean enable_osk)
+{
+  PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+
+  if (enable_osk) {
+    /* restore default OSK behavior */
+    g_object_set (priv->entry_pin, "im-module", NULL, NULL);
+  }
+
+  gtk_entry_grab_focus_without_selecting (GTK_ENTRY (priv->entry_pin));
+}
 
 /* callback of async auth task */
 static void
@@ -306,10 +322,7 @@ osk_button_clicked_cb (PhoshLockscreen *self,
 
   priv->last_input = g_get_monotonic_time ();
 
-  /* restore default OSK behavior */
-  g_object_set (priv->entry_pin, "im-module", NULL, NULL);
-
-  gtk_entry_grab_focus_without_selecting (GTK_ENTRY (priv->entry_pin));
+  focus_pin_entry (self, TRUE);
 }
 
 
@@ -394,9 +407,15 @@ key_press_event_cb (PhoshLockscreen *self, GdkEventKey *event, gpointer data)
 {
   PhoshLockscreenPrivate *priv;
   gboolean handled = FALSE;
+  gboolean on_unlock_page;
+  double position;
 
   g_assert (PHOSH_IS_LOCKSCREEN (self));
   priv = phosh_lockscreen_get_instance_private (self);
+
+  position = hdy_carousel_get_position (HDY_CAROUSEL (priv->carousel));
+  /* Round to nearest page so we already accept keyboard input before animation ends */
+  on_unlock_page = (int)round(position) == POS_UNLOCK;
 
   if (gtk_entry_im_context_filter_keypress (GTK_ENTRY (priv->entry_pin), event)) {
     show_unlock_page (self);
@@ -414,14 +433,18 @@ key_press_event_cb (PhoshLockscreen *self, GdkEventKey *event, gpointer data)
     case GDK_KEY_Delete:
     case GDK_KEY_KP_Delete:
     case GDK_KEY_BackSpace:
-      clear_input (self, FALSE);
-      handled = TRUE;
+      if (on_unlock_page == TRUE) {
+        clear_input (self, FALSE);
+        handled = TRUE;
+      }
       break;
     case GDK_KEY_Return:
     case GDK_KEY_ISO_Enter:
     case GDK_KEY_KP_Enter:
-      submit_cb (self),
-      handled = TRUE;
+      if (on_unlock_page == TRUE) {
+        submit_cb (self);
+        handled = TRUE;
+      }
       break;
     default:
       /* nothing to do */
@@ -442,8 +465,22 @@ wall_clock_notify_cb (PhoshLockscreen *self,
   PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
   const char *time;
   g_autofree char *date = NULL;
+  g_auto (GStrv) parts = NULL;
 
   time = gnome_wall_clock_get_clock (wall_clock);
+
+  /* Strip " {A,P}M" from 12h time format to look less cramped */
+  if (g_str_has_suffix (time, "AM") || g_str_has_suffix (time, "PM")) {
+    parts = g_strsplit (time, " ", -1);
+
+    /* Single number time starts with a leading space */
+    if (g_strv_length (parts) == 2)
+      time = parts[0];
+    else if (g_strv_length (parts) == 3)
+      time = parts[1];
+    else
+      g_warning ("Can't parse time format: %s", time);
+  }
   gtk_label_set_text (GTK_LABEL (priv->lbl_clock), time);
 
   date = phosh_util_local_date ();
@@ -457,6 +494,9 @@ carousel_position_notified_cb (PhoshLockscreen *self,
                                HdyCarousel     *carousel)
 {
   PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+  PhoshShell *shell = phosh_shell_get_default ();
+  PhoshOskManager *osk_manager = phosh_shell_get_osk_manager (shell);
+  gboolean osk_visible = phosh_osk_manager_get_visible (osk_manager);
   double position;
 
   position = hdy_carousel_get_position (HDY_CAROUSEL (priv->carousel));
@@ -469,6 +509,8 @@ carousel_position_notified_cb (PhoshLockscreen *self,
 
   if (position >= POS_UNLOCK) {
     gtk_widget_set_sensitive (priv->entry_pin, TRUE);
+
+    focus_pin_entry (self, osk_visible);
 
     if (!priv->idle_timer) {
       priv->last_input = g_get_monotonic_time ();
@@ -528,6 +570,36 @@ on_calls_call_removed (PhoshLockscreen *self, const gchar *path)
 
   g_clear_pointer (&priv->active, g_free);
   hdy_deck_navigate (priv->deck, HDY_NAVIGATION_DIRECTION_BACK);
+}
+
+
+static void
+on_deck_visible_child_changed (PhoshLockscreen *self, GParamSpec *pspec, HdyDeck *deck)
+{
+  GtkWidget *visible_child;
+  PhoshLockscreenPrivate *priv;
+  gboolean swipe_forward = TRUE;
+  gboolean swipe_back = TRUE;
+
+  g_return_if_fail (HDY_IS_DECK (deck));
+  g_return_if_fail (PHOSH_IS_LOCKSCREEN (self));
+  priv = phosh_lockscreen_get_instance_private (self);
+
+  visible_child = hdy_deck_get_visible_child (deck);
+
+  /* Avoid forward swipe to calls page if there's no active call */
+  if (visible_child == priv->carousel &&
+      phosh_calls_manager_get_active_call_handle (priv->calls_manager) == NULL) {
+    swipe_forward = FALSE;
+  }
+
+  /* Avoid backward  swipe to widget-box if there's no plugin */
+  if (visible_child == priv->carousel && !phosh_widget_box_has_plugins (PHOSH_WIDGET_BOX (priv->widget_box))) {
+    swipe_back = FALSE;
+  }
+
+  hdy_deck_set_can_swipe_forward(deck, swipe_forward);
+  hdy_deck_set_can_swipe_back (deck, swipe_back);
 }
 
 
@@ -597,6 +669,8 @@ phosh_lockscreen_constructed (GObject *object)
   const char *active;
   PhoshNotifyManager *manager;
   PhoshShell *shell;
+  g_autoptr (GSettings) plugin_settings = NULL;
+  g_auto (GStrv) plugins = NULL;
 
   G_OBJECT_CLASS (phosh_lockscreen_parent_class)->constructed (object);
 
@@ -666,6 +740,14 @@ phosh_lockscreen_constructed (GObject *object)
   g_settings_bind (priv->keypad_settings, "shuffle-keypad",
                    priv->keypad, "shuffle",
                    G_SETTINGS_BIND_GET);
+
+  plugin_settings = g_settings_new ("sm.puri.phosh.plugins");
+  plugins = g_settings_get_strv (plugin_settings, "lock-screen");
+
+  if (plugins)
+    phosh_widget_box_set_plugins (PHOSH_WIDGET_BOX (priv->widget_box), plugins);
+
+  on_deck_visible_child_changed (self, NULL, priv->deck);
 }
 
 static void
@@ -675,6 +757,16 @@ deck_back_clicked_cb (GtkWidget       *sender,
   PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
 
   hdy_deck_navigate (priv->deck, HDY_NAVIGATION_DIRECTION_BACK);
+}
+
+
+static void
+deck_forward_clicked_cb (GtkWidget       *sender,
+                         PhoshLockscreen *self)
+{
+  PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+
+  hdy_deck_navigate (priv->deck, HDY_NAVIGATION_DIRECTION_FORWARD);
 }
 
 
@@ -732,6 +824,7 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
 
   g_type_ensure (PHOSH_TYPE_KEYPAD);
   g_type_ensure (PHOSH_TYPE_OSK_BUTTON);
+  g_type_ensure (PHOSH_TYPE_WIDGET_BOX);
   gtk_widget_class_set_css_name (widget_class, "phosh-lockscreen");
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/sm/puri/phosh/ui/lockscreen.ui");
@@ -739,6 +832,12 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
   gtk_widget_class_bind_template_callback_full (widget_class,
                                                 "carousel_position_notified_cb",
                                                 G_CALLBACK (carousel_position_notified_cb));
+
+  /* main deck */
+  gtk_widget_class_bind_template_callback (widget_class, deck_forward_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, deck_forward_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, deck_back_clicked_cb);
+  gtk_widget_class_bind_template_callback (widget_class, on_deck_visible_child_changed);
 
   /* unlock page */
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, box_unlock);
@@ -765,11 +864,13 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, sw_notifications);
   gtk_widget_class_bind_template_callback (widget_class, show_unlock_page);
 
+  /* plugin page */
+  gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, widget_box);
+
   /* Call UI */
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, deck);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, box_call_display);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshLockscreen, call_display);
-  gtk_widget_class_bind_template_callback (widget_class, deck_back_clicked_cb);
 }
 
 
