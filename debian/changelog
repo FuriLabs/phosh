@@ -1,8 +1,15 @@
-phosh (0.20.0~beta3-1) UNRELEASED; urgency=medium
+phosh (0.20.0~beta3-1) experimental; urgency=medium
 
+  * Team upload.
+  * Upload to experimental
   * New upstream release
+  * Install icon
+  * Handle modules.
+    Make sure gio-querymodules knows about possible modules.
+  * Don't install example plugin.
+    It's not very useful and would trigger new processing
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 30 Jul 2022 16:14:41 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 30 Jul 2022 16:27:28 +0200
 
 phosh (0.20.0~beta2-1) experimental; urgency=medium
 
