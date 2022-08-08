@@ -24,6 +24,7 @@
 #include <gdk/gdkwayland.h>
 
 #include "phosh-config.h"
+#include "ambient.h"
 #include "drag-surface.h"
 #include "shell.h"
 #include "app-tracker.h"
@@ -157,6 +158,7 @@ typedef struct
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
   PhoshProximity *proximity;
+  PhoshAmbient *ambient;
   PhoshRotationManager *rotation_manager;
 
   PhoshShellDebugFlags debug_flags;
@@ -267,6 +269,34 @@ on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
 
 
 static void
+on_primary_monitor_configured (PhoshShell *self, PhoshMonitor *monitor)
+{
+  PhoshShellPrivate *priv;
+  int height;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  g_return_if_fail (PHOSH_IS_MONITOR (monitor));
+  priv = phosh_shell_get_instance_private (self);
+
+  phosh_shell_get_area (self, NULL, &height);
+  phosh_layer_surface_set_size (PHOSH_LAYER_SURFACE (priv->top_panel), -1, height);
+}
+
+
+static void
+setup_primary_monitor_configured_handler (PhoshShell *self)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  g_signal_connect_object (priv->primary_monitor, "configured",
+                           G_CALLBACK (on_primary_monitor_configured),
+                           self,
+                           G_CONNECT_SWAPPED);
+
+  if (phosh_monitor_is_configured (priv->primary_monitor))
+    on_primary_monitor_configured (self, priv->primary_monitor);
+}
+
+static void
 panels_create (PhoshShell *self)
 {
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
@@ -347,11 +377,7 @@ on_gtk_theme_name_changed (PhoshShell *self, GParamSpec *pspec, GtkSettings *set
                                                  GTK_STYLE_PROVIDER (priv->css_provider));
   }
 
-  if (g_strcmp0 (priv->theme_name, "HighContrast") == 0)
-    style = "/sm/puri/phosh/stylesheet/adwaita-hc-light.css";
-  else
-    style = "/sm/puri/phosh/stylesheet/adwaita-dark.css";
-
+  style = phosh_util_get_stylesheet (priv->theme_name);
   gtk_css_provider_load_from_resource (provider, style);
   gtk_style_context_add_provider_for_screen (gdk_screen_get_default (),
                                              GTK_STYLE_PROVIDER (provider),
@@ -673,6 +699,7 @@ setup_idle_cb (PhoshShell *self)
                                                     priv->sensor_proxy_manager);
     g_signal_connect_swapped (priv->proximity, "notify::fader",
                               G_CALLBACK (on_proximity_fader_changed), self);
+    priv->ambient = phosh_ambient_new (priv->sensor_proxy_manager);
   }
 
   priv->mount_manager = phosh_mount_manager_new ();
@@ -689,6 +716,8 @@ setup_idle_cb (PhoshShell *self)
   priv->run_command_manager = phosh_run_command_manager_new();
   priv->network_auth_manager = phosh_network_auth_manager_new ();
   priv->portal_access_manager = phosh_portal_access_manager_new ();
+
+  setup_primary_monitor_configured_handler (self);
 
   /* Delay signaling the compositor a bit so that idle handlers get a
    * chance to run and the user has can unlock right away. Ideally
@@ -759,7 +788,9 @@ phosh_shell_set_builtin_monitor (PhoshShell *self, PhoshMonitor *monitor)
 
   if (priv->builtin_monitor) {
     /* Power mode listener */
-    g_signal_handlers_disconnect_by_data (priv->builtin_monitor, self);
+    g_signal_handlers_disconnect_by_func (priv->builtin_monitor,
+                                          G_CALLBACK (on_builtin_monitor_power_mode_changed),
+                                          self);
     g_clear_object (&priv->builtin_monitor);
 
     if (priv->rotation_manager)
@@ -1083,6 +1114,11 @@ phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMonitor *monitor)
   if (monitor == priv->primary_monitor)
     return;
 
+  if (priv->primary_monitor)
+    g_signal_handlers_disconnect_by_func (priv->builtin_monitor,
+                                          G_CALLBACK (on_primary_monitor_configured),
+                                          self);
+
   if (monitor != NULL) {
     /* Make sure the new monitor exists */
     for (int i = 0; i < phosh_monitor_manager_get_num_monitors (priv->monitor_manager); i++) {
@@ -1103,6 +1139,8 @@ phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMonitor *monitor)
     panels_create (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PRIMARY_MONITOR]);
+
+  setup_primary_monitor_configured_handler (self);
 
   /* All monitors gone or disabled. See if monitor-manager finds a
    * fallback to enable. Do that in an idle callback so GTK can process
