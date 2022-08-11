@@ -50,7 +50,7 @@ Depends:
  fonts-lato,
  gnome-shell-common,
  gsettings-desktop-schemas,
- phoc (>= 0.21.0),
+ phoc (>= 0.21.0+ds1),
 Recommends:
  feedbackd,
  gnome-session-bin,
