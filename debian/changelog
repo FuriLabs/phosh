@@ -1,3 +1,20 @@
+phosh (0.20.0-2) unstable; urgency=medium
+
+  * Team upload.
+  [ Guido Günther ]
+  * d/control: Raise phoc dependency.
+    We want the renamed 0.21.0+ds1 tarball as the 0.21.0 one lacks the
+    rotation fixes.
+  * Add package for phosh plugins.
+    It will only contain a single plugin for now but
+    there will be more with upcoming releases.
+
+  [ Evangelos Ribeiro Tzaras ]
+  * Mark phosh-doc as Multi-Arch: foreign (was all)
+  * Update copyright
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 30 Aug 2022 11:30:57 +0200
+
 phosh (0.20.0-1) unstable; urgency=medium
 
   * Upload to unstable
