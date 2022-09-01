@@ -3,10 +3,8 @@
 <interface domain="call-ui">
   <requires lib="gtk+" version="3.22"/>
   <template class="CuiEncryptionIndicator" parent="GtkStack">
-    <property name="can_focus">False</property>
     <child>
       <object class="GtkBox" id="is_not_encrypted">
-        <property name="can_focus">False</property>
         <property name="spacing">6</property>
         <property name="halign">center</property>
         <property name="visible">True</property>
@@ -19,7 +17,6 @@
         </child>
         <child>
           <object class="GtkLabel">
-            <property name="can_focus">False</property>
             <property name="label" translatable="yes">This call is not encrypted</property>
             <property name="visible">True</property>
           </object>
@@ -28,7 +25,6 @@
     </child>
     <child>
       <object class="GtkBox" id="is_encrypted">
-        <property name="can_focus">False</property>
         <property name="spacing">6</property>
         <property name="halign">center</property>
         <property name="visible">True</property>
@@ -41,7 +37,6 @@
         </child>
         <child>
           <object class="GtkLabel">
-            <property name="can_focus">False</property>
             <property name="label" translatable="yes">This call is encrypted</property>
             <property name="visible">True</property>
           </object>
