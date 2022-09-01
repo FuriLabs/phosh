@@ -61,7 +61,8 @@ Recommends:
  gnome-settings-daemon,
  iio-sensor-proxy,
  phosh-mobile-tweaks,
- squeekboard
+ slurp,
+ squeekboard,
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
