@@ -61,6 +61,7 @@ Recommends:
  gnome-settings-daemon,
  iio-sensor-proxy,
  phosh-mobile-tweaks,
+ phosh-plugins,
  slurp,
  squeekboard,
 Provides:
