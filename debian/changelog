@@ -1,9 +1,10 @@
-phosh (0.21.0-2) UNRELEASED; urgency=medium
+phosh (0.21.0-2) unstable; urgency=medium
 
+  [ Evangelos Ribeiro Tzaras ]
   * Recommend phosh-plugins
   * d/patches: Don't use deprecated G_REGEX_JAVASCRIPT_COMPAT
 
- -- Evangelos Ribeiro Tzaras <devrtz-debian@fortysixandtwo.eu>  Fri, 23 Sep 2022 09:21:34 +0200
+ -- Arnaud Ferraris <aferraris@debian.org>  Fri, 23 Sep 2022 10:31:19 +0200
 
 phosh (0.21.0-1) unstable; urgency=medium
 
