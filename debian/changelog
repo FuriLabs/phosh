@@ -1,8 +1,14 @@
-phosh (0.21.1-1) UNRELEASED; urgency=medium
+phosh (0.21.1-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release
+  * Drop all patches
+  * Bump standards version.
+    No changes needed.
+  * d/phosh.lintian-overrides: Adjust format.
+    Add the binary package to match lintian's expectations
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 28 Sep 2022 13:04:47 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 28 Sep 2022 13:39:30 +0200
 
 phosh (0.21.0-2) unstable; urgency=medium
 
