@@ -1,1 +1,1 @@
-phosh: binary-without-manpage usr/bin/phosh
+phosh binary: binary-without-manpage usr/bin/phosh
