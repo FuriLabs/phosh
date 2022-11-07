@@ -1,0 +1,12 @@
+option('examples',
+       type: 'boolean', value: true,
+       description: 'Whether to compile the examples')
+
+option('tests',
+       type: 'boolean', value: true,
+       description: 'Whether to compile unit tests')
+
+option('gtk_doc',
+       type: 'boolean', value: false,
+       description: 'Whether to generate the API reference')
+
