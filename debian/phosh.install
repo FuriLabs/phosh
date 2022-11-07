@@ -2,7 +2,7 @@ usr/bin/phosh
 usr/libexec/phosh
 usr/libexec/phosh-calendar-server
 usr/share/icons/hicolor/symbolic/apps/sm.puri.Phosh-symbolic.svg
-usr/share/locale/
+usr/share/locale
 usr/share/wayland-sessions/phosh.desktop
 usr/share/phosh/phoc.ini
 usr/share/glib-2.0/schemas/sm.puri.phosh*.xml
