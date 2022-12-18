@@ -1,0 +1,84 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sat, 17 Dec 2022 17:11:38 +0100
+Subject: build: Allow to disable the plugin build
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+This allows to disable all plugins (e.g. to reduce compilation time
+or dependencies).
+
+Signed-off-by: Guido Günther <guido.gunther@puri.sm>
+Part-of: <https://gitlab.gnome.org/World/Phosh/phosh/-/merge_requests/1168>
+---
+ meson.build         | 18 ++++++++++--------
+ meson_options.txt   |  4 ++++
+ plugins/meson.build |  4 ++++
+ 3 files changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/meson.build b/meson.build
+index 9bf3da4..c08466d 100644
+--- a/meson.build
++++ b/meson.build
+@@ -96,6 +96,7 @@ configure_file(
+ 
+ gnome = import('gnome')
+ i18n  = import('i18n')
++pkgconfig = import ('pkgconfig')
+ 
+ glib_ver = '>= 2.66'
+ 
+@@ -207,16 +208,17 @@ subdir('calendar-server')
+ 
+ summary = [
+   '',
+-  '-----------',
++  '---------------------------',
+   'Phosh @0@'.format(meson.project_version()),
+   '',
+-  '        Tests: @0@'.format(get_option('tests')),
+-  '   Phoc Tests: @0@'.format(run_phoc_tests),
+-  '   Compositor: @0@'.format(get_option('compositor')),
+-  '      Systemd: @0@'.format(get_option('systemd')),
+-  'Documentation: @0@'.format(get_option('gtk_doc')),
+-  '        tools: @0@'.format(get_option('tools')),
+-  '-----------',
++  '               Tests: @0@'.format(get_option('tests')),
++  '          Phoc Tests: @0@'.format(run_phoc_tests),
++  '          Compositor: @0@'.format(get_option('compositor')),
++  '             Systemd: @0@'.format(get_option('systemd')),
++  '       Documentation: @0@'.format(get_option('gtk_doc')),
++  '               Tools: @0@'.format(get_option('tools')),
++  '  Lockscreen Plugins: @0@'.format(get_option('lockscreen-plugins')),
++  '----------------------------',
+ ]
+ 
+ message('\n'.join(summary))
+diff --git a/meson_options.txt b/meson_options.txt
+index 8e62278..3d7fdac 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -26,3 +26,7 @@ option('callui-i18n',
+ option('tools',
+        type: 'boolean', value: false,
+        description: 'Whether to build the tools')
++
++option('lockscreen-plugins',
++       type: 'boolean', value: 'true',
++       description: 'Whether to build the lockscreen plugins')
+diff --git a/plugins/meson.build b/plugins/meson.build
+index 8b91c77..8ca27ce 100644
+--- a/plugins/meson.build
++++ b/plugins/meson.build
+@@ -1,7 +1,11 @@
++if get_option('lockscreen-plugins')
++
+ subdir('calendar')
+ subdir('upcoming-events')
+ subdir('ticket-box')
+ 
++endif
++
+ pkgconfig.generate(
+   variables : ['lockscreen_plugins_dir=@0@'.format(plugins_dir),
+               ],
