@@ -5,7 +5,7 @@ Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-list
 Uploaders: Arnaud Ferraris <arnaud.ferraris@gmail.com>
 Build-Depends:
  debhelper-compat (= 13),
- gtk-doc-tools <!nodoc>,
+ gi-docgen <!nodoc>,
  libcallaudio-dev,
  libevince-dev,
  libsecret-1-dev,
@@ -13,10 +13,8 @@ Build-Depends:
  libfeedback-dev,
  libgcr-3-dev,
  libglib2.0-dev (>= 2.72.0),
- libglib2.0-doc <!nodoc>,
  libgnome-desktop-3-dev,
  libgtk-3-dev,
- libgtk-3-doc <!nodoc>,
  libgudev-1.0-dev,
  libhandy-1-dev (>= 1.1.90),
  libnm-dev,
@@ -26,7 +24,6 @@ Build-Depends:
  libupower-glib-dev,
  libwayland-dev,
  meson,
- pandoc <!nodoc>,
 # for the plugins
  libecal2.0-dev,
  evolution-data-server-dev,
