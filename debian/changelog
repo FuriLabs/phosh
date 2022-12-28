@@ -1,8 +1,17 @@
-phosh (0.23.0-1) UNRELEASED; urgency=medium
+phosh (0.23.0-1) experimental; urgency=medium
 
+  * Team upload
   * New upstream release
+  * Drop all patches.
+    They all were cherry-picks and are contained in the new upstream
+    version.
+  * d/control: Allow phosh-osk-stub to fulfill the OSK dependency
+    squeekboard is default but this allows systems that lack recent
+    rust to still pull in a working OSK.
+  * Switch to gi-docgen
+  * Build and install preference plugins
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 28 Dec 2022 12:14:19 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 28 Dec 2022 13:42:09 +0100
 
 phosh (0.22.0-2) experimental; urgency=medium
 
