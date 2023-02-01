@@ -42,7 +42,7 @@ Build-Depends:
  phoc (>= 0.23.0) <!nocheck>,
  xauth <!nocheck>,
  xvfb <!nocheck>,
-Standards-Version: 4.6.1
+Standards-Version: 4.6.2
 Homepage: https://gitlab.gnome.org/World/Phosh/phosh/
 Rules-Requires-Root: no
 Vcs-Browser: https://salsa.debian.org/DebianOnMobile-team/phosh
