@@ -26,6 +26,7 @@ Build-Depends:
  libupower-glib-dev,
  libwayland-dev,
  meson,
+ python3-docutils <!nodoc>,
 # for the plugins
  libecal2.0-dev,
  evolution-data-server-dev,
