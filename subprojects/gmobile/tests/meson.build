@@ -6,17 +6,26 @@ test_env = [
   'NO_AT_BRIDGE=1',
 ]
 
-timeout_test_sources = [
-  'test-timeout.c',
+test_cflags = [
+  '-DTEST_DATA_DIR="@0@"'.format(join_paths(meson.current_source_dir(), 'data')),
 ]
 
-timeout_test = executable(
-  'timeout', timeout_test_sources,
-  pie: true,
-  link_with : gm_lib,
-  dependencies : libgmobile_dep,
-)
+tests = [
+  'device-tree',
+  'display-panel',
+  'cutout',
+  'svg-path',
+  'timeout',
+]
 
-test ('timeout', timeout_test, env: test_env)
+foreach test : tests
+  t = executable('test-@0@'.format(test),
+                 ['test-@0@.c'.format(test)],
+		 c_args : test_cflags,
+                 pie: true,
+                 link_with: gm_lib,
+                 dependencies: gmobile_dep)
+  test(test, t, env: test_env)
+endforeach
 
 endif

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/org/gnome/gmobile/">
+    <!-- Devices with one panel matched by their DT compatible -->
+    <file preprocess="json-stripblanks">devices/display-panels/oneplus,enchilada.json</file>
+    <file preprocess="json-stripblanks">devices/display-panels/oneplus,fajita.json</file>
+    <file preprocess="json-stripblanks">devices/display-panels/purism,librem5.json</file>
+  </gresource>
+</gresources>

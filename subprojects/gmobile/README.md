@@ -1,13 +1,13 @@
-# libgmobile
+# gmobile
 
-Libgmobile carries some helpers for GNOME on mobile devices. Those
-parts should move to glib or libgnome-desktop eventually. It is
-meant to be used as a git submodule by projects. There aren't
-any API stability guarantees at this point in time.
+gmobile carries some helpers for GNOME on mobile devices. Some of those parts
+might move to glib or libgnome-desktop eventually. It is currently meant to be
+used as a git submodule by projects. There aren't any API stability guarantees
+at this point in time.
 
 ## License
 
-libgmobile is licensed under the LGPLv2.1-or-later.
+gmobile is licensed under the LGPLv2.1-or-later.
 
 ## Getting the source
 
@@ -23,11 +23,11 @@ See `meson.build` for required dependencies.
 
 ## Building
 
-We use the meson (and thereby Ninja) build system for libgmobile.  The quickest
+We use the meson (and thereby Ninja) build system for gmobile.  The quickest
 way to get going is to do the following:
 
     meson . _build
-    ninja -C _build
+    meson compile -C _build
 
 # API docs
 API documentation is available at https://guidog.pages.gitlab.gnome.org/gmobile/

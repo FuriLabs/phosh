@@ -1,8 +1,8 @@
 project('gmobile', 'c',
-        version: '0.0.0',
+        version: '0.0.1',
         license: 'LGPLv2.1+',
-	meson_version: '>= 0.56.1',
-	default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
+        meson_version: '>= 0.56.1',
+        default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
 
 cc = meson.get_compiler('c')
@@ -59,6 +59,9 @@ if get_option('buildtype') != 'plain'
 endif
 
 glib_dep = dependency('glib-2.0', version: '>=2.66')
+gio_dep = dependency('gio-2.0', version: '>=2.66')
+json_glib_dep = dependency('json-glib-1.0', version: '>= 1.6.2',
+                   fallback: ['json-glib', 'json_glib_dep'])
 
 foreach arg: test_c_args
   if cc.has_multi_arguments(arg)
@@ -82,7 +85,17 @@ configure_file(
   configuration: config_h,
 )
 
+subdir('data')
 subdir('src')
 subdir('tests')
 subdir('examples')
 subdir('doc')
+
+summary({
+    'Examples': get_option('examples'),
+    'Tests': get_option('tests'),
+    'Docmentation': get_option('gtk_doc'),
+  },
+  bool_yn: true,
+  section: 'Build',
+)

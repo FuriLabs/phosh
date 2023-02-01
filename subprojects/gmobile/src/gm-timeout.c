@@ -130,6 +130,7 @@ gm_timeout_source_once_new (gulong timeout_ms)
  * @notify: (nullable): function to call when the timeout is removed, or %NULL
  *
  * Sets a function to be called after a timeout with priority @priority.
+ * Correctly calculates the timeout even when the system is suspended in between.
  *
  * This internally creates a main loop source using
  * g_timeout_source_new_seconds() and attaches it to the main loop context
@@ -138,6 +139,9 @@ gm_timeout_source_once_new (gulong timeout_ms)
  * The timeout given is in terms of `CLOCK_BOOTTIME` time, it hence is also
  * correct across suspend and resume. If that doesn't matter use
  * `g_timeout_add_seconds_full` instead.
+ *
+ * Note that glib's `g_timeout_add_seconds()` doesn't take system
+ * suspend/resume into account: https://gitlab.gnome.org/GNOME/glib/-/issues/2739
  *
  * Returns: the ID (greater than 0) of the event source.
  **/
@@ -172,7 +176,8 @@ gm_timeout_add_seconds_once_full (gint           priority,
  * @data: data to pass to @function
  *
  * Sets a function to be called after a timeout with the default
- * priority, %G_PRIORITY_DEFAULT.
+ * priority, %G_PRIORITY_DEFAULT. Correctly calculates the timeout
+ * even when the system is suspended in between.
  *
  * This internally creates a main loop source using
  * g_timeout_source_new_seconds() and attaches it to the main loop context
@@ -181,6 +186,9 @@ gm_timeout_add_seconds_once_full (gint           priority,
  * The timeout given is in terms of `CLOCK_BOOTTIME` time, it hence is also
  * correct across suspend and resume. If that doesn't matter use
  * `g_timeout_add_seconds` instead.
+ *
+ * Note that glib's `g_timeout_add_seconds()` doesn't take system
+ * suspend/resume into account: https://gitlab.gnome.org/GNOME/glib/-/issues/2739
  *
  * Returns: the ID (greater than 0) of the event source.
  **/
