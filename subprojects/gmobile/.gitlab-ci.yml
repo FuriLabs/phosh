@@ -6,9 +6,9 @@ stages:
 variables:
   DIST: bookworm
   DEPS: >-
-    ccache build-essential libglib2.0-dev meson
+    ccache build-essential libglib2.0-dev libjson-glib-dev meson
     python3-toml python3-jinja2 python3-typogrify libgirepository1.0-dev git
-    gcovr
+    gi-docgen gcovr
 
 before_script:
   - echo "man-db man-db/auto-update boolean false" | debconf-set-selections
@@ -48,7 +48,7 @@ doc:
   script:
     - meson ${BUILD_OPTS} _build
     - ninja -C _build
-    - mv _build/doc/libgmobile-0 _doc/
+    - mv _build/doc/gmobile-0 _doc/
   artifacts:
     paths:
       - _doc/

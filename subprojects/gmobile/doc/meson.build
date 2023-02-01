@@ -7,9 +7,9 @@ expand_content_md_files = [
 toml_data = configuration_data()
 toml_data.set('VERSION', meson.project_version())
 
-libgmobile_toml = configure_file(
-  input: 'libgmobile.toml.in',
-  output: 'libgmobile.toml',
+gmobile_toml = configure_file(
+  input: 'gmobile.toml.in',
+  output: 'gmobile.toml',
   configuration: toml_data
 )
 
@@ -22,9 +22,9 @@ gidocgen = find_program('gi-docgen')
 
 docs_dir = datadir / 'doc'
 
-custom_target('libgmobile-doc',
-  input: [ libgmobile_toml, libgmobile_gir[0] ],
-  output: 'libgmobile-0',
+custom_target('gmobile-doc',
+  input: [ gmobile_toml, gmobile_gir[0] ],
+  output: 'gmobile-0',
   command: [
     gidocgen,
     'generate',

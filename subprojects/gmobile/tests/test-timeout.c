@@ -73,8 +73,8 @@ main (gint argc,
 {
   g_test_init (&argc, &argv, NULL);
 
-  g_test_add_func ("/GM/timeout/simple", test_gm_timeout_simple);
-  g_test_add_func ("/GM/timeout/remove", test_gm_timeout_remove);
+  g_test_add_func ("/Gm/timeout/simple", test_gm_timeout_simple);
+  g_test_add_func ("/Gm/timeout/remove", test_gm_timeout_remove);
 
   return g_test_run ();
 }

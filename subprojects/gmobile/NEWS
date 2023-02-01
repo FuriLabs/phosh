@@ -1,0 +1,19 @@
+gmobile 0.0.1
+-------------
+Released: January 2023
+* Initial release (no API guarantees!)
+* New API:
+  - GmSvgPath: Store SVG path and get it's bounds
+  - GmRect: Simple rectangle
+  - GmCutout: A display cutout or notch
+  - GmDisplayPanel: Describes a display panel
+  - GmDeviceInfo: Retrieve device information
+* New tools:
+  - gm-display-panel-preview: Generate SVGs and HTML to visualize a device's
+    panel
+* Added devices:
+  - Librem 5
+  - OnePlus 6
+  - OnePlust 6T
+* API changes:
+  gm_device_tree_get_compatibles -> gm_devicetree_get_compatibles
