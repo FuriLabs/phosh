@@ -1,8 +1,12 @@
-phosh (0.25.0-1) UNRELEASED; urgency=medium
+phosh (0.25.0-1) experimental; urgency=medium
 
   * New upstream release
+  * Upload to experimental
+  * d/control: Depend on phoc 0.25.0
+    Ensures consistent power button behavior
+  * salsa-ci: Disable some bits until we can rely newer phoc
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 01 Mar 2023 13:24:53 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 01 Mar 2023 13:55:11 +0100
 
 phosh (0.24.0-1) unstable; urgency=medium
 
