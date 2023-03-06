@@ -43,7 +43,7 @@ Build-Depends:
  xauth <!nocheck>,
  xvfb <!nocheck>,
 Standards-Version: 4.6.2
-Homepage: https://gitlab.gnome.org/World/Phosh/phosh/
+Homepage: https://phosh.mobi/
 Rules-Requires-Root: no
 Vcs-Browser: https://salsa.debian.org/DebianOnMobile-team/phosh
 Vcs-Git: https://salsa.debian.org/DebianOnMobile-team/phosh.git
