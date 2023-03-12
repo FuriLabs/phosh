@@ -1,3 +1,9 @@
+phosh (0.25.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 12 Mar 2023 12:16:25 +0100
+
 phosh (0.25.1-1) experimental; urgency=medium
 
   * Team upload
