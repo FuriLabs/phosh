@@ -1,3 +1,13 @@
+phosh (0.26.0-2) experimental; urgency=medium
+
+  * Team upload
+  * d/control: Bump phoc dependency.
+    Phosh can work with older phoc but will only bind to the
+    newer protocol versions with phoc >= 0.26.0
+  * d/control: Make sure plugins match the phosh version
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 03 Apr 2023 19:44:14 +0200
+
 phosh (0.26.0-1) experimental; urgency=medium
 
   * Team upload
