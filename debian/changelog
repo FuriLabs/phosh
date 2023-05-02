@@ -1,8 +1,11 @@
-phosh (0.27.0-1) UNRELEASED; urgency=medium
+phosh (0.27.0-1) experimental; urgency=medium
 
   * New upstream release
+  * d/control: Bump libfeedback build dependency
+  * d/salsa-ci.yml: Build against experimental
+    We need newer libfeedback-dev
 
- -- Guido Günther <agx@sigxcpu.org>  Tue, 02 May 2023 13:30:29 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 02 May 2023 13:58:25 +0200
 
 phosh (0.26.0-2) experimental; urgency=medium
 
