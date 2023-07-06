@@ -5,5 +5,6 @@
     <file preprocess="json-stripblanks">devices/display-panels/oneplus,enchilada.json</file>
     <file preprocess="json-stripblanks">devices/display-panels/oneplus,fajita.json</file>
     <file preprocess="json-stripblanks">devices/display-panels/purism,librem5.json</file>
+    <file preprocess="json-stripblanks">devices/display-panels/xiaomi,beryllium.json</file>
   </gresource>
 </gresources>
