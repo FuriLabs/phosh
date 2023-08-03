@@ -26,7 +26,7 @@ See `meson.build` for required dependencies.
 We use the meson (and thereby Ninja) build system for gmobile.  The quickest
 way to get going is to do the following:
 
-    meson . _build
+    meson setup _build
     meson compile -C _build
 
 # API docs

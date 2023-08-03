@@ -1,3 +1,23 @@
+gmobile 0.0.3
+-------------
+Released: August 2023
+* Fix Librem 5 device information
+
+gmobile 0.0.2
+-------------
+Released: July 2023
+* New tools:
+  gm-display-panel-run-phosh: Run a nested phosh and phoc emulating the
+  given device and enable cutout overlay rendering
+* Added devices:
+  * Fairphone 4
+  * Xiaomi Poco F1
+* No API changes
+* Contributors:
+  * Guido Günther
+  * Luca Weiss
+  * Suraj Kumar Mahto
+
 gmobile 0.0.1
 -------------
 Released: January 2023
