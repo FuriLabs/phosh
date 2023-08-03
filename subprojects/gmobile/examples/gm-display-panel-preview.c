@@ -148,7 +148,7 @@ int main (int argc, char **argv)
   if (version)
     print_version ();
 
-  if (compatibles_opt && compatibles_opt) {
+  if (compatibles_opt && compatibles_opt[0]) {
     compatibles = g_strdupv (compatibles_opt);
   } else {
     compatibles = gm_device_tree_get_compatibles (NULL, &err);

@@ -56,8 +56,8 @@ gm_cutout_set_path (GmCutout *self, const char *path, GError **err)
   if (gm_svg_path_get_bounding_box (path, &x1, &x2, &y1, &y2, &local_err) == FALSE) {
     if (err)
       *err = g_error_copy (local_err);
-    /* Tracking errors in when setting properties can be hard so make it simple
-     * to get some debugging */
+    /* Tracking errors when setting properties can be hard so make it
+     * simple to get some debugging */
     g_debug ("Failed to parse bounding box for %s: %s", path, local_err->message);
     return FALSE;
   }

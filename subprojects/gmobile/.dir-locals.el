@@ -14,5 +14,8 @@
  (js-mode . (
 	     (indent-tabs-mode . nil)
              (js-indent-level . 2)
+             ))
+ (meson-mode . (
+             (indent-tabs-mode . nil)
             ))
 )
