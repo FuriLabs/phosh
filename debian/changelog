@@ -1,3 +1,9 @@
+phosh (0.33.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 03 Nov 2023 15:00:05 +0100
+
 phosh (0.32.0-1) unstable; urgency=medium
 
   * New upstream release
