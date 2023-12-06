@@ -67,7 +67,7 @@ tests:
   needs: ['build-debian-gcc']
   script:
     - meson ${BUILD_OPTS} _build
-    - xvfb-run meson test -C _build
+    - xvfb-run meson test -C _build --print-errorlogs
     - ninja -C _build coverage
   coverage: '/^lines:\s+([\d.]+\%)\s+/'
   artifacts:

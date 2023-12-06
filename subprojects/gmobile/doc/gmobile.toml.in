@@ -3,9 +3,9 @@ version = "@VERSION@"
 description = "Mobile friendly helpers"
 authors = "Purism SPC"
 license = "LGPL-2.1-or-later"
-browse_url = "https://gitlab.gnome.org/guidog/gmobile/"
-repository_url = "https://gitlab.gnome.org/guidog/gmobile.git"
-website_url = "https://gitlab.gnome.org/guidog/gmobile"
+browse_url = "https://gitlab.gnome.org/World/Phosh/gmobile/"
+repository_url = "https://gitlab.gnome.org/World/Phosh/gmobile.git"
+website_url = "https://gitlab.gnome.org/World/Phosh/gmobile"
 dependencies = [
   "GLib-2.0",
 ]
@@ -24,7 +24,7 @@ show_class_hierarchy = true
 
 [source-location]
 # The base URL for the web UI
-base_url = "https://gitlab.gnome.org/guidog/gmobile/-/blob/main/"
+base_url = "https://gitlab.gnome.org/World/Phosh/gmobile/-/blob/main/"
 # The format for links, using "filename" and "line" for the format
 file_format = "{filename}#L{line}"
 

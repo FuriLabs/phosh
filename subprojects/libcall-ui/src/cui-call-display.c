@@ -165,34 +165,16 @@ hide_dial_pad_clicked_cb (CuiCallDisplay *self)
 static void
 set_pretty_time (CuiCallDisplay *self)
 {
-#define MINUTE 60
-#define HOUR   (60 * MINUTE)
-
   gdouble elapsed;
-  g_autoptr (GString) str = NULL;
-  guint seconds, minutes;
+  g_autofree char *duration = NULL;
 
   g_assert (CUI_IS_CALL_DISPLAY (self));
   g_assert (CUI_IS_CALL (self->call));
 
   elapsed = cui_call_get_active_time (self->call);
+  duration = cui_call_format_duration (elapsed);
 
-  str = g_string_new ("");
-
-  if (elapsed > HOUR) {
-    guint hours = (guint) (elapsed / HOUR);
-    g_string_append_printf (str, "%u:", hours);
-    elapsed -= (hours * HOUR);
-  }
-
-  minutes = (guint) (elapsed / MINUTE);
-  seconds = elapsed - (minutes * MINUTE);
-  g_string_append_printf (str, "%02u:%02u", minutes, seconds);
-
-  gtk_label_set_label (self->status, str->str);
-
-#undef HOUR
-#undef MINUTE
+  gtk_label_set_label (self->status, duration);
 }
 
 

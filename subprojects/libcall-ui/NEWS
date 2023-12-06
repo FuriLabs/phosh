@@ -1,3 +1,15 @@
+libcall-ui 0.1.1
+----------------
+Released: September 2023
+* Ignore visual separators in entry
+* Add call duration format helper
+* Contributors:
+    * Evangelos Ribeiro Tzaras
+    * Guido Günther
+* UI translations:
+    * Boyuan Yang (zh_CN)
+    * Jordi Mas i Hernandez (ca)
+
 libcall-ui 0.l.0
 ----------------
 Released: March 2023

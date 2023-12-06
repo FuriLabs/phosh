@@ -1,7 +1,7 @@
 /*
- * Copyright (C) 2022 Guido Günther
+ * Copyright (C) 2022-2023 Guido Günther
  *
- * SPDX-License-Identifier: GPL-3.0-or-later
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  * Author: Guido Günther <agx@sigxcpu.org>
  */

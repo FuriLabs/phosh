@@ -12,13 +12,14 @@ gmobile is licensed under the LGPLv2.1-or-later.
 ## Getting the source
 
 ```sh
-    git clone https://gitlab.gnome.org/guidog/gmobile.git
+    git clone https://gitlab.gnome.org/World/Phosh/gmobile.git
     cd gmobile.git
 ```
 
 The `main` branch has the current development version.
 
 ## Dependencies
+
 See `meson.build` for required dependencies.
 
 ## Building
@@ -30,9 +31,13 @@ way to get going is to do the following:
     meson compile -C _build
 
 # API docs
-API documentation is available at https://guidog.pages.gitlab.gnome.org/gmobile/
+API documentation is available at https://World/Phosh.pages.gitlab.gnome.org/gmobile/
+
+# Adding a new device
+If you want to add display panel information for a new device see
+this post on [notch support](https://phosh.mobi/posts/notch-support/).
 
 # Getting in Touch
-* Issue tracker: https://gitlab.gnome.org/guidog/gmobile/-/issues
+* Issue tracker: https://gitlab.gnome.org/World/Phosh/gmobile/-/issues
 * Matrix: https://im.puri.sm/#/room/#phosh:talk.puri.sm
 

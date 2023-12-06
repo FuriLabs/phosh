@@ -51,6 +51,10 @@ struct _CuiKeypad {
   guint16     column_spacing;
   gboolean    symbols_visible;
   gboolean    letters_visible;
+
+  GRegex     *re_separators;
+  GRegex     *re_no_digits;
+  GRegex     *re_no_digits_or_symbols;
 };
 
 G_DEFINE_TYPE (CuiKeypad, cui_keypad, GTK_TYPE_BIN)
@@ -71,6 +75,7 @@ symbol_clicked (CuiKeypad *self,
   if (gtk_widget_get_can_focus (GTK_WIDGET (self->entry)))
     gtk_entry_grab_focus_without_selecting (self->entry);
 }
+
 
 static void
 button_clicked_cb (CuiKeypad       *self,
@@ -106,26 +111,31 @@ insert_text_cb (CuiKeypad   *self,
                 gpointer     position,
                 GtkEditable *editable)
 {
-  gchar *p = text;
+  g_autofree char *no_separators = NULL;
+  g_autoptr (GError) error = NULL;
 
   g_assert (g_utf8_validate (text, length, NULL));
 
-  while (p != text + length) {
-    gchar *q = p;
-
-    p = g_utf8_next_char (p);
-
-    if (g_ascii_isdigit (*q))
-      continue;
-
-    if (self->symbols_visible && strchr ("#*+", *q))
-      continue;
-
+  /* Get rid of visual separators and potentially resubmit text insertion */
+  no_separators = g_regex_replace_literal (self->re_separators, text, -1, 0, "", 0, &error);
+  if (!no_separators) {
+    g_warning ("Error replacing visual characters in '%s': %s",
+               text, error->message);
     gtk_widget_error_bell (GTK_WIDGET (editable));
-
     g_signal_stop_emission_by_name (editable, "insert-text");
+  } else if (g_strcmp0 (text, no_separators)) {
+      g_signal_stop_emission_by_name (editable, "insert-text");
+      gtk_editable_insert_text (editable, no_separators, -1, position);
+      return;
+  }
 
-    return;
+  /* Validate input */
+  if ((self->symbols_visible &&
+       g_regex_match (self->re_no_digits_or_symbols, text, 0, NULL)) ||
+      (!self->symbols_visible &&
+       g_regex_match (self->re_no_digits, text, 0, NULL))) {
+    gtk_widget_error_bell (GTK_WIDGET (editable));
+    g_signal_stop_emission_by_name (editable, "insert-text");
   }
 }
 
@@ -224,8 +234,10 @@ cui_keypad_finalize (GObject *object)
 {
   CuiKeypad *self = CUI_KEYPAD (object);
 
-  if (self->long_press_zero_gesture != NULL)
-    g_object_unref (self->long_press_zero_gesture);
+  g_clear_object (&self->long_press_zero_gesture);
+  g_clear_pointer (&self->re_separators, g_regex_unref);
+  g_clear_pointer (&self->re_no_digits, g_regex_unref);
+  g_clear_pointer (&self->re_no_digits_or_symbols, g_regex_unref);
 
   G_OBJECT_CLASS (cui_keypad_parent_class)->finalize (object);
 }
@@ -350,10 +362,29 @@ cui_keypad_class_init (CuiKeypadClass *klass)
 static void
 cui_keypad_init (CuiKeypad *self)
 {
+  g_autoptr (GError) error = NULL;
+
   self->row_spacing = 6;
   self->column_spacing = 6;
   self->letters_visible = TRUE;
   self->symbols_visible = TRUE;
+
+  self->re_separators = g_regex_new ("(\\(0\\)|[-./[:blank:]()\\[\\]])", 0, 0, &error);
+  if (!self->re_separators)
+    g_warning ("Could not compile regex for visual separators: %s",
+               error->message);
+
+  g_clear_error (&error);
+  self->re_no_digits = g_regex_new ("[^0-9]", 0, 0, &error);
+  if (!self->re_no_digits)
+    g_warning ("Could not compile regex for non-digits: %s",
+               error->message);
+
+  g_clear_error (&error);
+  self->re_no_digits_or_symbols = g_regex_new ("[^0-9#*+]", 0, 0, &error);
+  if (!self->re_no_digits_or_symbols)
+    g_warning ("Could not compile regex for non-digits or non-symbols: %s",
+               error->message);
 
   g_type_ensure (CUI_TYPE_KEYPAD_BUTTON);
   gtk_widget_init_template (GTK_WIDGET (self));

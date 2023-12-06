@@ -67,6 +67,18 @@ tests:
     reports:
       junit: _build/meson-logs/testlog.junit.xml
 
+render-display-info:
+  image: debian:bookworm
+  stage: tests
+  variables:
+  needs: ['build-debian-gcc']
+  script:
+    - tools/render-all
+  artifacts:
+    expose_as: 'Display panel html'
+    paths:
+      - _build/out/
+
 pages:
   stage: deploy
   before_script: []
