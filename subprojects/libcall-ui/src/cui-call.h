@@ -76,3 +76,4 @@ void         cui_call_hang_up          (CuiCall *self);
 void         cui_call_send_dtmf (CuiCall *self, const gchar *dtmf);
 
 const char  *cui_call_state_to_string  (CuiCallState state);
+char        *cui_call_format_duration  (double duration);

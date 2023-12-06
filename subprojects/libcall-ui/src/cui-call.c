@@ -319,3 +319,35 @@ cui_call_state_to_string (CuiCallState state)
     return _("Unknown");
   }
 }
+
+/**
+ * cui_call_format_duration:
+ * @duration: The call duration
+ *
+ * Formats the call duration as mm:ss or hh:mm:ss depending
+ * on the duration.
+ *
+ * Returns: (transfer full): The call duration as text
+ */
+char *
+cui_call_format_duration (double duration)
+{
+#define MINUTE 60
+#define HOUR   (60 * MINUTE)
+  guint seconds, minutes;
+  GString *str = g_string_new ("");
+
+  if (duration > HOUR) {
+    int hours = (int) (duration / HOUR);
+    g_string_append_printf (str, "%u:", hours);
+    duration -= (hours * HOUR);
+  }
+
+  minutes = (int) (duration / MINUTE);
+  seconds = duration - (minutes * MINUTE);
+  g_string_append_printf (str, "%02u:%02u", minutes, seconds);
+
+  return g_string_free (str, FALSE);
+#undef HOUR
+#undef MINUTE
+}

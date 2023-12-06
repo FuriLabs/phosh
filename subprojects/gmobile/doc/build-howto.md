@@ -4,7 +4,7 @@ Slug: building
 # Compiling with gmobile
 
 If you need to build gmobile, get the source from
-[here](https://gitlab.gnome.org/guidog/gmobile/) and see the `README.md` file.
+[here](https://gitlab.gnome.org/World/Phosh/gmobile/) and see the `README.md` file.
 
 ## Bundling the library
 
@@ -16,7 +16,7 @@ in one of two ways:
 To use it as a submodule add the submodule to git
 
 ```
-git submodule add https://gitlab.gnome.org/guidog/gmobile.git subprojects/gmobile
+git submodule add https://gitlab.gnome.org/World/Phosh/gmobile.git subprojects/gmobile
 ```
 
 And then add this to your `meson.build`:
@@ -42,7 +42,7 @@ To use it as a meson subproject add this to `subprojects/gmobile.wrap`:
 ```ini
 [wrap-git]
 directory=gmobile
-url=https://gitlab.gnome.org/guidog/gmobile.git
+url=https://gitlab.gnome.org/World/Phosh/gmobile.git
 revision=main
 depth=1
 ```

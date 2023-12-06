@@ -1,3 +1,13 @@
+gmobile 0.0.4
+-------------
+Released: October 2023
+* Add helper to render all display infos
+* Added devices:
+    * Xiaomi Dandelion
+* Contributors:
+    * darkc0der
+    * Guido Günther
+
 gmobile 0.0.3
 -------------
 Released: August 2023

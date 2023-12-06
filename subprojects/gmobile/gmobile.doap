@@ -12,7 +12,7 @@
     gmobile aims to make developing GLib/GObject based software for
     mobile devices running Linux easier.
   </description>
-  <homepage rdf:resource="https://gitlab.gnome.org/guidog/gmobile" />
+  <homepage rdf:resource="https://gitlab.gnome.org/World/Phosh/gmobile" />
   <license rdf:resource="http://usefulinc.com/doap/licenses/lgpl" />
 
   <programming-language>C</programming-language>

@@ -233,6 +233,56 @@ test_cui_keypad_end_action (void)
 }
 
 
+static void
+test_cui_keypad_separators (void)
+{
+  g_autoptr (CuiKeypad) keypad = NULL;
+  g_autoptr (GtkEntry) entry = NULL;
+
+  keypad = g_object_ref_sink (CUI_KEYPAD (cui_keypad_new (FALSE, TRUE)));
+  entry = g_object_ref_sink (GTK_ENTRY (gtk_entry_new ()));
+
+  cui_keypad_set_entry (keypad, entry);
+
+  gtk_entry_set_text (entry, "(0123) / 456-789");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "0123456789");
+
+  cui_keypad_set_symbols_visible (keypad, FALSE);
+  gtk_entry_set_text (entry, "+31[123] / (456) - 789.0");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "");
+
+  cui_keypad_set_symbols_visible (keypad, TRUE);
+  gtk_entry_set_text (entry, "+31[123] / (456) - 789.0");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "+311234567890");
+
+  gtk_entry_set_text (entry, "+31(0)123 / (456) - 789.0");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "+311234567890");
+}
+
+static void
+test_cui_keypad_invalid_input (void)
+{
+  g_autoptr (CuiKeypad) keypad = NULL;
+  g_autoptr (GtkEntry) entry = NULL;
+
+  keypad = g_object_ref_sink (CUI_KEYPAD (cui_keypad_new (FALSE, TRUE)));
+  entry = g_object_ref_sink (GTK_ENTRY (gtk_entry_new ()));
+
+  cui_keypad_set_entry (keypad, entry);
+
+  gtk_entry_set_text (entry, "not-a-number");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "");
+
+  gtk_entry_set_text (entry, "(0123) still-not-a-number / (456) - 789.0");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "");
+
+  gtk_entry_set_text (entry, "?%!@");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "");
+
+  gtk_entry_set_text (entry, "(0123) ? / (456) - 789.0");
+  g_assert_cmpstr (gtk_entry_get_text (entry), ==, "");
+}
+
 
 gint
 main (gint argc,
@@ -248,6 +298,8 @@ main (gint argc,
   g_test_add_func ("/CallUI/Keypad/entry", test_cui_keypad_entry);
   g_test_add_func ("/CallUI/Keypad/start_action", test_cui_keypad_start_action);
   g_test_add_func ("/CallUI/Keypad/end_action", test_cui_keypad_end_action);
+  g_test_add_func ("/CallUI/Keypad/separators", test_cui_keypad_separators);
+  g_test_add_func ("/CallUI/Keypad/invalid_input", test_cui_keypad_invalid_input);
 
   return g_test_run ();
 }
