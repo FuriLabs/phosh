@@ -1,8 +1,9 @@
-phosh (0.34.1-1) UNRELEASED; urgency=medium
+phosh (0.34.1-1) unstable; urgency=medium
 
-  * New upstream release
+  * New upstream bugfix release
+  * Drop patches. All applied upstream
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 20 Dec 2023 14:21:31 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 20 Dec 2023 14:22:08 +0100
 
 phosh (0.34.0-2) unstable; urgency=medium
 
