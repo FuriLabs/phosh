@@ -7,6 +7,7 @@
 #pragma once
 
 #include "drag-surface.h"
+#include "top-panel-bg.h"
 
 #define PHOSH_TYPE_TOP_PANEL            (phosh_top_panel_get_type ())
 
@@ -34,5 +35,6 @@ void               phosh_top_panel_toggle_fold (PhoshTopPanel *self);
 void               phosh_top_panel_fold (PhoshTopPanel *self);
 void               phosh_top_panel_unfold (PhoshTopPanel *self);
 PhoshTopPanelState phosh_top_panel_get_state (PhoshTopPanel *self);
+void               phosh_top_panel_set_layer (PhoshTopPanel *self, guint32 layer);
 int                phosh_top_panel_get_bar_height (PhoshTopPanel *self);
 void               phosh_top_panel_force_update (PhoshTopPanel *self);

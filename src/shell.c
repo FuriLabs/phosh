@@ -84,6 +84,7 @@
 #include "suspend-manager.h"
 #include "system-prompter.h"
 #include "top-panel.h"
+#include "top-panel-bg.h"
 #include "torch-manager.h"
 #include "torch-info.h"
 #include "util.h"
@@ -262,8 +263,7 @@ update_top_level_layer (PhoshShell *self)
     return;
 
   g_debug ("Moving top-panel to %s layer", use_top_layer ? "top" : "overlay");
-  phosh_layer_surface_set_layer (PHOSH_LAYER_SURFACE (priv->top_panel), layer);
-  phosh_layer_surface_wl_surface_commit (PHOSH_LAYER_SURFACE (priv->top_panel));
+  phosh_top_panel_set_layer (PHOSH_TOP_PANEL (priv->top_panel), layer);
 }
 
 
@@ -356,6 +356,7 @@ setup_primary_monitor_signal_handlers (PhoshShell *self)
     on_primary_monitor_configured (self, priv->primary_monitor);
 }
 
+
 static void
 panels_create (PhoshShell *self)
 {
@@ -369,6 +370,8 @@ panels_create (PhoshShell *self)
   g_return_if_fail (monitor);
 
   top_layer = priv->locked ? ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY : ZWLR_LAYER_SHELL_V1_LAYER_TOP;
+
+  /* Top panel */
   priv->top_panel = PHOSH_DRAG_SURFACE (phosh_top_panel_new (
                                           phosh_wayland_get_zwlr_layer_shell_v1 (wl),
                                           phosh_wayland_get_zphoc_layer_shell_effects_v1 (wl),
@@ -376,6 +379,7 @@ panels_create (PhoshShell *self)
                                           top_layer));
   gtk_widget_show (GTK_WIDGET (priv->top_panel));
 
+  /* Home is created after the top-panel so it honors its exclusive zone */
   priv->home = PHOSH_DRAG_SURFACE (phosh_home_new (phosh_wayland_get_zwlr_layer_shell_v1 (wl),
                                                    phosh_wayland_get_zphoc_layer_shell_effects_v1 (wl),
                                                    monitor));
@@ -712,10 +716,9 @@ setup_idle_cb (PhoshShell *self)
   priv->layout_manager = phosh_layout_manager_new ();
 
   if (!priv->kiosk_mode_apps) {
-    panels_create (self);
-
-    /* Create background after panel since it needs the panel's size */
+    /* PhoshHome needs the background manager */
     priv->background_manager = phosh_background_manager_new ();
+    panels_create (self);
   } else {
     /* Since kiosk mode does not load the panels, docked_manager is ultimately never created
        This happens because its instantiation is actually an indirect side effect of the panel creation
@@ -2501,7 +2504,6 @@ phosh_shell_get_blanked (PhoshShell *self)
 
   return phosh_shell_get_state (self) & PHOSH_STATE_BLANKED;
 }
-
 
 /**
  * phosh_shell_activate_action:
