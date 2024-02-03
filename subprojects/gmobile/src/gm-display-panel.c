@@ -17,6 +17,8 @@
  *
  * Physical properties of a display panel like size, cutouts and
  * rounded corners.
+ *
+ * Since: 0.0.1
  */
 
 enum {
@@ -227,6 +229,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:name:
    *
    * The name of the display
+   *
+   * Since: 0.0.1
    */
   props[PROP_NAME] =
     g_param_spec_string ("name", "", "",
@@ -237,6 +241,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:cutouts:
    *
    * The display cutouts as `GListModel` of [class@Cutout].
+   *
+   * Since: 0.0.1
    */
   props[PROP_CUTOUTS] =
     g_param_spec_object ("cutouts", "", "",
@@ -246,6 +252,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:x-res:
    *
    * The panel resolution in pixels in the x direction
+   *
+   * Since: 0.0.1
    */
   props[PROP_X_RES] =
     g_param_spec_int ("x-res", "", "",
@@ -255,6 +263,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:y-res:
    *
    * The panel resolution in pixels in the y direction
+   *
+   * Since: 0.0.1
    */
   props[PROP_Y_RES] =
     g_param_spec_int ("y-res", "", "",
@@ -265,6 +275,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    *
    * The border radius of the panel edges in device pixels
    * If a single border radius isn't enough use multiple [type@Cutout].
+   *
+   * Since: 0.0.1
    */
   props[PROP_BORDER_RADIUS] =
     g_param_spec_int ("border-radius", "", "",
@@ -274,6 +286,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:width:
    *
    * The display width in millimeters
+   *
+   * Since: 0.0.1
    */
   props[PROP_WIDTH] =
     g_param_spec_int ("width", "", "",
@@ -283,6 +297,8 @@ gm_display_panel_class_init (GmDisplayPanelClass *klass)
    * GmDisplayPanel:height:
    *
    * The display height in millimeters
+   *
+   * Since: 0.0.1
    */
   props[PROP_HEIGHT] =
     g_param_spec_int ("height", "", "",
@@ -299,13 +315,33 @@ gm_display_panel_init (GmDisplayPanel *self)
   self->cutouts = g_list_store_new (GM_TYPE_CUTOUT);
 }
 
-
+/**
+ * gm_display_panel_new:
+ *
+ * Constructs a new display panel object.
+ *
+ * Returns: The new display panel object
+ *
+ * Since: 0.0.1
+ */
 GmDisplayPanel *
 gm_display_panel_new (void)
 {
   return GM_DISPLAY_PANEL (g_object_new (GM_TYPE_DISPLAY_PANEL, NULL));
 }
 
+/**
+ * gm_display_panel_new_from_data:
+ * @data: The panel's data as JSON
+ * @error: Return location for an error
+ *
+ * Constructs a new display panel based on the given data. If that fails
+ * `NULL` is returned and `error` describes the error that occurred.
+ *
+ * Returns: The new display panel object
+ *
+ * Since: 0.0.1
+ */
 GmDisplayPanel *
 gm_display_panel_new_from_data (const gchar *data, GError **error)
 {
@@ -316,6 +352,19 @@ gm_display_panel_new_from_data (const gchar *data, GError **error)
   return GM_DISPLAY_PANEL (json_gobject_deserialize (GM_TYPE_DISPLAY_PANEL, node));
 }
 
+/**
+ * gm_display_panel_new_from_resource:
+ * @resource_name: A path to a gresource
+ * @error: Return location for an error
+  *
+ * Constructs a new display panel by fetching the data from the given
+ * GResource. If that fails `NULL` is returned and `error` describes
+ * the error that occurred.
+ *
+ * Returns: The new display panel object
+ *
+ * Since: 0.0.1
+ */
 GmDisplayPanel *
 gm_display_panel_new_from_resource (const gchar *resource_name, GError **error)
 {
@@ -334,6 +383,15 @@ gm_display_panel_new_from_resource (const gchar *resource_name, GError **error)
                                                            error));
 }
 
+/**
+ * gm_display_panel_get_name:
+ *
+ * Gets the panel's name.
+ *
+ * Returns: The panel's name
+ *
+ * Since: 0.0.1
+ */
 const char *
 gm_display_panel_get_name (GmDisplayPanel *self)
 {
@@ -349,6 +407,8 @@ gm_display_panel_get_name (GmDisplayPanel *self)
  * Get the display cutouts.
  *
  * Returns: (transfer none): The display cutouts
+ *
+ * Since: 0.0.1
  */
 GListModel *
 gm_display_panel_get_cutouts (GmDisplayPanel *self)
@@ -358,6 +418,16 @@ gm_display_panel_get_cutouts (GmDisplayPanel *self)
   return G_LIST_MODEL (self->cutouts);
 }
 
+/**
+ * gm_display_panel_get_x_res:
+ * @self: The display panel
+ *
+ * Gets the panels resolution (in pixels) in the x direction
+ *
+ * Returns: The x resolution.
+ *
+ * Since: 0.0.1
+ */
 int
 gm_display_panel_get_x_res (GmDisplayPanel *self)
 {
@@ -366,6 +436,16 @@ gm_display_panel_get_x_res (GmDisplayPanel *self)
   return self->x_res;
 }
 
+/**
+ * gm_display_panel_get_y_res:
+ * @self: The display panel
+ *
+ * Gets the panels resolution (in pixels) in the y direction.
+ *
+ * Returns: The y resolution.
+ *
+ * Since: 0.0.1
+ */
 int
 gm_display_panel_get_y_res (GmDisplayPanel *self)
 {
@@ -374,6 +454,17 @@ gm_display_panel_get_y_res (GmDisplayPanel *self)
   return self->y_res;
 }
 
+/**
+ * gm_display_panel_get_border_radius:
+ * @self: The display panel
+ *
+ * Gets the panels border radius. 0 indicates rectangular corners.  If
+ * given applies to all corners of the panel.
+ *
+ * Returns: The panel's border radius.
+ *
+ * Since: 0.0.1
+ */
 int
 gm_display_panel_get_border_radius (GmDisplayPanel *self)
 {
@@ -382,6 +473,16 @@ gm_display_panel_get_border_radius (GmDisplayPanel *self)
   return self->border_radius;
 }
 
+/**
+ * gm_display_panel_get_width:
+ * @self: The display panel
+ *
+ * Gets the panels width in mm.
+ *
+ * Returns: The panel's width.
+ *
+ * Since: 0.0.1
+ */
 int
 gm_display_panel_get_width (GmDisplayPanel *self)
 {
@@ -390,6 +491,16 @@ gm_display_panel_get_width (GmDisplayPanel *self)
   return self->width;
 }
 
+/**
+ * gm_display_panel_get_height:
+ * @self: The display panel
+ *
+ * Gets the panels height in mm.
+ *
+ * Returns: The panel's height.
+ *
+ * Since: 0.0.1
+ */
 int
 gm_display_panel_get_height (GmDisplayPanel *self)
 {

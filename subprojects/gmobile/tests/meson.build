@@ -16,6 +16,7 @@ tests = [
   'cutout',
   'svg-path',
   'timeout',
+  'utils',
 ]
 
 foreach test : tests

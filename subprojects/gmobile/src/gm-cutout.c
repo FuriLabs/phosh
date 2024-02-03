@@ -23,6 +23,8 @@
  * natural orientation. Applications can query the area to avoid
  * for rendering via the `bounds` property so they don't need to
  * deal with the SVG path themselves.
+ *
+ * Since: 0.0.2
  */
 
 enum {
@@ -147,6 +149,8 @@ gm_cutout_class_init (GmCutoutClass *klass)
    * GmCutout:name:
    *
    * A name identifying the cutout.
+   *
+   * Since: 0.0.2
    */
   props[PROP_NAME] =
     g_param_spec_string ("name", "", "",
@@ -156,6 +160,8 @@ gm_cutout_class_init (GmCutoutClass *klass)
    * GmCutout:path:
    *
    * The SVG path that describes the display cutout or notch.
+   *
+   * Since: 0.0.2
    */
   props[PROP_PATH] =
     g_param_spec_string ("path", "", "",
@@ -165,6 +171,8 @@ gm_cutout_class_init (GmCutoutClass *klass)
    * GmCutout:bounds:
    *
    * Rectangular bounds of the cutout
+   *
+   * Since: 0.0.2
    */
   props[PROP_BOUNDS] =
     g_param_spec_boxed ("bounds", "", "",
@@ -180,14 +188,32 @@ gm_cutout_init (GmCutout *self)
 {
 }
 
-
+/**
+ * gm_cutout_new:
+ * @path: An svg path
+ *
+ * Create a new cutout based on the given SVG path.
+ *
+ * Returns: The cutout.
+ *
+ * Since: 0.0.2
+ */
 GmCutout *
 gm_cutout_new (const char *path)
 {
   return GM_CUTOUT (g_object_new (GM_TYPE_CUTOUT, "path", path, NULL));
 }
 
-
+/**
+ * gm_cutout_get_name:
+ * @self: A cutout
+ *
+ * The name of the cutout.
+ *
+ * Returns: The cutout's name.
+ *
+ * Since: 0.0.2
+ */
 const char *
 gm_cutout_get_name (GmCutout *self)
 {
@@ -196,7 +222,16 @@ gm_cutout_get_name (GmCutout *self)
   return self->name;
 }
 
-
+/**
+ * gm_cutout_get_path:
+ * @self: A cutout
+ *
+ * Gets the SVG path describing the shape of the cutout.
+ *
+ * Returns: The cutout's shape as SVG path
+ *
+ * Since: 0.0.2
+ */
 const char *
 gm_cutout_get_path (GmCutout *self)
 {
@@ -205,7 +240,16 @@ gm_cutout_get_path (GmCutout *self)
   return self->path;
 }
 
-
+/**
+ * gm_cutout_get_bounds:
+ * @self: A cutout
+ *
+ * Gets the bounding box of the cutout.
+ *
+ * Returns: The bounding box.
+ *
+ * Since: 0.0.2
+ */
 const GmRect *
 gm_cutout_get_bounds (GmCutout *self)
 {

@@ -6,13 +6,11 @@
 
 #include "gm-error.h"
 
-GQuark
-gm_error_quark (void)
-{
-  static GQuark quark = 0;
-
-  if (!quark)
-    quark = g_quark_from_static_string("gm");
-
-  return quark;
-}
+/**
+ * gm_error_quark:
+ *
+ * Gets the GM Error Quark.
+ *
+ * Returns: a #GQuark.
+ **/
+G_DEFINE_QUARK (gm-error-quark, gm_error)

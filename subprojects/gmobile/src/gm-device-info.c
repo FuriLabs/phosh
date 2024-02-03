@@ -24,6 +24,8 @@
  *
  * The lookups are currently based on device tree compatibles.
  * See [func@device_tree_get_compatibles].
+ *
+ * Since: 0.0.1
  */
 
 enum {
@@ -106,6 +108,8 @@ gm_device_info_class_init (GmDeviceInfoClass *klass)
    * GmDeviceInfo:compatibles:
    *
    * The compatibles to look up device information for.
+   *
+   * Since: 0.0.1
    */
   props[PROP_COMPATIBLES] =
     g_param_spec_boxed ("compatibles", "", "",
@@ -121,7 +125,16 @@ gm_device_info_init (GmDeviceInfo *self)
 {
 }
 
-
+/**
+ * gm_device_info_new:
+ * @compatibles: device tree compatibles
+ *
+ * Gets device information based on the passed in device tree compatibles.
+ *
+ * Returns: The known device information
+ *
+ * Since: 0.0.1
+ */
 GmDeviceInfo *
 gm_device_info_new (const char * const *compatibles)
 {
@@ -134,10 +147,12 @@ gm_device_info_new (const char * const *compatibles)
  * gm_device_info_get_display_panel:
  * @self: The device info
  *
- * Get display panel information. Queries the database for the best
+ * Gets display panel information. Queries the database for the best
  * matching panel based on the device's compatibles.
  *
  * Returns:(transfer none): The display panel information
+ *
+ * Since: 0.0.1
  */
 GmDisplayPanel *
 gm_device_info_get_display_panel (GmDeviceInfo *self)

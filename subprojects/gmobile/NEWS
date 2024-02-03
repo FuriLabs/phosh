@@ -1,3 +1,18 @@
+gmobile 0.0.5
+-------------
+Released: January 2024
+* Fix build on FreeBSD
+* Add new macros to check for empty string types
+* Added devices:
+  * Fairphone 5
+* Updated devices:
+  * Fairphone 4
+* Contributors:
+    * Arnaud Ferraris
+    * Guido Günther
+    * Jan Beich
+    * Luca Weiss
+
 gmobile 0.0.4
 -------------
 Released: October 2023
