@@ -1,8 +1,9 @@
-phosh (0.36.0-1) UNRELEASED; urgency=medium
+phosh (0.36.0-1) unstable; urgency=medium
 
   * New upstream release
+  * d/copyright: Drop now superfluous sections
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 03 Feb 2024 13:06:44 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 03 Feb 2024 13:15:07 +0100
 
 phosh (0.35.0-1) unstable; urgency=medium
 
