@@ -1,4 +1,5 @@
 gm_deps = [
+  epoll_dep,
   gio_dep,
   glib_dep,
   json_glib_dep,
@@ -26,6 +27,8 @@ gm_public_sources = files(
   'gm-svg-path.h',
   'gm-timeout.c',
   'gm-timeout.h',
+  'gm-util.c',
+  'gm-util.h',
 )
 
 gm_sources = [

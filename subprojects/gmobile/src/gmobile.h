@@ -22,3 +22,4 @@
 #include "gm-error.h"
 #include "gm-main.h"
 #include "gm-timeout.h"
+#include "gm-util.h"

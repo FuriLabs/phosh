@@ -341,9 +341,14 @@ normalize_path (const char *path)
  * @x2: The upper x coordinate
  * @y1: The lower y coordinate
  * @y2: The upper x coordinate
+ * @err: Return location for an error
  *
  * Returns the bounding box of an SVG path. As this is meant for
- * display cutouts we operate on integer (whole pixel) values.
+ * display cutouts we operate on integer (whole pixel) values.  When
+ * parsing fails, `FALSE` is returned and `error` contains the error
+ * information.
+ *
+ * Returns: `TRUE` when parsing was successful, `FALSE` otherwise.
  *
  * See https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths for path syntax introduction.
  */

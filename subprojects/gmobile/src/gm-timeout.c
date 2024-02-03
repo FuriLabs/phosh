@@ -12,6 +12,11 @@
 #include <unistd.h>
 #include <sys/timerfd.h>
 
+#if defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+/* https://github.com/jiixyj/epoll-shim/issues/45 */
+#undef CLOCK_BOOTTIME
+#define CLOCK_BOOTTIME CLOCK_MONOTONIC
+#endif
 
 typedef struct _GmTimeoutOnce {
   GSource  source;

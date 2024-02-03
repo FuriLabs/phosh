@@ -31,7 +31,7 @@ way to get going is to do the following:
     meson compile -C _build
 
 # API docs
-API documentation is available at https://World/Phosh.pages.gitlab.gnome.org/gmobile/
+API documentation is available at https://world.pages.gitlab.gnome.org/Phosh/gmobile/
 
 # Adding a new device
 If you want to add display panel information for a new device see
