@@ -1,8 +1,12 @@
-phosh (0.37.0-1) UNRELEASED; urgency=medium
+phosh (0.37.0-1) unstable; urgency=medium
 
   * New upstream release
+  * Depend on desktop-file-utils.
+    Used for desktop file validation
+  * rules: Let dh handle nocheck
+  * Make sure to not install any gmobile related files
 
- -- Guido Günther <agx@sigxcpu.org>  Fri, 08 Mar 2024 17:20:48 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 08 Mar 2024 17:50:27 +0100
 
 phosh (0.36.0-1) unstable; urgency=medium
 
