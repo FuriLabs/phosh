@@ -1,3 +1,30 @@
+gmobile 0.0.6
+-------------
+Released: February 2024
+* Build a shared library for testing purposes.
+* Added devices:
+  * Daria Bond
+  * Gigaset GS5
+  * Gigaset GX4
+  * Google Pixel 6
+  * Google Pixel 6 Pro
+  * Motorola ThinkPhone
+  * Volla Phone 22
+  * Volla Phone X23
+  * Xiaomi POCO M2 Pro
+  * Xiaomi Redmi 7
+  * Xiaomi Redmi 9C
+  * Xiaomi Redmi 9C NFC
+  * Xiaomi Redmi Note 7
+  * Xiaomi Redmi Note 9 Pro
+  * Xiaomi Redmi Note 9 Pro Max
+  * Xiaomi Redmi Note 9S
+* Updated devies:
+  * Xiaomi Redmi 9A
+* Contributors:
+    * Bardia Moshiri
+    * Guido Günther
+
 gmobile 0.0.5
 -------------
 Released: January 2024
