@@ -1,3 +1,11 @@
+phosh (0.37.0-2) unstable; urgency=medium
+
+  * Switch to using systemd user units
+    gnome-session 46 dropped non systemd support.
+    Thanks djhg2000 for tracking this down.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 31 Mar 2024 11:34:35 +0200
+
 phosh (0.37.0-1) unstable; urgency=medium
 
   * New upstream release
