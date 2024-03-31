@@ -1,4 +1,7 @@
 usr/bin/phosh-session
+usr/lib/systemd/user/gnome-session@phosh.target.d/session.conf
+usr/lib/systemd/user/sm.puri.Phosh.service
+usr/lib/systemd/user/sm.puri.Phosh.target
 usr/libexec/phosh
 usr/libexec/phosh-calendar-server
 usr/share/icons/hicolor/symbolic/apps/sm.puri.Phosh-symbolic.svg
