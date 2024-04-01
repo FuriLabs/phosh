@@ -1,3 +1,9 @@
+phosh (0.37.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 01 Apr 2024 16:31:32 +0200
+
 phosh (0.37.0-2) unstable; urgency=medium
 
   * Switch to using systemd user units
