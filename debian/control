@@ -75,7 +75,6 @@ Provides:
 Breaks:
  gnome-calls (<< 41~alpha),
  gnome-control-center (<< 42),
- gnome-session (<< 46~),
  libgtk-3-0 (<< 3.24.30),
 Description: Pure Wayland shell for mobile devices
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
