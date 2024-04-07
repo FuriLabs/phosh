@@ -133,6 +133,8 @@ libphosh_tool_sources = files(
   'gtk-mount-prompt.h',
   'keypad.c',
   'keypad.h',
+  'launcher-entry-manager.c',
+  'launcher-entry-manager.h',
   'lockshield.c',
   'lockshield.h',
   'log.h',
@@ -313,7 +315,14 @@ libphosh_sources = files(
   phosh_wwan_sources,
 ]
 
+# See https://gitlab.gnome.org/GNOME/libsoup/-/merge_requests/394
+custom_libsoup_dep = declare_dependency (
+  include_directories: libsoup_dep.get_variable(pkgconfig: 'includedir') / 'libsoup-3.0',
+  dependencies: cc.find_library('libsoup-3.0', required: true),
+)
+
 phosh_deps = [
+  custom_libsoup_dep,
   fribidi_dep,
   gcr_dep,
   gio_dep,
