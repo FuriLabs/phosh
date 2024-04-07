@@ -1,3 +1,9 @@
+phosh (0.38.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 07 Apr 2024 11:01:35 +0200
+
 phosh (0.37.1-1) unstable; urgency=medium
 
   * New upstream release. This version doesn't require gnome-session >= 46 but
