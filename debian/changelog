@@ -1,8 +1,10 @@
-phosh (0.38.0-1) UNRELEASED; urgency=medium
+phosh (0.38.0-1) experimental; urgency=medium
 
+  * Upload to experimental to stay clear of the 6 ongoing transitions
+    phosh is part of.
   * New upstream release
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 07 Apr 2024 11:01:35 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 07 Apr 2024 11:17:45 +0200
 
 phosh (0.37.1-1) unstable; urgency=medium
 
