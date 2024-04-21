@@ -1,0 +1,30 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sun, 21 Apr 2024 12:47:07 +0200
+Subject: tests: Skip symbol check on some architectures
+
+These architectures have too many exported symbols
+---
+ tools/check-exported-symbols | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/tools/check-exported-symbols b/tools/check-exported-symbols
+index 18b5b73..34dc826 100755
+--- a/tools/check-exported-symbols
++++ b/tools/check-exported-symbols
+@@ -6,6 +6,16 @@ BIN=${1:-"_build/src/phosh"}
+ 
+ PHOSH_SYMBOL_PREFIXES='phosh_(shell|quick_setting|status_icon|session_manager)_'
+ 
++arch=$(uname -m)
++
++case $arch in
++  mips64*|riscv64|s390*)
++      echo "Skipping symbol check on $arch"
++      exit 77
++      ;;
++esac
++
++
+ if objdump -T  $BIN | grep 'g    DF .text' \
+ 	| grep -v -E " (main$|${PHOSH_SYMBOL_PREFIXES}|gtk_(filter|sort)_list_model_)"; then
+     echo "Found symbols that shouldn't be exported"
