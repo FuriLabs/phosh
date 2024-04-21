@@ -1,3 +1,10 @@
+phosh (0.38.0-2) experimental; urgency=medium
+
+  * tests: Skip symbol check on some architectures
+   (Closes: #1068916)
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 21 Apr 2024 12:48:09 +0200
+
 phosh (0.38.0-1) experimental; urgency=medium
 
   * Upload to experimental to stay clear of the 6 ongoing transitions
