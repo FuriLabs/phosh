@@ -1,3 +1,9 @@
+phosh (0.38.0-3) unstable; urgency=medium
+
+  * Upload to unstable to fix the FTBFS
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 22 Apr 2024 17:05:45 +0200
+
 phosh (0.38.0-2) experimental; urgency=medium
 
   * tests: Skip symbol check on some architectures
