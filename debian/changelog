@@ -1,3 +1,12 @@
+phosh (0.38.0-4) unstable; urgency=medium
+
+  * Backport layout manager fixes
+    - layout-manager-Return-min-padding-in-non-device-mode.patch
+    - layout-manager-Use-min-padding-with-zero-radius.patch
+    This unbreaks the top bar alignment on e.g. the Librem 5
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 03 May 2024 19:49:46 +0200
+
 phosh (0.38.0-3) unstable; urgency=medium
 
   * Upload to unstable to fix the FTBFS
