@@ -1,1 +1,3 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+layout-manager-Return-min-padding-in-non-device-mode.patch
+layout-manager-Use-min-padding-with-zero-radius.patch
