@@ -23,15 +23,13 @@
 
 #include <libsoup/soup.h>
 
+#include <gmobile.h>
+
 #ifdef PHOSH_HAVE_MEMFD_CREATE
 #include <sys/mman.h>
 #include <linux/memfd.h>
 #include <linux/mman.h>
 #include <fcntl.h>
-#endif
-
-#if !GLIB_CHECK_VERSION(2, 73, 2)
-#define G_REGEX_DEFAULT 0
 #endif
 
 
@@ -321,66 +319,6 @@ phosh_create_shm_file (off_t size)
   return fd;
 }
 
-/**
- * phoc_util_date_fmt:
- *
- * Get a date format based on LC_TIME.
- * This is done by temporarily switching LC_MESSAGES so we can look up
- * the format in our message catalog.  This will fail if LANGUAGE is
- * set to something different since LANGUAGE overrides
- * LC_{ALL,MESSAGE}.
- */
-static const char *
-phosh_util_date_fmt (void)
-{
-  const char *locale;
-  const char *fmt;
-
-  locale = setlocale (LC_TIME, NULL);
-  if (locale) /* Lookup date format via messages catalog */
-    setlocale (LC_MESSAGES, locale);
-  /* Translators: This is a time format for a date in
-     long format */
-  fmt = _("%A, %B %-e");
-  setlocale (LC_MESSAGES, "");
-  return fmt;
-}
-
-/**
- * phoc_util_local_date:
- *
- * Get the local date as string
- * We honor LC_MESSAGES so we e.g. don't get a translated date when
- * the user has LC_MESSAGES=en_US.UTF-8 but LC_TIME to their local
- * time zone.
- *
- * Returns: The local date as string
- */
-char *
-phosh_util_local_date (void)
-{
-  time_t current = time (NULL);
-  struct tm local;
-  g_autofree char *date = NULL;
-  const char *fmt;
-  const char *locale;
-
-  g_return_val_if_fail (current != (time_t) -1, NULL);
-  g_return_val_if_fail (localtime_r (&current, &local), NULL);
-
-  date = g_malloc0 (256);
-  fmt = phosh_util_date_fmt ();
-  locale = setlocale (LC_MESSAGES, NULL);
-  if (locale) /* make sure weekday and month use LC_MESSAGES */
-    setlocale (LC_TIME, locale);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-  /* Can't use a string literal since it needs to be translated */
-  g_return_val_if_fail (strftime (date, 255, fmt, &local), NULL);
-#pragma GCC diagnostic pop
-  setlocale (LC_TIME, "");
-  return g_steal_pointer (&date);
-}
 
 /**
  * phosh_util_escape_markup:
@@ -564,22 +502,9 @@ phosh_util_get_stylesheet (const char *theme_name)
 gboolean
 phosh_clear_fd (int *fd, GError **err)
 {
-  gboolean success;
-
   g_return_val_if_fail (fd, FALSE);
 
-#if GLIB_CHECK_VERSION(2, 75, 1)
-  success = g_clear_fd (fd, err);
-#else
-  if (*fd >= 0) {
-    success = g_close (*fd, err);
-    *fd = -1;
-  } else {
-    success = TRUE;
-  }
-#endif
-
-  return success;
+  return g_clear_fd (fd, err);
 }
 
 /**
@@ -673,4 +598,114 @@ phosh_util_data_uri_to_pixbuf (const char *uri, GError **error)
 
   g_object_ref (pixbuf);
   return g_steal_pointer (&pixbuf);
+}
+
+static const char *(*app_attr[]) (GAppInfo *info) = {
+  g_app_info_get_display_name,
+  g_app_info_get_name,
+  g_app_info_get_description,
+  g_app_info_get_executable,
+};
+
+static const char *(*desktop_attr[]) (GDesktopAppInfo *info) = {
+  g_desktop_app_info_get_generic_name,
+  g_desktop_app_info_get_categories,
+};
+
+/**
+ * phosh_util_matches_app_info:
+ * @info: app-info to check
+ * @search: Search string to use for matching
+ *
+ * Returns: `TRUE` if the info matches search else `FALSE`
+ */
+gboolean
+phosh_util_matches_app_info (GAppInfo *info, const char *search)
+{
+  const char *str = NULL;
+  for (int i = 0; i < G_N_ELEMENTS (app_attr); i++) {
+    g_autofree char *folded = NULL;
+
+    str = app_attr[i] (info);
+
+    if (gm_str_is_null_or_empty (str))
+      continue;
+
+    folded = g_utf8_casefold (str, -1);
+
+    if (strstr (folded, search))
+      return TRUE;
+  }
+
+  if (G_IS_DESKTOP_APP_INFO (info)) {
+    const char * const *kwds;
+
+    for (int i = 0; i < G_N_ELEMENTS (desktop_attr); i++) {
+      g_autofree char *folded = NULL;
+
+      str = desktop_attr[i] (G_DESKTOP_APP_INFO (info));
+
+      if (gm_str_is_null_or_empty (str))
+        continue;
+
+      folded = g_utf8_casefold (str, -1);
+
+      if (strstr (folded, search))
+        return TRUE;
+    }
+
+    kwds = g_desktop_app_info_get_keywords (G_DESKTOP_APP_INFO (info));
+
+    if (kwds) {
+      int i = 0;
+
+      while ((str = kwds[i])) {
+        g_autofree char *folded = g_utf8_casefold (str, -1);
+        if (strstr (folded, search))
+          return TRUE;
+        i++;
+      }
+    }
+  }
+
+  return FALSE;
+}
+
+/**
+ * phosh_util_append_to_strv:
+ * @array: A `NULL` terminated array of strings
+ * @element: The string to append
+ *
+ * Append `element` to an array of strings.
+ *
+ * Returns: (transfer full): A new `NULL` terminated array with the element appended to it.
+ */
+GStrv
+phosh_util_append_to_strv (GStrv array, const char *element)
+{
+  g_autoptr (GStrvBuilder) builder = g_strv_builder_new ();
+  g_strv_builder_addv (builder, (const char **) array);
+  g_strv_builder_add (builder, element);
+  return g_strv_builder_end (builder);
+}
+
+/**
+ * phosh_util_remove_from_strv:
+ * @array: A `NULL` terminated array of strings
+ * @element: The string to remove
+ *
+ * Remove all elements from a string array that match `element`.
+ *
+ * Returns: (transfer full): A new `NULL` terminated array with the element removed from it.
+ */
+GStrv
+phosh_util_remove_from_strv (GStrv array, const char *element)
+{
+  g_autoptr (GStrvBuilder) builder = g_strv_builder_new ();
+  for (int i = 0; array[i] != NULL; i++) {
+    if (g_strcmp0 (array[i], element) == 0)
+      continue;
+    g_strv_builder_add (builder, array[i]);
+  }
+  return g_strv_builder_end (builder);
 }

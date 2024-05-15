@@ -50,6 +50,14 @@ test_env_unit.set('XDG_DATA_DIRS', '/usr/local/share/', '/usr/share/')
 # but then we can't find the system gschemas
 test_env_unit.prepend('XDG_DATA_DIRS', '@0@/system/share/'.format(meson.current_source_dir()))
 
+
+test_resources = gnome.compile_resources(
+  'phosh-test-resources',
+  'phosh-test.gresources.xml',
+  extra_args: '--manual-register',
+  c_name: 'phosh_test',
+)
+
 test_cflags = [
   '-DTEST_BUILD_DIR="@0@"'.format(meson.project_build_root()),
   '-DTEST_DATA_DIR="@0@/data"'.format(meson.current_source_dir()),
@@ -66,11 +74,13 @@ testlib_sources = [
   'testlib.c',
   'testlib-head-stub.c',
   'testlib-compositor.c',
+  'testlib-wall-clock-mock.c',
   'testlib-full-shell.c',
   'testlib-calls-mock.c',
   'testlib-mpris-mock.c',
-  'testlib-emergency-calls.c'
-]
+  'testlib-emergency-calls.c',
+  'testlib-wait-for-shell-state.c',
+] + test_resources
 
 testlib = static_library('phoshtest', testlib_sources,
   dependencies: [phosh_deps, phosh_tool_dep],
@@ -83,11 +93,13 @@ testlib_dep = declare_dependency(
 tests = [
   'activity',
   'app-grid-button',
+  'app-grid-folder-button',
   'app-list-model',
   'connectivity-info',
   'css',
   'fading-label',
   'favourite-model',
+  'folder-info',
   'gamma-table',
   'head',
   'keypad',
