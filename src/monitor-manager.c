@@ -939,7 +939,7 @@ find_monitor_by_wl_output (PhoshMonitorManager *self, struct wl_output *output)
 static void
 phosh_monitor_manager_set_night_light_supported (PhoshMonitorManager *self)
 {
-  gboolean night_light_supported = FALSE;
+  gboolean night_light_supported = TRUE;
 
   for (guint i = 0; i < self->monitors->len; i++) {
     PhoshMonitor *monitor = g_ptr_array_index (self->monitors, i);
