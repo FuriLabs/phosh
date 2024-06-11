@@ -1,1 +1,4 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+backport/background-manager-Don-t-try-to-get-background-for-zero-s.patch
+backport/background-Avoid-update-when-the-layer-surface-isn-t-conf.patch
+backport/app-grid-folder-button-Force-16px-as-icon-size.patch
