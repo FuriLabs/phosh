@@ -1,3 +1,11 @@
+phosh (0.40.0-3) unstable; urgency=medium
+
+  * prompt: Only show when we got a request
+    Fixes an unclosable empty prompt when adding the first key
+    after commit.
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 23 Jul 2024 10:58:41 +0200
+
 phosh (0.40.0-2) unstable; urgency=medium
 
   * Restore "tests: Skip symbol check on some architectures"
