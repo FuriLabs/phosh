@@ -1,1 +1,2 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+prompt-Only-show-when-we-got-a-request.patch
