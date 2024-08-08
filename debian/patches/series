@@ -1,1 +1,2 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+media-player-Use-G_GINT64_FORMAT-to-print-gint64.patch
