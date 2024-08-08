@@ -16,5 +16,7 @@
  (css-mode . (
             (css-indent-offset . 2)
             ))
+ (meson-mode . (
+             (indent-tabs-mode . nil)
+            ))
 )
-

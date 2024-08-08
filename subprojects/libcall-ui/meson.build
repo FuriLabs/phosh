@@ -1,7 +1,7 @@
 project('libcall-ui', 'c',
-          version: '0.1.1',
+          version: '0.1.2',
           license: 'LGPLv2.1+',
-    meson_version: '>= 0.50.0',
+    meson_version: '>= 0.56.2',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
 
