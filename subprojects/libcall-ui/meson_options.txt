@@ -3,7 +3,7 @@ option('tests',
        description: 'Whether to compile unit tests')
 
 option('examples',
-       type: 'boolean', value: 'true',
+       type: 'boolean', value: true,
        description: 'Whether to build the examples')
 
 option('gtk_doc',
