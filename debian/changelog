@@ -1,8 +1,20 @@
-phosh (0.41.0-1) UNRELEASED; urgency=medium
+phosh (0.41.0-1) unstable; urgency=medium
 
   * New upstream release
+    - media-player: Add track position, length and progress bar
+    - Add (optional) Wi-Fi Hotspot Quick Setting
+    - Add Bluetooth Quick Setting status page allowing to
+      connect/disconnect known devices
+    - Allow to (optionally) put the phone in silent mode when pressing Vol- on
+      incoming calls
+    - Give Quick Setting status pages (and their individual rows) more
+      vertical space so selecting from a large list of Wi-Fi networks or
+      Bluetooth devices becomes less fiddly
+    - Fix keypad layouts in RTL languages
+  * Drop media-player-Use-G_GINT64_FORMAT-to-print-gint64.patch.
+    Applied upstream
 
- -- Guido Günther <agx@sigxcpu.org>  Thu, 15 Aug 2024 14:59:21 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 15 Aug 2024 15:08:26 +0200
 
 phosh (0.41.0~rc1-1) unstable; urgency=medium
 
