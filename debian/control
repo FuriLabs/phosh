@@ -138,3 +138,28 @@ Description: Pure Wayland shell for mobile devices - development files
  based inputs and small screens.
  .
  This package contains the development files.
+
+Package: libphosh0-41-dev
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+ phosh-dev (= ${binary:Version})
+Description: Pure Wayland shell for mobile devices - development files
+ Phosh is a graphical shell for Wayland compositors speaking the layer-surface
+ protocol and aimed at mobile devices like smart phones and tablets using touch
+ based inputs and small screens.
+ .
+ This package contains the development files for bindings
+
+Package: libphosh0-41
+Architecture: any
+Depends:
+ ${misc:Depends},
+ ${shlibs:Depends},
+Description: Pure Wayland shell for mobile devices - development files
+ Phosh is a graphical shell for Wayland compositors speaking the layer-surface
+ protocol and aimed at mobile devices like smart phones and tablets using touch
+ based inputs and small screens.
+ .
+ This package contains the shared libarary for bindings.
