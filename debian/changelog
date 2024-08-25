@@ -1,3 +1,16 @@
+phosh (0.41.0-2) unstable; urgency=medium
+
+  [ Simon McVittie ]
+  * d/control, d/rules: Use dbus-run-session to run tests.
+    Instead of relying on X11 autolaunching, explicitly start a session
+    bus for the unit tests. This avoids a dependency on dbus-x11.
+    (Closes: #1079555)
+
+  [ Guido Günther ]
+  * Add bindings lib. Needed for libphosh-rs.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 25 Aug 2024 22:52:58 +0200
+
 phosh (0.41.0-1) unstable; urgency=medium
 
   * New upstream release
