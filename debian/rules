@@ -17,6 +17,8 @@ else
   CONFIGURE_OPTS+=-Dtests=false
 endif
 
+CONFIGURE_OPTS+=--force-fallback-for=gvc
+
 %:
 	dh $@
 
