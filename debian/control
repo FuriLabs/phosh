@@ -141,7 +141,7 @@ Description: Pure Wayland shell for mobile devices - development files
  .
  This package contains the development files.
 
-Package: libphosh0-41-dev
+Package: libphosh0-42-dev
 Architecture: any
 Section: libdevel
 Depends:
@@ -155,7 +155,7 @@ Description: Pure Wayland shell for mobile devices - binding developmen files
  .
  This package contains the development files for bindings
 
-Package: libphosh0-41
+Package: libphosh0-42
 Architecture: any
 Section: libs
 Depends:
