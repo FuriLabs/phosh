@@ -1,8 +1,25 @@
-phosh (0.42~rc1-1) UNRELEASED; urgency=medium
+phosh (0.42~rc1-1) unstable; urgency=medium
 
   * New upstream release
+    - lockscreen: Allow to adjust to smaller screen sizes
+    - lockscreen: Swap horizontal deck and vertical carousel to not
+      accidentally trigger swipe when entering PIN
+    - upcoming-events: Plugin allow to configure number of days
+    - torch: Hide brightness slider when there's only a single brightness
+      level
+    - Use parent's icon for toplevels without a proper matching icon
+    - Handle WWan network types better
+    - Fix Wi-Fi hotspot related crash
+    - Make Wi-Fi hotspot insensitive on lock screen to be consistent
+      with Wi-Fi network switching.
+  * Drop dbus-Add-Backlight-property-to-DisplayConfig.patch.
+    Fixed upstream.
+  * d/control: B-D on libmm-glib
+  * Bump lib version
+  * Apply subproject patches
+    Works around https://github.com/mesonbuild/meson/issues/13102
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 21 Sep 2024 09:34:47 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 21 Sep 2024 09:50:02 +0200
 
 phosh (0.41.1-2) unstable; urgency=medium
 
