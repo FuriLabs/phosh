@@ -46,10 +46,9 @@ static void
 update_sensitivity_cb (PhoshWifiHotspotQuickSetting *self)
 {
   PhoshShell *shell = phosh_shell_get_default ();
-  gboolean sensitive, locked;
+  gboolean sensitive;
 
-  g_object_get (shell, "locked", &locked, NULL);
-  if (locked) {
+  if (phosh_shell_get_locked (shell)) {
     gtk_widget_set_sensitive (GTK_WIDGET (self), FALSE);
     return;
   }
