@@ -147,7 +147,8 @@ Section: libdevel
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
- phosh-dev (= ${binary:Version})
+ libphosh0-42 (= ${binary:Version}),
+ phosh-dev (= ${binary:Version}),
 Description: Pure Wayland shell for mobile devices - binding developmen files
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
