@@ -1,2 +1,3 @@
 tests-Skip-symbol-check-on-some-architectures.patch
 Apply-subproject-patches.patch
+build-Version-the-library-name-instead-of-the-soname.patch
