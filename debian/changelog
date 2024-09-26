@@ -1,3 +1,14 @@
+phosh (0.42~rc1-2) unstable; urgency=medium
+
+  * Team upload.
+  * Version the library name instead of the soname.
+    This avoids file conflicts for the development files
+    (Closes: #1082627)
+  * d/control: Make dev package depend on the shared lib.
+    Thanks to Arnaud Ferraris
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 26 Sep 2024 10:54:03 +0200
+
 phosh (0.42~rc1-1) unstable; urgency=medium
 
   * New upstream release
