@@ -208,6 +208,10 @@
                     <child>
                       <object class="CuiCallDisplay" id="call_display">
                         <property name="visible">True</property>
+                        <property name="margin-top">24</property>
+                        <property name="margin-bottom">24</property>
+                        <property name="margin-start">24</property>
+                        <property name="margin-end">24</property>
                       </object>
                     </child>
                   </object>
