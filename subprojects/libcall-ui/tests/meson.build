@@ -4,7 +4,7 @@ test_env = [
   'G_DEBUG=gc-friendly,fatal-warnings',
   'MALLOC_CHECK_=2',
   'NO_AT_BRIDGE=1',
-  'LSAN_OPTIONS=suppressions=@0@/data/leak-suppress.txt'.format(meson.source_root()),
+  'LSAN_OPTIONS=suppressions=@0@/data/leak-suppress.txt'.format(meson.project_source_root()),
   'ASAN_OPTIONS=fast_unwind_on_malloc=0',
 ]
 

@@ -1,3 +1,12 @@
+libcall-ui 0.1.4
+----------------
+Released: September 2024
+* Reduce call-display margins allowing it to fit onto
+  smaller screens
+* Contributors:
+    * Dexter Reed
+    * Guido Günther
+
 libcall-ui 0.1.3
 ----------------
 Released: July 2024
