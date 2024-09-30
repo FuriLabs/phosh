@@ -1,8 +1,12 @@
-phosh (0.42.0-1) UNRELEASED; urgency=medium
+phosh (0.42.0-1) unstable; urgency=medium
 
+  * Team upload.
   * New upstream release
+  * Drop patches applied upstream
+  * d/control: Bump recommends on feedbackd.
+    Needed to get the correct overrides for apps marked as important
 
- -- Guido Günther <agx@sigxcpu.org>  Mon, 30 Sep 2024 12:09:10 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 30 Sep 2024 12:16:02 +0200
 
 phosh (0.42~rc1-2) unstable; urgency=medium
 
