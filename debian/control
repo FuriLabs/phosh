@@ -63,7 +63,7 @@ Depends:
  gsettings-desktop-schemas,
  phoc (>= 0.33.0),
 Recommends:
- feedbackd,
+ feedbackd (>= 0.5.0),
  gnome-session-bin,
  gnome-session-common,
  gnome-settings-daemon,
