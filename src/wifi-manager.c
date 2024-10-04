@@ -14,6 +14,8 @@
 
 #include <NetworkManager.h>
 
+#define IS_FURIOS 1
+
 /**
  * PhoshWifiManager:
  *
@@ -381,7 +383,90 @@ create_hotspot_connection (const char              *con_name,
   return connection;
 }
 
+#if IS_FURIOS
+static void
+start_hotspot (PhoshWifiManager *self)
+{
+  NMDeviceWifiCapabilities caps;
+  const char *wifi_mode;
+  const GPtrArray *connections;
+  NMConnection *hotspot_conn = NULL;
+  NMSettingWireless *s_wifi;
 
+  NMDevice *ap_device = NULL;
+  NMDeviceWifi *target_device;
+
+  const GPtrArray *devices = nm_client_get_devices (self->nmclient);
+  for (guint i = 0; i < devices->len; i++) {
+    NMDevice *device = g_ptr_array_index (devices, i);
+    const char *iface = nm_device_get_iface (device);
+    if (g_strcmp0 (iface, "ap0") == 0) {
+      ap_device = g_object_ref (device);
+      break;
+    }
+  }
+
+  /* If ap0 is found, use it; otherwise, use whatever is in self->dev */
+  if (ap_device && NM_IS_DEVICE_WIFI (ap_device))
+    target_device = NM_DEVICE_WIFI (ap_device);
+  else
+    target_device = self->dev;
+
+  caps = nm_device_wifi_get_capabilities (target_device);
+  if (caps & NM_WIFI_DEVICE_CAP_AP) {
+    wifi_mode = NM_SETTING_WIRELESS_MODE_AP;
+  } else if (caps & NM_WIFI_DEVICE_CAP_ADHOC) {
+    wifi_mode = NM_SETTING_WIRELESS_MODE_ADHOC;
+  } else {
+    g_message ("Device does not support AP or Ad-Hoc mode");
+    if (ap_device)
+      g_object_unref (ap_device);
+    return;
+  }
+
+  connections = nm_client_get_connections (self->nmclient);
+  for (int i = 0; i < connections->len; i++) {
+    NMConnection *conn = g_ptr_array_index (connections, i);
+    s_wifi = nm_connection_get_setting_wireless (conn);
+
+    if (!s_wifi)
+      continue;
+
+    if (g_strcmp0 (nm_setting_wireless_get_mode (s_wifi), wifi_mode) != 0)
+      continue;
+
+    if (!nm_device_connection_compatible (NM_DEVICE (target_device), conn, NULL))
+      continue;
+
+    hotspot_conn = conn;
+    break;
+  }
+
+  if (!hotspot_conn) {
+    g_autoptr (NMConnection) new_hotspot_conn;
+    g_message ("Creating a new hotspot connection as no existing connection was found");
+    new_hotspot_conn = create_hotspot_connection ("Phosh Hotspot", wifi_mode, caps);
+    nm_client_add_and_activate_connection_async (self->nmclient,
+                                                 new_hotspot_conn,
+                                                 NM_DEVICE (target_device),
+                                                 NULL,
+                                                 self->cancel,
+                                                 on_hotspot_connection_add_and_activated,
+                                                 NULL);
+  } else {
+    nm_client_activate_connection_async (self->nmclient,
+                                         hotspot_conn,
+                                         NM_DEVICE (target_device),
+                                         NULL,
+                                         self->cancel,
+                                         on_hotspot_connection_activated,
+                                         NULL);
+  }
+
+  if (ap_device)
+    g_object_unref (ap_device);
+}
+#else
 static void
 start_hotspot (PhoshWifiManager *self)
 {
@@ -440,6 +525,7 @@ start_hotspot (PhoshWifiManager *self)
                                          NULL);
   }
 }
+#endif
 
 
 static void
