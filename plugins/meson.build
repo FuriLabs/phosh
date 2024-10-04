@@ -62,6 +62,7 @@ quick_setting_plugins = [
   'location-privacy-quick-setting',
   'microphone-privacy-quick-setting',
   'powersaving-quick-setting',
+  'airplane-mode-quick-setting',
 ]
 
 plugin_schema_dirs = []
