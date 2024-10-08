@@ -1,3 +1,11 @@
+phosh (0.42.0-2) unstable; urgency=medium
+
+  * build: Install gir when we create the bindngs lib
+    (cherry picked from commit 52cd94c5491b2745e6411b22809c6d78bda0e450)
+  * Bump standards version. No changes needed
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 08 Oct 2024 16:30:42 +0200
+
 phosh (0.42.0-1) unstable; urgency=medium
 
   * Team upload.
