@@ -147,7 +147,22 @@ Section: libdevel
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
+ libcallaudio-dev,
+ libfeedback-dev,
+ libgcr-3-dev,
+ libgmobile-dev,
+ libgnome-bluetooth-3.0-dev,
+ libgnome-desktop-3-dev,
+ libgudev-1.0-dev,
+ libhandy-1-dev,
+ libmm-glib-dev,
+ libnm-dev,
  libphosh0-42 (= ${binary:Version}),
+ libpolkit-agent-1-dev,
+ libpulse-dev,
+ libsecret-1-dev,
+ libsoup-3.0-dev,
+ libupower-glib-dev,
  phosh-dev (= ${binary:Version}),
 Description: Pure Wayland shell for mobile devices - binding developmen files
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
