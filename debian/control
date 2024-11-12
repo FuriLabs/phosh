@@ -141,7 +141,7 @@ Description: Pure Wayland shell for mobile devices - development files
  .
  This package contains the development files.
 
-Package: libphosh0-42-dev
+Package: libphosh-0-43-dev
 Architecture: any
 Section: libdevel
 Depends:
@@ -157,13 +157,17 @@ Depends:
  libhandy-1-dev,
  libmm-glib-dev,
  libnm-dev,
- libphosh0-42 (= ${binary:Version}),
+ libphosh-0-43 (= ${binary:Version}),
  libpolkit-agent-1-dev,
  libpulse-dev,
  libsecret-1-dev,
  libsoup-3.0-dev,
  libupower-glib-dev,
  phosh-dev (= ${binary:Version}),
+Breaks:
+ libphosh0-42-dev,
+Replaces:
+ libphosh0-42-dev,
 Description: Pure Wayland shell for mobile devices - binding developmen files
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
@@ -171,7 +175,7 @@ Description: Pure Wayland shell for mobile devices - binding developmen files
  .
  This package contains the development files for bindings
 
-Package: libphosh0-42
+Package: libphosh-0-43
 Architecture: any
 Section: libs
 Depends:
