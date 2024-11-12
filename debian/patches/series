@@ -1,2 +1,1 @@
 tests-Skip-symbol-check-on-some-architectures.patch
-build-Install-gir-when-we-create-the-bindngs-lib.patch

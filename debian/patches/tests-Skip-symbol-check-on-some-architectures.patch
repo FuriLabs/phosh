@@ -8,12 +8,12 @@ These architectures have too many exported symbols
  1 file changed, 10 insertions(+)
 
 diff --git a/tools/check-exported-symbols b/tools/check-exported-symbols
-index 4c550bd..dd7d6d6 100755
+index 80cb33b..e830d4f 100755
 --- a/tools/check-exported-symbols
 +++ b/tools/check-exported-symbols
 @@ -6,6 +6,16 @@ BIN=${1:-"_build/src/phosh"}
  
- PHOSH_SYMBOL_PREFIXES='phosh_(shell|wifi|wwan|monitor_manager|quick_setting|status_icon|session_manager)_'
+ PHOSH_SYMBOL_PREFIXES='phosh_(shell|wifi|wwan|monitor_manager|notification|notify_manager|quick_setting|status_icon|status_page|status_page_placholder|session_manager)_'
  
 +arch=$(uname -m)
 +
