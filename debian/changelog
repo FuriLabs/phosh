@@ -1,5 +1,6 @@
 phosh (0.43~rc1-1) unstable; urgency=medium
 
+  * Team upload.
   * New upstream release
     - Improved quick settings
       - Do away with long press to open status pages
