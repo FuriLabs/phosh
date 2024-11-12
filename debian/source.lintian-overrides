@@ -1,0 +1,2 @@
+# We ship the XML for the rust bindings but no typelib atm 
+phosh source: typelib-missing-gir-depends gir1.2-phosh-0-dev [debian/control]

@@ -1,0 +1,2 @@
+# We ship the XML for the rust bindings but no typelib atm
+gir1.2-phosh-0-dev: gir-missing-typelib-dependency gir1.2-phosh-0 [usr/share/gir-1.0/Phosh-0.gir]
