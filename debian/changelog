@@ -1,8 +1,30 @@
-phosh (0.43~rc1-1) UNRELEASED; urgency=medium
+phosh (0.43~rc1-1) unstable; urgency=medium
 
   * New upstream release
+    - Improved quick settings
+      - Do away with long press to open status pages
+      - Show status pages below quick settings
+      - Custom quick settings can now have status pages too
+    - Support accent colors
+    - New quick setting: Simple Pomodoro timer (can be
+      configured via Mobile Settings)
+    - Notification system improvements and fixes, e.g.
+      - Fix some banners not showing
+      - Animate hiding applications in the tray
+      - More consistent event feedback for notifications (so that
+        e.g. there's not only LED feedback when the device is
+        unused/locked)
+      - Try harder to find an application item
+    - Allow one to disable lockscreen authentication
+    - Save screenshots to screenshots folder
+  * Drop patch to install gir. Fixed upstream.
+  * Update library name
+  * Install pomodoro plugin schema
+  * Temporarily disable xdg-desktop-portal-phosh usage.
+    It's pending NEW processing. We'll drop the patches once it enters
+    unstable.
 
- -- Guido Günther <agx@sigxcpu.org>  Tue, 12 Nov 2024 09:52:32 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 12 Nov 2024 11:30:30 +0100
 
 phosh (0.42.0-2) unstable; urgency=medium
 
