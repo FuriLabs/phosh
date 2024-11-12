@@ -1,0 +1,2 @@
+# We provide the directory for plugin prefs so we can run gio-querymodules
+phosh: package-contains-empty-directory [usr/lib/*/phosh/plugins/prefs/]
