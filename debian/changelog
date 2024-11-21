@@ -1,3 +1,10 @@
+phosh (0.43.0-2) unstable; urgency=medium
+
+  * Drop reverts. xdg-desktop-portal-phosh got accepted. We can now use the
+    new settings portal for accent colors. Thanks to the ftp-masters.
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 21 Nov 2024 13:50:37 +0100
+
 phosh (0.43.0-1) unstable; urgency=medium
 
   * New upstream release
