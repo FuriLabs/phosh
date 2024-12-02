@@ -1,3 +1,10 @@
+phosh (0.43.0-3) unstable; urgency=medium
+
+  * notification-banner: Use minimal size for banner
+    Makes sure the layer surface takes the size of the allocation
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 02 Dec 2024 09:30:52 +0100
+
 phosh (0.43.0-2) unstable; urgency=medium
 
   * Drop reverts. xdg-desktop-portal-phosh got accepted. We can now use the
