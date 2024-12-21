@@ -1,8 +1,29 @@
-phosh (0.44~rc1-1) UNRELEASED; urgency=medium
+phosh (0.44~rc1-1) unstable; urgency=medium
 
   * New upstream release
+   * Set background in overview
+   * Allow to unfullscreen fullscreen apps from the overview
+   * Handle Cell broadcast messages. (libmm-glib in Debian isn't
+     recent enough so this will need a rebuild once it is)
+   * Use AdwPreferencesDialog for prefs plugins giving more mobile
+     friendly dialogs
+   * Notification style fixes
+  * Drop notification-banner-Use-minimal-size-for-banner.patch.
+    Fixed upstream.
+  * d/control: Bump gsettings-desktop-schema dependency.
+    Ensures we have recent enough settings for accent colors
+  * d/control: Bump phoc dependency.
+    We want recent enough phoc to get a recent implementation of the layer
+    shell effects protocol needed for the backgrounds in the overview and
+    a fix for the wlr-foreign-toplevel protocol
+  * d/control: Conflict with older xdg-desktop-portal-phosh.
+    The portal name changed so we want to update in lock step.
+  * d/control: Conflict with older phosh-mobile-settings.
+    The prefs plugins changed ABI so we want to update in lock step.
+  * Update library name
+  * install: Update app-id and portal name
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 21 Dec 2024 10:12:09 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 21 Dec 2024 10:51:02 +0100
 
 phosh (0.43.0-3) unstable; urgency=medium
 
