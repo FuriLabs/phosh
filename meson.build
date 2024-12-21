@@ -1,11 +1,11 @@
 project('phosh', 'c',
-          version: '0.43.0',
+          version: '0.44.rc1',
           license: 'GPL-3.0-or-later',
     meson_version: '>= 1.0.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
 )
 
-app_id = 'sm.puri.Phosh'
+app_id = 'mobi.phosh.Shell'
 ver_parts = meson.project_version().split('.')
 libversion = '@0@.@1@'.format(ver_parts[0], ver_parts[1])
 lib_inc_subdir = 'libphosh-@0@'.format(libversion)
@@ -182,7 +182,7 @@ libhandy_dep = dependency('libhandy-1',
 libcall_ui_dep = libcall_ui.get_variable('libcall_ui_dep')
 libnm_dep = dependency('libnm', version: '>= 1.14')
 libpolkit_agent_dep = dependency('polkit-agent-1', version: '>= 0.122')
-libsoup_dep = dependency('libsoup-3.0', version: '>= 3.0')
+libsoup_dep = dependency('libsoup-3.0', version: '>= 3.6')
 libsystemd_dep = dependency('libsystemd', 'libelogind', version: '>= 241')
 mm_glib_dep = dependency('mm-glib')
 network_agent_dep = dependency('libsecret-1')
@@ -198,6 +198,20 @@ struct rfkill_event_ext e;
 have_rfkill_event_ext = cc.compiles(code, name : 'Have rfkill_event_ext')
 have_memfd_create = cc.has_function('memfd_create', prefix: '''#define _GNU_SOURCE
                                                                #include <sys/mman.h>''')
+have_mm_cbm = true
+# Check CBM support thoroughly as API isn't in a released MM version yet
+foreach f: [
+  'mm_cbm_get_channel',
+  'mm_cbm_get_path',
+  'mm_cbm_get_text',
+  'mm_modem_cell_broadcast_list',
+  'mm_object_get_modem_cell_broadcast',
+  'mm_object_peek_modem_cell_broadcast',
+]
+  if not cc.has_function(f, dependencies: mm_glib_dep)
+    have_mm_cbm = false
+  endif
+endforeach
 
 config_h = configuration_data()
 config_h.set_quoted('GETTEXT_PACKAGE', 'phosh')
@@ -210,6 +224,8 @@ config_h.set('PHOSH_HAVE_MEMFD_CREATE', have_memfd_create,
              description: 'Whether we have memdfd_create on Linux')
 config_h.set('PHOSH_USES_ASAN', get_option('b_sanitize') == 'address',
              description: 'Whether ASAN was enabled via meson')
+config_h.set('PHOSH_HAVE_MM_CBM', have_mm_cbm,
+             description: 'Whether ModemManager supports Cell Broadcast')
 config_h.set_quoted('PHOSH_DATA_DIR', datadir,
              description: 'Systemwide data dir')
 config_h.set_quoted('PHOSH_APP_ID', app_id)
@@ -246,6 +262,13 @@ summary({
   },
   bool_yn: true,
   section: 'Build',
+)
+
+summary({
+    'ModemManager with Cellbroadcast support': have_mm_cbm,
+  },
+  bool_yn: true,
+  section: 'Versions',
 )
 
 summary({

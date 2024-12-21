@@ -178,6 +178,26 @@ on_activity_closed (PhoshOverview *self, PhoshActivity *activity)
 
 
 static void
+on_activity_fullscreened (PhoshOverview *self, gboolean fullscreen, PhoshActivity *activity)
+{
+  PhoshToplevel *toplevel;
+
+  g_return_if_fail (PHOSH_IS_OVERVIEW (self));
+  g_return_if_fail (PHOSH_IS_ACTIVITY (activity));
+
+  toplevel = g_object_get_data (G_OBJECT (activity), "toplevel");
+  g_return_if_fail (PHOSH_IS_TOPLEVEL (toplevel));
+
+  g_debug ("Fullscreen %s (%s); %d",
+           phosh_activity_get_app_id (activity),
+           phosh_toplevel_get_title (toplevel),
+           fullscreen);
+
+  phosh_toplevel_fullscreen (toplevel, fullscreen);
+}
+
+
+static void
 on_toplevel_closed (PhoshToplevel *toplevel, PhoshOverview *overview)
 {
   PhoshActivity *activity;
@@ -259,6 +279,30 @@ on_activity_has_focus_changed (PhoshOverview *self, GParamSpec *pspec, PhoshActi
 }
 
 
+static int
+get_last_app_id_pos (PhoshOverview *self, const char *app_id)
+{
+  PhoshOverviewPrivate *priv;
+  g_autoptr (GList) children = NULL;
+  int pos;
+
+  priv = phosh_overview_get_instance_private (self);
+
+  children = gtk_container_get_children (GTK_CONTAINER (priv->carousel_running_activities));
+  pos = g_list_length (children);
+  for (GList *l = g_list_last (children); l; l = l->prev) {
+    PhoshActivity *a = PHOSH_ACTIVITY (l->data);
+
+    if (g_strcmp0 (phosh_activity_get_app_id (a), app_id) == 0)
+      break;
+
+    pos--;
+  }
+
+  return pos;
+}
+
+
 static void
 add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
 {
@@ -269,6 +313,7 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
   int width, height;
   PhoshToplevelManager *m = phosh_shell_get_toplevel_manager (phosh_shell_get_default ());
   PhoshToplevel *parent = NULL;
+  gint pos;
 
   g_return_if_fail (PHOSH_IS_OVERVIEW (self));
   priv = phosh_overview_get_instance_private (self);
@@ -293,11 +338,15 @@ add_activity (PhoshOverview *self, PhoshToplevel *toplevel)
                            NULL);
   g_object_set_data (G_OBJECT (activity), "toplevel", toplevel);
 
-  gtk_container_add (GTK_CONTAINER (priv->carousel_running_activities), activity);
+  pos = get_last_app_id_pos (self, parent_app_id);
+  hdy_carousel_insert (HDY_CAROUSEL (priv->carousel_running_activities), activity, pos);
   gtk_widget_show (activity);
 
-  g_signal_connect_swapped (activity, "clicked", G_CALLBACK (on_activity_clicked), self);
-  g_signal_connect_swapped (activity, "closed", G_CALLBACK (on_activity_closed), self);
+  g_object_connect (activity,
+                    "swapped-signal::clicked", on_activity_clicked, self,
+                    "swapped-signal::closed", on_activity_closed, self,
+                    "swapped-signal::fullscreened", on_activity_fullscreened, self,
+                    NULL);
 
   g_signal_connect_object (toplevel, "closed", G_CALLBACK (on_toplevel_closed), self, 0);
   g_signal_connect_object (toplevel, "notify::activated", G_CALLBACK (on_toplevel_activated_changed), self, 0);
@@ -503,34 +552,51 @@ phosh_overview_class_init (PhoshOverviewClass *klass)
   object_class->get_property = phosh_overview_get_property;
   widget_class->size_allocate = phosh_overview_size_allocate;
 
+  /**
+   * PhoshOverview:has-activities:
+   *
+   * Whether the overview has running activities
+   */
   props[PROP_HAS_ACTIVITIES] =
-    g_param_spec_boolean (
-      "has-activities",
-      "Has activities",
-      "Whether the overview has running activities",
-      FALSE,
-      G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+    g_param_spec_boolean ("has-activities", "", "",
+                          FALSE,
+                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  signals[ACTIVITY_LAUNCHED] =
+    g_signal_new ("activity-launched",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST, 0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  signals[ACTIVITY_RAISED] =
+    g_signal_new ("activity-raised",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST, 0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  signals[SELECTION_ABORTED] =
+    g_signal_new ("selection-aborted",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST, 0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  signals[ACTIVITY_CLOSED] =
+    g_signal_new ("activity-closed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST, 0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   /* ensure used custom types */
   PHOSH_TYPE_APP_GRID;
-  gtk_widget_class_set_template_from_resource (widget_class,
-                                               "/sm/puri/phosh/ui/overview.ui");
+  gtk_widget_class_set_template_from_resource (widget_class, "/mobi/phosh/ui/overview.ui");
 
-  gtk_widget_class_bind_template_child_private (widget_class, PhoshOverview, carousel_running_activities);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshOverview, app_grid);
-
-  signals[ACTIVITY_LAUNCHED] = g_signal_new ("activity-launched",
-      G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      NULL, G_TYPE_NONE, 0);
-  signals[ACTIVITY_RAISED] = g_signal_new ("activity-raised",
-      G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      NULL, G_TYPE_NONE, 0);
-  signals[SELECTION_ABORTED] = g_signal_new ("selection-aborted",
-      G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      NULL, G_TYPE_NONE, 0);
-  signals[ACTIVITY_CLOSED] = g_signal_new ("activity-closed",
-      G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-      NULL, G_TYPE_NONE, 0);
+  gtk_widget_class_bind_template_child_private (widget_class, PhoshOverview,
+                                                carousel_running_activities);
 
   gtk_widget_class_set_css_name (widget_class, "phosh-overview");
 }

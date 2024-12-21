@@ -1,6 +1,6 @@
 # Desktop files
+data/mobi.phosh.Shell.desktop.in.in
 data/phosh.session.desktop.in.in
-data/sm.puri.Phosh.desktop.in.in
 data/wayland-sessions/phosh.desktop
 plugins/caffeine-quick-setting/caffeine-quick-setting.desktop.in.in
 plugins/calendar/calendar.desktop.in.in
@@ -78,6 +78,7 @@ src/ui/app-grid-button.ui
 src/ui/app-grid.ui
 src/ui/audio-settings.ui
 src/ui/bt-status-page.ui
+src/ui/cell-broadcast-prompt.ui
 src/ui/emergency-menu.ui
 src/ui/emergency-contact-row.ui
 src/ui/end-session-dialog.ui

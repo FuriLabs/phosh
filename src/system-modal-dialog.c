@@ -126,11 +126,10 @@ phosh_system_modal_dialog_get_property (GObject    *obj,
                                         GParamSpec *pspec)
 {
   PhoshSystemModalDialog *self = PHOSH_SYSTEM_MODAL_DIALOG (obj);
-  PhoshSystemModalDialogPrivate *priv = phosh_system_modal_dialog_get_instance_private (self);
 
   switch (prop_id) {
   case PROP_TITLE:
-    g_value_set_string (value, priv->title);
+    g_value_set_string (value, phosh_system_modal_dialog_get_title (self));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (obj, prop_id, pspec);
@@ -215,7 +214,7 @@ phosh_system_modal_dialog_class_init (PhoshSystemModalDialogClass *klass)
 
   g_type_ensure (PHOSH_TYPE_SWIPE_AWAY_BIN);
   gtk_widget_class_set_template_from_resource (widget_class,
-                                               "/sm/puri/phosh/ui/system-modal-dialog.ui");
+                                               "/mobi/phosh/ui/system-modal-dialog.ui");
   gtk_widget_class_bind_template_child_private (widget_class, PhoshSystemModalDialog, lbl_title);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshSystemModalDialog, box_dialog);
   gtk_widget_class_bind_template_child_private (widget_class, PhoshSystemModalDialog, box_buttons);
@@ -365,6 +364,26 @@ phosh_system_modal_dialog_get_buttons (PhoshSystemModalDialog *self)
   return gtk_container_get_children (GTK_CONTAINER (priv->box_buttons));
 }
 
+/**
+ * phosh_system_modal_dialog_get_title:
+ * @self: The dialog
+ *
+ * Get the dialog's title.
+ *
+ * Returns: The dialog's title
+ *
+ * Since: 0.44.0
+ */
+const char *
+phosh_system_modal_dialog_get_title (PhoshSystemModalDialog *self)
+{
+  PhoshSystemModalDialogPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SYSTEM_MODAL_DIALOG (self), NULL);
+  priv = phosh_system_modal_dialog_get_instance_private (PHOSH_SYSTEM_MODAL_DIALOG (self));
+
+  return priv->title;
+}
 
 void
 phosh_system_modal_dialog_set_title (PhoshSystemModalDialog *self, const gchar *title)
