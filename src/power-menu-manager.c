@@ -112,7 +112,7 @@ on_screenshot_activated (GSimpleAction *action, GVariant *param, gpointer data)
   close_menu (self);
 
   /* Queue screenshot capture after 500ms */
-  g_timeout_add (500, do_take_screenshot_idle, g_object_ref (manager));
+  g_timeout_add (1000, do_take_screenshot_idle, g_object_ref (manager));
 }
 
 
