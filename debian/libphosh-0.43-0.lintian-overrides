@@ -1,2 +1,0 @@
-# We currently bump the API version per release:
-libphosh-0.43-0: no-symbols-control-file usr/lib/*/libphosh-0.43.so.0
