@@ -105,6 +105,8 @@ libphosh_tool_headers = files(
   'call.h',
   'calls-manager.h',
   'call-notification.h',
+  'cell-broadcast-manager.h',
+  'cell-broadcast-prompt.h',
   'clamp.h',
   'connectivity-info.h',
   'drag-surface.h',
@@ -182,6 +184,8 @@ libphosh_tool_sources = files(
   'call.c',
   'calls-manager.c',
   'call-notification.c',
+  'cell-broadcast-manager.c',
+  'cell-broadcast-prompt.c',
   'clamp.c',
   'connectivity-info.c',
   'drag-surface.c',
@@ -269,6 +273,7 @@ libphosh_headers = files(
   'osk-button.h',
   'osk-manager.h',
   'top-panel.h',
+  'top-panel-bg.h',
   'plugin-shell.h',
   'polkit-auth-agent.h',
   'polkit-auth-prompt.h',
@@ -337,6 +342,7 @@ libphosh_sources = files(
   'osk-button.c',
   'osk-manager.c',
   'top-panel.c',
+  'top-panel-bg.c',
   'polkit-auth-agent.c',
   'polkit-auth-prompt.c',
   'portal-access-manager.c',
@@ -371,15 +377,6 @@ libphosh_sources = files(
   phosh_settings_sources,
   phosh_wwan_sources,
 ]
-
-# See https://gitlab.gnome.org/GNOME/libsoup/-/merge_requests/394
-if libsoup_dep.version().version_compare('< 3.5.1')
-  libsoup_dep = declare_dependency (
-    include_directories: libsoup_dep.get_variable(pkgconfig: 'includedir') / 'libsoup-3.0',
-    dependencies: cc.find_library('soup-3.0', required: true),
-  )
-endif
-
 
 # Headers are bundled as they're not shipped by gnome-bluetooth
 # https://gitlab.gnome.org/GNOME/gnome-bluetooth/-/merge_requests/200
