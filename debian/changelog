@@ -1,3 +1,9 @@
+phosh (0.44~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 21 Dec 2024 10:12:09 +0100
+
 phosh (0.43.0-3) unstable; urgency=medium
 
   * notification-banner: Use minimal size for banner
