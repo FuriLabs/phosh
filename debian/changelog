@@ -1,8 +1,9 @@
-phosh (0.44.0-1) UNRELEASED; urgency=medium
+phosh (0.44.0-1) unstable; urgency=medium
 
   * New upstream release
+  * Ignore test failures on armel as xvfb fails to start up there
 
- -- Guido Günther <agx@sigxcpu.org>  Tue, 31 Dec 2024 11:03:20 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 31 Dec 2024 11:04:31 +0100
 
 phosh (0.44~rc1-2) unstable; urgency=medium
 
