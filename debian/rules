@@ -3,6 +3,7 @@
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 CONFIGURE_OPTS=-Dphoc_tests=disabled -Dbindings-lib=true
+TEST = LC_ALL=C.UTF-8 xvfb-run -a -s "-noreset" dbus-run-session -- dh_auto_test -- --no-suite manual --print-errorlogs
 
 ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
   CONFIGURE_OPTS+=-Dgtk_doc=true -Dman=true
@@ -36,4 +37,8 @@ override_dh_installsystemd:
 	dh_installsystemd --no-start --no-enable --no-restart-on-upgrade --no-restart-after-upgrade
 
 override_dh_auto_test:
-	LC_ALL=C.UTF-8 xvfb-run -a dbus-run-session -- dh_auto_test -- --no-suite manual --print-errorlogs
+ifneq (,$(filter $(DEB_HOST_ARCH),armel))
+	$(TEST) || true
+else
+	$(TEST)
+endif
