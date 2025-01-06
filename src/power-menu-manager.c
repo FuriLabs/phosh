@@ -86,6 +86,16 @@ on_screen_lock_activated (GSimpleAction *action, GVariant *param, gpointer data)
 }
 
 
+static gboolean
+do_take_screenshot_idle (gpointer user_data)
+{
+  PhoshScreenshotManager *manager = user_data;
+  phosh_screenshot_manager_take_screenshot (manager, NULL, NULL, TRUE, FALSE);
+  g_object_unref (manager);
+  return G_SOURCE_REMOVE;
+}
+
+
 static void
 on_screenshot_activated (GSimpleAction *action, GVariant *param, gpointer data)
 
@@ -98,7 +108,9 @@ on_screenshot_activated (GSimpleAction *action, GVariant *param, gpointer data)
   g_return_if_fail (PHOSH_IS_SCREENSHOT_MANAGER (manager));
 
   close_menu (self);
-  phosh_screenshot_manager_take_screenshot (manager, NULL, NULL, TRUE, FALSE);
+
+  /* Queue screenshot capture after 500ms */
+  g_timeout_add (1000, do_take_screenshot_idle, g_object_ref (manager));
 }
 
 
