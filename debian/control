@@ -70,6 +70,7 @@ Recommends:
  gnome-session-common,
  gnome-settings-daemon,
  iio-sensor-proxy,
+ kbd,
  phosh-mobile-tweaks,
  phosh-plugins,
  slurp,
