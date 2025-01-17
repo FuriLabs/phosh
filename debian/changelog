@@ -1,8 +1,16 @@
-phosh (0.44.1-1) UNRELEASED; urgency=medium
+phosh (0.44.1-1) unstable; urgency=medium
 
-  * New upstream release
+  * New upstream bugfix release
+   * mm: Make sure we register all interfaces
+   * Avoid crash when fixing between certain combinations of fractional
+     scales (with e.g. wlr-randr)
+   * Fix crash on unlock with media player widget
+   * Use solid color background when background image fails to load
+   * Ensure `@phosh_bg_color` behind top- and home bar as otherwise we might
+     see artifacts depending on the GPU driver
+   * Refresh background image when dark style URI changes
 
- -- Guido Günther <agx@sigxcpu.org>  Fri, 17 Jan 2025 16:59:07 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 17 Jan 2025 17:04:20 +0100
 
 phosh (0.44.0-1) unstable; urgency=medium
 
