@@ -11,10 +11,12 @@
 #include "phosh-config.h"
 
 #include "log.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "phosh-wayland.h"
 #include "wall-clock.h"
+#include "fake-clock.h"
 #include "background-cache.h"
+#include "metainfo-cache.h"
 
 #include <handy.h>
 #include <libfeedback.h>
@@ -90,6 +92,33 @@ on_shell_ready (PhoshShell *shell, GTimer *timer)
 }
 
 
+static PhoshWallClock *
+get_clock (void)
+{
+  PhoshWallClock *wall_clock = NULL;
+  g_autoptr (GDateTime) dt = NULL;
+  const char *clock_str = g_getenv ("PHOSH_FAKE_CLOCK");
+
+  if (clock_str) {
+    if (g_str_equal (clock_str, "now")) {
+      dt = g_date_time_new_now_local ();
+    } else {
+      dt = g_date_time_new_from_iso8601 (clock_str, NULL);
+      if (!dt)
+        g_critical ("Failed to create fake clock from '%s'", clock_str);
+    }
+  }
+
+  if (dt)
+    wall_clock = PHOSH_WALL_CLOCK (phosh_fake_clock_new (dt));
+
+  if (!wall_clock)
+    wall_clock = phosh_wall_clock_new ();
+
+  return wall_clock;
+}
+
+
 int
 main (int argc, char *argv[])
 {
@@ -99,8 +128,10 @@ main (int argc, char *argv[])
   g_autoptr (PhoshWayland) wl = NULL;
   g_autoptr (PhoshShell) shell = NULL;
   g_autoptr (PhoshBackgroundCache) background_cache = NULL;
+  g_autoptr (PhoshMetainfoCache) metainfo_cache = NULL;
   g_autoptr (GTimer) timer = g_timer_new ();
-  g_autoptr (PhoshWallClock) wall_clock = phosh_wall_clock_new ();
+  g_autoptr (PhoshWallClock) wall_clock = NULL;
+
   const GOptionEntry options [] = {
     {"unlocked", 'U', 0, G_OPTION_ARG_NONE, &unlocked,
      "Don't start with screen locked", NULL},
@@ -135,9 +166,11 @@ main (int argc, char *argv[])
   g_unix_signal_add (SIGINT, on_shutdown_signal, NULL);
   g_unix_signal_add (SIGUSR1, on_sigusr1_signal, NULL);
 
+  wall_clock = get_clock ();
   phosh_wall_clock_set_default (wall_clock);
   wl = phosh_wayland_get_default ();
   background_cache = phosh_background_cache_get_default ();
+  metainfo_cache = phosh_metainfo_cache_get_default ();
   shell = phosh_shell_new ();
   phosh_shell_set_default (shell);
 

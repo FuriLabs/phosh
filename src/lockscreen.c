@@ -13,12 +13,11 @@
 #include "call-notification.h"
 #include "calls-manager.h"
 #include "keypad.h"
-#include "lockscreen.h"
+#include "lockscreen-priv.h"
 #include "notifications/notify-manager.h"
 #include "notifications/notification-frame.h"
-#include "osk-button.h"
 #include "osk-manager.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "util.h"
 #include "widget-box.h"
 #include "wall-clock.h"
@@ -45,7 +44,7 @@
  * and unlock keypad. It handles displaying ongoing calls when the
  * shell is locked and can be extended via plugins.
  *
- * Other outputs are locked via [type@Phosh.Lockshield]s.
+ * Other outputs are locked via PhoshLockshields.
  *
  * # CSS nodes
  *
@@ -1030,7 +1029,6 @@ phosh_lockscreen_class_init (PhoshLockscreenClass *klass)
                                          NULL, G_TYPE_NONE, 0);
 
   g_type_ensure (PHOSH_TYPE_KEYPAD);
-  g_type_ensure (PHOSH_TYPE_OSK_BUTTON);
   g_type_ensure (PHOSH_TYPE_WIDGET_BOX);
   gtk_widget_class_set_css_name (widget_class, "phosh-lockscreen");
   gtk_widget_class_set_template_from_resource (widget_class,

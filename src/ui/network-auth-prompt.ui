@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+  <requires lib="gtk+" version="3.24"/>
   <template class="PhoshNetworkAuthPrompt" parent="PhoshSystemModalDialog">
     <signal name="dialog-canceled" handler="on_dialog_canceled"/>
     <property name="title" translatable="yes">Authentication required</property>
@@ -7,7 +8,6 @@
       <object class="GtkBox">
         <property name="visible">1</property>
         <property name="orientation">vertical</property>
-
         <!-- Message Label -->
         <child>
           <object class="GtkLabel" id="message_label">
@@ -19,17 +19,14 @@
             <property name="wrap">1</property>
           </object>
         </child>
-
         <child>
           <object class="GtkBox" id="main_box">
             <property name="visible">1</property>
             <property name="margin-bottom">12</property>
           </object>
         </child>
-
       </object>
     </child>
-
     <!-- Cancel button -->
     <child type="phosh-dialog-button">
       <object class="GtkButton" id="cancel_button">
@@ -45,7 +42,6 @@
         <property name="position">0</property>
       </packing>
     </child>
-
     <!-- Connect button -->
     <child type="phosh-dialog-button">
       <object class="GtkButton" id="connect_button">
@@ -70,7 +66,6 @@
       <class name="phosh-network-auth-prompt"/>
     </style>
   </template>
-
   <!-- Grid for for WEP/WPA passwords -->
   <object class="GtkGrid" id="wpa_grid">
     <property name="visible">1</property>
@@ -102,13 +97,11 @@
       </packing>
     </child>
   </object>
-
   <!-- Grid for VPN credentials -->
   <object class="GtkGrid" id="vpn_grid">
     <property name="visible">1</property>
     <property name="column-spacing">12</property>
   </object>
-
   <object class="GcrSecureEntryBuffer" id="username_buffer"/>
   <object class="GcrSecureEntryBuffer" id="password_buffer"/>
 </interface>

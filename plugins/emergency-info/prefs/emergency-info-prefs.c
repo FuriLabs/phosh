@@ -33,24 +33,25 @@ struct _PhoshEmergencyInfoPrefs {
   char                *other_info;
   GStrv                contacts;
 
-  GtkEntryBuffer      *owner_name_entry_buffer;
-  GtkEntryBuffer      *dob_entry_buffer;
-  GtkEntryBuffer      *language_entry_buffer;
   GtkTextBuffer       *home_addr_text_buffer;
-
-  GtkEntryBuffer      *age_entry_buffer;
-  GtkEntryBuffer      *blood_type_entry_buffer;
-  GtkEntryBuffer      *height_entry_buffer;
-  GtkEntryBuffer      *weight_entry_buffer;
   GtkTextBuffer       *allergies_text_buffer;
   GtkTextBuffer       *med_cond_text_buffer;
   GtkTextBuffer       *other_info_text_buffer;
 
-  GtkEntryBuffer      *new_emer_contact_entry_buffer;
-  GtkEntryBuffer      *new_emer_contact_relationship_entry_buffer;
-  GtkEntryBuffer      *new_emer_contact_number_entry_buffer;
+  AdwEntryRow         *owner_name_entry;
+  AdwEntryRow         *dob_entry;
+  AdwEntryRow         *pref_language_entry;
 
-  GtkDialog           *add_emer_contact_dialog;
+  AdwEntryRow         *age_entry;
+  AdwEntryRow         *blood_type_entry;
+  AdwEntryRow         *height_entry;
+  AdwEntryRow         *weight_entry;
+
+  AdwEntryRow         *contact_name_entry;
+  AdwEntryRow         *relationship_entry;
+  AdwEntryRow         *contact_number_entry;
+
+  AdwDialog           *add_emer_contact_dialog;
 
   AdwPreferencesGroup *emer_contacts;
 
@@ -197,27 +198,21 @@ load_settings (PhoshEmergencyInfoPrefs *self)
                                             "OwnerName",
                                             NULL);
 
-  gtk_entry_buffer_set_text (self->owner_name_entry_buffer,
-                             self->owner_name ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->owner_name_entry), self->owner_name ?: "");
 
   self->dob = g_key_file_get_string (key_file,
                                      INFO_GROUP,
                                      "DateOfBirth",
                                      NULL);
 
-  gtk_entry_buffer_set_text (self->dob_entry_buffer,
-                             self->dob ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->dob_entry), self->dob ?: "");
 
   self->language = g_key_file_get_string (key_file,
                                           INFO_GROUP,
                                           "PreferredLanguage",
                                           NULL);
 
-  gtk_entry_buffer_set_text (self->language_entry_buffer,
-                             self->language ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->pref_language_entry), self->language ?: "");
 
   self->home_address = g_key_file_get_string (key_file,
                                               INFO_GROUP,
@@ -234,36 +229,28 @@ load_settings (PhoshEmergencyInfoPrefs *self)
                                      "Age",
                                      NULL);
 
-  gtk_entry_buffer_set_text (self->age_entry_buffer,
-                             self->age ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->age_entry), self->age ?: "");
 
   self->blood_type = g_key_file_get_string (key_file,
                                             INFO_GROUP,
                                             "BloodType",
                                             NULL);
 
-  gtk_entry_buffer_set_text (self->blood_type_entry_buffer,
-                             self->blood_type ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->blood_type_entry), self->blood_type ?: "");
 
   self->height = g_key_file_get_string (key_file,
                                         INFO_GROUP,
                                         "Height",
                                         NULL);
 
-  gtk_entry_buffer_set_text (self->height_entry_buffer,
-                             self->height ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->height_entry), self->height ?: "");
 
   self->weight = g_key_file_get_string (key_file,
                                         INFO_GROUP,
                                         "Weight",
                                         NULL);
 
-  gtk_entry_buffer_set_text (self->weight_entry_buffer,
-                             self->weight ?: "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->weight_entry), self->weight ?: "");
 
   temp_allergies = g_key_file_get_string_list (key_file,
                                                INFO_GROUP,
@@ -334,57 +321,53 @@ phosh_emergency_info_prefs_free_data (PhoshEmergencyInfoPrefs *self)
 }
 
 static void
-on_dialog_update_emer_contact (GtkDialog* dialog, int response_id, gpointer user_data)
+on_dialog_update_emer_contact (PhoshEmergencyInfoPrefs *self)
 {
-  PhoshEmergencyInfoPrefs *self = PHOSH_EMERGENCY_INFO_PREFS (user_data);
-  const char *contact = gtk_entry_buffer_get_text (self->new_emer_contact_entry_buffer);
-  const char *relationship = gtk_entry_buffer_get_text (self->new_emer_contact_relationship_entry_buffer);
-  const char *number = gtk_entry_buffer_get_text (self->new_emer_contact_number_entry_buffer);
+  g_autofree char *number_joined = NULL;
+  const char *contact = NULL;
+  const char *relationship = NULL;
+  const char *number = NULL;
+  g_autoptr (GKeyFile) key_file = g_key_file_new ();
 
-  if (response_id == GTK_RESPONSE_OK && *contact) {
-    g_autofree char *number_joined = NULL;
-    g_autoptr (GKeyFile) key_file = g_key_file_new ();
+  contact = gtk_editable_get_text (GTK_EDITABLE (self->contact_name_entry));
+  relationship = gtk_editable_get_text (GTK_EDITABLE (self->relationship_entry));
+  number = gtk_editable_get_text (GTK_EDITABLE (self->contact_number_entry));
 
-    number_joined = g_strdup_printf ("%s;%s", number ?: "", relationship ?: "");
+  number_joined = g_strdup_printf ("%s;%s", number ?: "", relationship ?: "");
 
-    add_contact_row (self, contact, number_joined);
+  add_contact_row (self, contact, number_joined);
 
-    if (!g_key_file_load_from_file (key_file, self->keyfile_path, G_KEY_FILE_KEEP_COMMENTS, NULL))
-      g_warning ("No Keyfile found at %s", self->keyfile_path);
+  if (!g_key_file_load_from_file (key_file, self->keyfile_path, G_KEY_FILE_KEEP_COMMENTS, NULL))
+    g_warning ("No Keyfile found at %s", self->keyfile_path);
 
-    g_key_file_set_string (key_file,
-                           CONTACTS_GROUP,
-                           contact,
-                           number_joined);
+  g_key_file_set_string (key_file,
+                         CONTACTS_GROUP,
+                         contact,
+                         number_joined);
 
-    save_keyfile (self, key_file);
-  }
+  save_keyfile (self, key_file);
 
-  gtk_entry_buffer_set_text (self->new_emer_contact_entry_buffer,
-                             "",
-                             -1);
+  gtk_editable_set_text (GTK_EDITABLE (self->contact_name_entry), "");
+  gtk_editable_set_text (GTK_EDITABLE (self->relationship_entry), "");
+  gtk_editable_set_text (GTK_EDITABLE (self->contact_number_entry), "");
 
-  gtk_entry_buffer_set_text (self->new_emer_contact_relationship_entry_buffer,
-                             "",
-                             -1);
+  adw_dialog_close (ADW_DIALOG (self->add_emer_contact_dialog));
+}
 
-  gtk_entry_buffer_set_text (self->new_emer_contact_number_entry_buffer,
-                             "",
-                             -1);
+static void
+on_dialog_update_emer_contact_cancelled (PhoshEmergencyInfoPrefs *self)
+{
+  gtk_editable_set_text (GTK_EDITABLE (self->contact_name_entry), "");
+  gtk_editable_set_text (GTK_EDITABLE (self->relationship_entry), "");
+  gtk_editable_set_text (GTK_EDITABLE (self->contact_number_entry), "");
 
-  gtk_widget_set_visible (GTK_WIDGET (dialog), FALSE);
+  adw_dialog_close (ADW_DIALOG (self->add_emer_contact_dialog));
 }
 
 static void
 on_update_emer_contact (PhoshEmergencyInfoPrefs *self)
 {
-  GtkNative *native;
-
-  native = gtk_widget_get_native (GTK_WIDGET (self));
-
-  gtk_window_set_transient_for (GTK_WINDOW (self->add_emer_contact_dialog), GTK_WINDOW (native));
-  gtk_window_set_modal (GTK_WINDOW (self->add_emer_contact_dialog), TRUE);
-  gtk_window_present (GTK_WINDOW (self->add_emer_contact_dialog));
+  adw_dialog_present (self->add_emer_contact_dialog, GTK_WIDGET (self));
 }
 
 static void
@@ -400,19 +383,19 @@ on_update_information_clicked (PhoshEmergencyInfoPrefs *self)
 
   phosh_emergency_info_prefs_free_data (self);
 
-  self->owner_name = g_strdup (gtk_entry_buffer_get_text (self->owner_name_entry_buffer));
-  self->dob = g_strdup (gtk_entry_buffer_get_text (self->dob_entry_buffer));
-  self->language = g_strdup (gtk_entry_buffer_get_text (self->language_entry_buffer));
+  self->owner_name = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->owner_name_entry)));
+  self->dob = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->dob_entry)));
+  self->language = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->pref_language_entry)));
 
   gtk_text_buffer_get_start_iter (self->home_addr_text_buffer, &start);
   gtk_text_buffer_get_end_iter (self->home_addr_text_buffer, &end);
   self->home_address = gtk_text_buffer_get_text (self->home_addr_text_buffer,
                                                  &start, &end, true);
 
-  self->age = g_strdup (gtk_entry_buffer_get_text (self->age_entry_buffer));
-  self->blood_type = g_strdup (gtk_entry_buffer_get_text (self->blood_type_entry_buffer));
-  self->height = g_strdup (gtk_entry_buffer_get_text (self->height_entry_buffer));
-  self->weight = g_strdup (gtk_entry_buffer_get_text (self->weight_entry_buffer));
+  self->age = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->age_entry)));
+  self->blood_type = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->blood_type_entry)));
+  self->height = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->height_entry)));
+  self->weight = g_strdup (gtk_editable_get_text (GTK_EDITABLE (self->weight_entry)));
 
   gtk_text_buffer_get_start_iter (self->allergies_text_buffer, &start);
   gtk_text_buffer_get_end_iter (self->allergies_text_buffer, &end);
@@ -458,22 +441,23 @@ phosh_emergency_info_prefs_class_init (PhoshEmergencyInfoPrefsClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/plugins/emergency-info-prefs/emergency-info-prefs.ui");
 
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, dob_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, owner_name_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, language_entry_buffer);
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, home_addr_text_buffer);
-
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, age_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, blood_type_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, height_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, weight_entry_buffer);
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, allergies_text_buffer);
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, med_cond_text_buffer);
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, other_info_text_buffer);
 
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, new_emer_contact_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, new_emer_contact_relationship_entry_buffer);
-  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, new_emer_contact_number_entry_buffer);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, owner_name_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, dob_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, pref_language_entry);
+
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, age_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, blood_type_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, height_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, weight_entry);
+
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, contact_name_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, relationship_entry);
+  gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, contact_number_entry);
 
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, add_emer_contact_dialog);
   gtk_widget_class_bind_template_child (widget_class, PhoshEmergencyInfoPrefs, emer_contacts);
@@ -482,6 +466,7 @@ phosh_emergency_info_prefs_class_init (PhoshEmergencyInfoPrefsClass *klass)
   gtk_widget_class_bind_template_callback (widget_class, on_update_information_clicked);
   gtk_widget_class_bind_template_callback (widget_class, on_update_information_cancelled);
   gtk_widget_class_bind_template_callback (widget_class, on_dialog_update_emer_contact);
+  gtk_widget_class_bind_template_callback (widget_class, on_dialog_update_emer_contact_cancelled);
 }
 
 

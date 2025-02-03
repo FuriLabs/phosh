@@ -12,7 +12,7 @@
 #include "phosh-config.h"
 #include "overview.h"
 #include "home.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "phosh-enums.h"
 #include "osk-manager.h"
 #include "style-manager.h"
@@ -60,6 +60,7 @@ struct _PhoshHome
   GtkWidget *home_bar;
   GtkWidget *rev_powerbar;
   GtkWidget *powerbar;
+  GtkWidget *evbox_home_bar;
 
   guint      debounce_handle;
   gboolean   focus_app_search;
@@ -95,7 +96,8 @@ phosh_home_update_home_bar (PhoshHome *self)
 
   if (self->use_background)
     solid = !!(self->state == PHOSH_HOME_STATE_FOLDED && drag_state != PHOSH_DRAG_SURFACE_STATE_DRAGGED);
-  phosh_util_toggle_style_class (GTK_WIDGET (self), "p-solid", solid);
+
+  phosh_util_toggle_style_class (self->evbox_home_bar, "p-solid", solid);
 }
 
 
@@ -533,7 +535,8 @@ phosh_home_add_background (PhoshHome *self)
                                          /* Span over whole display */
                                          FALSE,
                                          ZWLR_LAYER_SHELL_V1_LAYER_TOP));
-  gtk_widget_show (GTK_WIDGET (self->background));
+  g_object_bind_property (self, "visible", self->background, "visible", G_BINDING_SYNC_CREATE);
+
   g_signal_connect_object (phosh_shell_get_background_manager (shell),
                            "config-changed",
                            G_CALLBACK (phosh_background_needs_update),
@@ -553,6 +556,10 @@ on_theme_name_changed (PhoshHome  *self, GParamSpec *pspec, PhoshStyleManager *s
   g_assert (PHOSH_IS_STYLE_MANAGER (style_manager));
 
   self->use_background = !phosh_style_manager_is_high_contrast (style_manager);
+  phosh_util_toggle_style_class (GTK_WIDGET (self), "p-solid", !self->use_background);
+  if (gtk_widget_get_visible (GTK_WIDGET (self)))
+    gtk_widget_set_visible (GTK_WIDGET (self->background), self->use_background);
+
   phosh_home_update_home_bar (self);
 }
 
@@ -660,6 +667,7 @@ phosh_home_class_init (PhoshHomeClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/ui/home.ui");
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, click_gesture);
+  gtk_widget_class_bind_template_child (widget_class, PhoshHome, evbox_home_bar);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, home_bar);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, osk_toggle_long_press);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, overview);

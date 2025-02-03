@@ -27,6 +27,7 @@ src/bt-device-row.c
 src/bt-info.c
 src/bt-status-page.c
 src/call-notification.c
+src/connectivity-manager.c
 src/docked-info.c
 src/emergency-menu.c
 src/end-session-dialog.c
@@ -126,4 +127,7 @@ plugins/upcoming-events/event-list.c
 plugins/upcoming-events/event-list.ui
 plugins/upcoming-events/upcoming-event.c
 plugins/upcoming-events/prefs/upcoming-events-prefs.ui
+plugins/scaling-quick-setting/qs.ui
+plugins/scaling-quick-setting/scale-row.c
+plugins/scaling-quick-setting/scaling-quick-setting.c
 plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c

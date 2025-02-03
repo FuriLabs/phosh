@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.24"/>
   <template class="PhoshWifiStatusPage" parent="PhoshStatusPage">
     <property name="visible">True</property>
     <property name="title" translatable="yes">Wi-Fi</property>
@@ -10,6 +10,7 @@
       <object class="GtkStack" id="stack">
         <property name="visible">1</property>
         <property name="transition-type">crossfade</property>
+        <property name="vhomogeneous">0</property>
         <child>
           <object class="PhoshStatusPagePlaceholder" id="empty_state">
             <property name="visible">True</property>
@@ -34,7 +35,7 @@
             <style>
               <class name="content"/>
             </style>
-            <signal name="row-activated" handler="on_network_activated_cb" object="PhoshWifiStatusPage" swapped="yes"/>
+            <signal name="row-activated" handler="on_network_activated" object="PhoshWifiStatusPage" swapped="yes"/>
           </object>
           <packing>
             <property name="name">list_box</property>

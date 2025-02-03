@@ -27,13 +27,14 @@
 #include "ambient.h"
 #include "background.h"
 #include "drag-surface.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "app-tracker.h"
 #include "batteryinfo.h"
 #include "background-manager.h"
 #include "bt-info.h"
 #include "bt-manager.h"
 #include "connectivity-info.h"
+#include "connectivity-manager.h"
 #include "calls-manager.h"
 #include "cell-broadcast-manager.h"
 #include "docked-info.h"
@@ -52,7 +53,7 @@
 #include "location-info.h"
 #include "layout-manager.h"
 #include "location-manager.h"
-#include "lockscreen-manager.h"
+#include "lockscreen-manager-priv.h"
 #include "media-player.h"
 #include "mode-manager.h"
 #include "monitor-manager.h"
@@ -119,6 +120,7 @@ enum {
   PROP_BUILTIN_MONITOR,
   PROP_PRIMARY_MONITOR,
   PROP_SHELL_STATE,
+  PROP_OVERVIEW_VISIBLE,
   PROP_LAST_PROP
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -135,6 +137,7 @@ typedef struct
 {
   PhoshDragSurface *top_panel;
   PhoshDragSurface *home;
+  gboolean          overview_visible;
   GPtrArray *faders;              /* for final fade out */
 
   GtkWidget *notification_banner;
@@ -179,6 +182,7 @@ typedef struct
   PhoshStyleManager *style_manager;
   PhoshLauncherEntryManager *launcher_entry_manager;
   PhoshCellBroadcastManager *cell_broadcast_manager;
+  PhoshConnectivityManager *connectivity_manager;
 
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
@@ -386,7 +390,7 @@ panels_create (PhoshShell *self)
   priv->home = PHOSH_DRAG_SURFACE (phosh_home_new (phosh_wayland_get_zwlr_layer_shell_v1 (wl),
                                                    phosh_wayland_get_zphoc_layer_shell_effects_v1 (wl),
                                                    monitor));
-  gtk_widget_show (GTK_WIDGET (priv->home));
+  g_object_bind_property (self, "overview-visible", priv->home, "visible", G_BINDING_SYNC_CREATE);
 
   g_signal_connect_swapped (priv->top_panel,
                             "activated",
@@ -444,13 +448,13 @@ set_locked (PhoshShell *self, gboolean locked)
 
 
 static void
-phosh_shell_set_property (GObject *object,
-                          guint property_id,
+phosh_shell_set_property (GObject      *object,
+                          guint         property_id,
                           const GValue *value,
-                          GParamSpec *pspec)
+                          GParamSpec   *pspec)
 {
   PhoshShell *self = PHOSH_SHELL (object);
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private(self);
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   switch (property_id) {
   case PROP_LOCKED:
@@ -464,6 +468,9 @@ phosh_shell_set_property (GObject *object,
   case PROP_PRIMARY_MONITOR:
     phosh_shell_set_primary_monitor (self, g_value_get_object (value));
     break;
+  case PROP_OVERVIEW_VISIBLE:
+    priv->overview_visible = g_value_get_boolean (value);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -472,13 +479,13 @@ phosh_shell_set_property (GObject *object,
 
 
 static void
-phosh_shell_get_property (GObject *object,
-                          guint property_id,
-                          GValue *value,
+phosh_shell_get_property (GObject    *object,
+                          guint       property_id,
+                          GValue     *value,
                           GParamSpec *pspec)
 {
   PhoshShell *self = PHOSH_SHELL (object);
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private(self);
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   switch (property_id) {
   case PROP_LOCKED:
@@ -495,6 +502,9 @@ phosh_shell_get_property (GObject *object,
     break;
   case PROP_SHELL_STATE:
     g_value_set_flags (value, priv->shell_state);
+    break;
+  case PROP_OVERVIEW_VISIBLE:
+    g_value_set_boolean (value, priv->overview_visible);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -517,6 +527,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->notification_banner);
 
   /* dispose managers in opposite order of declaration */
+  g_clear_object (&priv->connectivity_manager);
   g_clear_object (&priv->cell_broadcast_manager);
   g_clear_object (&priv->launcher_entry_manager);
   g_clear_object (&priv->power_menu_manager);
@@ -713,6 +724,9 @@ setup_idle_cb (PhoshShell *self)
   priv->app_tracker = phosh_app_tracker_new ();
   priv->session_manager = phosh_session_manager_new ();
   priv->mode_manager = phosh_mode_manager_new ();
+  priv->wifi_manager = phosh_wifi_manager_new ();
+  /* Connecivity manager needs Wi-Fi manager: */
+  priv->connectivity_manager = phosh_connectivity_manager_new ();
 
   priv->sensor_proxy_manager = phosh_sensor_proxy_manager_new (&err);
   if (!priv->sensor_proxy_manager)
@@ -1225,32 +1239,46 @@ phosh_shell_class_init (PhoshShellClass *klass)
    *
    * The built in monitor. This is a hardware property and hence can
    * only be read. It can be %NULL when not present or disabled.
+   *
+   * Since: 0.10.1
    */
   props[PROP_BUILTIN_MONITOR] =
-    g_param_spec_object ("builtin-monitor",
-                         "Built in monitor",
-                         "The builtin monitor",
+    g_param_spec_object ("builtin-monitor", "", "",
                          PHOSH_TYPE_MONITOR,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
   /**
    * PhoshShell:primary-monitor:
    *
    * The primary monitor that has the panels, lock screen etc.
+   *
+   * Since: 0.0.2
    */
   props[PROP_PRIMARY_MONITOR] =
-    g_param_spec_object ("primary-monitor",
-                         "Primary monitor",
-                         "The primary monitor",
+    g_param_spec_object ("primary-monitor", "", "",
                          PHOSH_TYPE_MONITOR,
                          G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
-
+  /**
+   * PhoshShell:shell-state:
+   *
+   * The state of the shell (locked, modal dialog shown, …)
+   *
+   * Since: 0.10.0
+   */
   props[PROP_SHELL_STATE] =
-    g_param_spec_flags ("shell-state",
-                        "Shell state",
-                        "The state of the shell",
+    g_param_spec_flags ("shell-state", "", "",
                         PHOSH_TYPE_SHELL_STATE_FLAGS,
                         PHOSH_STATE_NONE,
                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
+
+  /**
+   * PhoshShell:overview-visible:
+   *
+   * Whether to display the `PhoshHome` (overview and home bar)
+   */
+  props[PROP_OVERVIEW_VISIBLE] =
+    g_param_spec_boolean ("overview-visible", "", "",
+                          TRUE,
+                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
@@ -1260,6 +1288,8 @@ phosh_shell_class_init (PhoshShellClass *klass)
    *
    * The ready signal is emitted once when the shell finished starting
    * up.
+   *
+   * Since: 0.11.0
    */
   signals[READY] = g_signal_new ("ready",
                                  G_TYPE_FROM_CLASS (klass),
@@ -1286,6 +1316,8 @@ phosh_shell_init (PhoshShell *self)
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   cui_init (TRUE);
+
+  priv->overview_visible = TRUE;
 
   g_io_extension_point_register (PHOSH_EXTENSION_POINT_LOCKSCREEN_WIDGET);
   g_io_extension_point_register (PHOSH_EXTENSION_POINT_QUICK_SETTING_WIDGET);
@@ -1397,11 +1429,11 @@ phosh_shell_get_builtin_monitor (PhoshShell *self)
 
   g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
   priv = phosh_shell_get_instance_private (self);
-  g_return_val_if_fail (PHOSH_IS_MONITOR (priv->builtin_monitor) || priv->builtin_monitor == NULL, NULL);
+  g_return_val_if_fail (PHOSH_IS_MONITOR (priv->builtin_monitor) || priv->builtin_monitor == NULL,
+                        NULL);
 
   return priv->builtin_monitor;
 }
-
 
 /**
  * phosh_shell_get_primary_monitor:
@@ -1442,7 +1474,6 @@ phosh_shell_get_app_tracker (PhoshShell *self)
   return priv->app_tracker;
 }
 
-
 /**
  * phosh_shell_get_background_manager:
  * @self: The shell singleton
@@ -1462,7 +1493,6 @@ phosh_shell_get_background_manager (PhoshShell *self)
 
   return priv->background_manager;
 }
-
 
 /**
  * phosh_shell_get_calls_manager:
@@ -1484,6 +1514,25 @@ phosh_shell_get_calls_manager (PhoshShell *self)
   return priv->calls_manager;
 }
 
+/**
+ * phosh_shell_get_connectivity_manager:
+ * @self: The shell singleton
+ *
+ * Get the connectivity manager
+ *
+ * Returns: (transfer none): The connectivity manager
+ */
+PhoshConnectivityManager *
+phosh_shell_get_connectivity_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+
+  g_return_val_if_fail (PHOSH_IS_CONNECTIVITY_MANAGER (priv->connectivity_manager), NULL);
+  return priv->connectivity_manager;
+}
 
 /**
  * phosh_shell_get_emergency_calls_manager:
@@ -1505,7 +1554,6 @@ phosh_shell_get_emergency_calls_manager (PhoshShell *self)
   return priv->emergency_calls_manager;
 }
 
-
 /**
  * phosh_shell_get_feedback_manager:
  * @self: The shell singleton
@@ -1525,7 +1573,6 @@ phosh_shell_get_feedback_manager (PhoshShell *self)
 
   return priv->feedback_manager;
 }
-
 
 /**
  * phosh_shell_get_gtk_mount_manager:
@@ -1547,7 +1594,6 @@ phosh_shell_get_gtk_mount_manager (PhoshShell *self)
   return priv->gtk_mount_manager;
 }
 
-
 /**
  * phosh_shell_get_launcher_entry_manager:
  * @self: The shell singleton
@@ -1567,7 +1613,6 @@ phosh_shell_get_launcher_entry_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_LAUNCHER_ENTRY_MANAGER (priv->launcher_entry_manager), NULL);
   return priv->launcher_entry_manager;
 }
-
 
 /**
  * phosh_shell_get_layout_manager:
@@ -1589,7 +1634,6 @@ phosh_shell_get_layout_manager (PhoshShell *self)
   return priv->layout_manager;
 }
 
-
 /**
  * phosh_shell_get_lockscreen_manager:
  * @self: The shell singleton
@@ -1609,7 +1653,6 @@ phosh_shell_get_lockscreen_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_LOCKSCREEN_MANAGER (priv->lockscreen_manager), NULL);
   return priv->lockscreen_manager;
 }
-
 
 /**
  * phosh_shell_get_mode_manager:
@@ -1671,7 +1714,6 @@ phosh_shell_get_monitor_manager (PhoshShell *self)
   return priv->monitor_manager;
 }
 
-
 /**
  * phosh_shell_get_toplevel_manager:
  * @self: The shell singleton
@@ -1691,7 +1733,6 @@ phosh_shell_get_toplevel_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_TOPLEVEL_MANAGER (priv->toplevel_manager), NULL);
   return priv->toplevel_manager;
 }
-
 
 /**
  * phosh_shell_get_screen_saver_manager:
@@ -1713,7 +1754,6 @@ phosh_shell_get_screen_saver_manager (PhoshShell *self)
   return priv->screen_saver_manager;
 }
 
-
 /**
  * phosh_shell_get_screenshot_manager:
  * @self: The shell singleton
@@ -1733,7 +1773,6 @@ phosh_shell_get_screenshot_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_SCREENSHOT_MANAGER (priv->screenshot_manager), NULL);
   return priv->screenshot_manager;
 }
-
 
 /**
  * phosh_shell_get_session_manager:
@@ -1755,6 +1794,26 @@ phosh_shell_get_session_manager (PhoshShell *self)
   return priv->session_manager;
 }
 
+/**
+ * phosh_shell_get_wifi_manager:
+ * @self: The shell singleton
+ *
+ * Get the Wifi manager
+ *
+ * Returns: (transfer none): The Wifi manager
+ */
+PhoshWifiManager *
+phosh_shell_get_wifi_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+
+  g_return_val_if_fail (PHOSH_IS_WIFI_MANAGER (priv->wifi_manager), NULL);
+  return priv->wifi_manager;
+}
+
 /* Manager getters that create them as needed */
 
 /**
@@ -1774,12 +1833,11 @@ phosh_shell_get_bt_manager (PhoshShell *self)
   priv = phosh_shell_get_instance_private (self);
 
   if (!priv->bt_manager)
-      priv->bt_manager = phosh_bt_manager_new ();
+    priv->bt_manager = phosh_bt_manager_new ();
 
   g_return_val_if_fail (PHOSH_IS_BT_MANAGER (priv->bt_manager), NULL);
   return priv->bt_manager;
 }
-
 
 /**
  * phosh_shell_get_docked_manager:
@@ -1810,7 +1868,6 @@ phosh_shell_get_docked_manager (PhoshShell *self)
   return priv->docked_manager;
 }
 
-
 /**
  * phosh_shell_get_hks_manager:
  * @self: The shell singleton
@@ -1833,7 +1890,6 @@ phosh_shell_get_hks_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_HKS_MANAGER (priv->hks_manager), NULL);
   return priv->hks_manager;
 }
-
 
 /**
  * phosh_shell_get_location_manager:
@@ -1858,7 +1914,6 @@ phosh_shell_get_location_manager (PhoshShell *self)
   return priv->location_manager;
 }
 
-
 /**
  * phosh_shell_get_osk_manager:
  * @self: The shell singleton
@@ -1876,12 +1931,11 @@ phosh_shell_get_osk_manager (PhoshShell *self)
   priv = phosh_shell_get_instance_private (self);
 
   if (!priv->osk_manager)
-      priv->osk_manager = phosh_osk_manager_new ();
+    priv->osk_manager = phosh_osk_manager_new ();
 
   g_return_val_if_fail (PHOSH_IS_OSK_MANAGER (priv->osk_manager), NULL);
   return priv->osk_manager;
 }
-
 
 /**
  * phosh_shell_get_rotation_manager:
@@ -1907,14 +1961,13 @@ phosh_shell_get_rotation_manager (PhoshShell *self)
      * Make sure rotation works even if the primary monitor has already appeared
      * when we create the rotation manager.
      */
-    phosh_rotation_manager_set_monitor(priv->rotation_manager, priv->primary_monitor);
+    phosh_rotation_manager_set_monitor (priv->rotation_manager, priv->primary_monitor);
   }
 
   g_return_val_if_fail (PHOSH_IS_ROTATION_MANAGER (priv->rotation_manager), NULL);
 
   return priv->rotation_manager;
 }
-
 
 /**
  * phosh_shell_get_torch_manager:
@@ -1939,7 +1992,6 @@ phosh_shell_get_torch_manager (PhoshShell *self)
   return priv->torch_manager;
 }
 
-
 /**
  * phosh_shell_get_vpn_manager:
  * @self: The shell singleton
@@ -1957,36 +2009,11 @@ phosh_shell_get_vpn_manager (PhoshShell *self)
   priv = phosh_shell_get_instance_private (self);
 
   if (!priv->vpn_manager)
-      priv->vpn_manager = phosh_vpn_manager_new ();
+    priv->vpn_manager = phosh_vpn_manager_new ();
 
   g_return_val_if_fail (PHOSH_IS_VPN_MANAGER (priv->vpn_manager), NULL);
   return priv->vpn_manager;
 }
-
-
-/**
- * phosh_shell_get_wifi_manager:
- * @self: The shell singleton
- *
- * Get the Wifi manager
- *
- * Returns: (transfer none): The Wifi manager
- */
-PhoshWifiManager *
-phosh_shell_get_wifi_manager (PhoshShell *self)
-{
-  PhoshShellPrivate *priv;
-
-  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
-  priv = phosh_shell_get_instance_private (self);
-
-  if (!priv->wifi_manager)
-      priv->wifi_manager = phosh_wifi_manager_new ();
-
-  g_return_val_if_fail (PHOSH_IS_WIFI_MANAGER (priv->wifi_manager), NULL);
-  return priv->wifi_manager;
-}
-
 
 /**
  * phosh_shell_get_wwan:
@@ -2257,7 +2284,6 @@ phosh_shell_remove_global_keyboard_action_entries (PhoshShell *self,
   }
 }
 
-
 /**
  * phosh_shell_is_session_active
  * @self: The shell
@@ -2274,7 +2300,6 @@ phosh_shell_is_session_active (PhoshShell *self)
 
   return phosh_session_manager_is_active (priv->session_manager);
 }
-
 
 /**
  * phosh_shell_get_app_launch_context:
@@ -2414,7 +2439,6 @@ phosh_shell_set_locked (PhoshShell *self, gboolean locked)
   phosh_lockscreen_manager_set_locked (priv->lockscreen_manager, locked);
 }
 
-
 /**
  * phosh_shell_get_show_splash:
  * @self: The #PhoshShell singleton
@@ -2440,7 +2464,6 @@ phosh_shell_get_show_splash (PhoshShell *self)
   return TRUE;
 }
 
-
 /**
  * phosh_shell_get_docked:
  * @self: The #PhoshShell singleton
@@ -2457,7 +2480,6 @@ phosh_shell_get_docked (PhoshShell *self)
 
   return priv->docked;
 }
-
 
 /**
  * phosh_shell_get_blanked:
