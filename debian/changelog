@@ -1,8 +1,28 @@
-phosh (0.45~beta1-1) UNRELEASED; urgency=medium
+phosh (0.45~beta1-1) experimental; urgency=medium
 
+  * Upload to experimental
   * New upstream release
+    * Minimize and stabilize libphosh API so we can have a stable
+      API for trixie
+    * Detect captive portals and allow to open browser
+    * New quick setting plugin to switch display scales
+    * Create thumbnails for Screenshots
+    * Allow to uninstall apps from app-grid
+    * Close quick setting status pages when action was successful
+    * WWan enable/disable autoconnect with the connection so e.g.
+      mobile data doesn't turn on resume
+    * prefs plugins: Remove the last remaining GtkDialog and use
+      AdwEntryRow
+    * Respect week number setting in calendar widget
+    * Avoid crash when fixing between certain combinations of fractional
+      scales (with e.g. wlr-randr)
+    * Allow libphosh users to hide the whole overview/bottom bar
+    * Fade in system modal dialogs
+    * Several background image related fixes
+    * Fix crash on unlock with media player widget
+  * Rediff patches
 
- -- Guido Günther <agx@sigxcpu.org>  Mon, 03 Feb 2025 11:19:59 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 03 Feb 2025 11:26:29 +0100
 
 phosh (0.44.1-1) unstable; urgency=medium
 
