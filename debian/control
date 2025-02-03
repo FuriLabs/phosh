@@ -63,7 +63,7 @@ Depends:
  fonts-lato,
  gnome-shell-common,
  gsettings-desktop-schemas (>= 47),
- phoc (>= 0.44~),
+ phoc (>= 0.45~beta1),
 Recommends:
  feedbackd (>= 0.5.0),
  gnome-session-bin,
