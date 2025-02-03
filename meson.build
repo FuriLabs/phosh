@@ -1,5 +1,5 @@
 project('phosh', 'c',
-          version: '0.44.1',
+          version: '0.45.beta1',
           license: 'GPL-3.0-or-later',
     meson_version: '>= 1.0.0',
   default_options: [ 'warning_level=1', 'buildtype=debugoptimized', 'c_std=gnu11' ],
@@ -123,6 +123,7 @@ gnome = import('gnome')
 i18n  = import('i18n')
 pkgconfig = import ('pkgconfig')
 
+appstream_dep = dependency('appstream', version: '>= 1.0.0')
 ecal_dep = dependency('libecal-2.0', version: '>= 3.33.1')
 eds_dep = dependency('libedataserver-1.2', version: '>= 3.33.1')
 fribidi_dep = dependency('fribidi')

@@ -19,7 +19,7 @@
  * PhoshQuickSetting:
  *
  * A `PhoshQuickSetting` represents a state of an entity (like Wi-Fi, Bluetooth) using an icon
- * and label. It should be added to a [class@Phosh.QuickSettingsBox] for better integration.
+ * and label. It should be added to a PhoshQuickSettingsBox for better integration.
  *
  * A quick-setting displays the state using an icon and label. The state is set by
  * [class@Phosh.StatusIcon], which must be added as a child. It can also have a status-page, which
@@ -298,6 +298,13 @@ on_status_destroy (PhoshQuickSetting *self)
 
 
 static void
+on_status_page_done (PhoshQuickSetting *self)
+{
+  g_signal_emit (self, signals[HIDE_STATUS], 0);
+}
+
+
+static void
 phosh_quick_setting_finalize (GObject *object)
 {
   PhoshQuickSetting *self = PHOSH_QUICK_SETTING (object);
@@ -568,6 +575,11 @@ phosh_quick_setting_set_status_page (PhoshQuickSetting *self, PhoshStatusPage *s
     g_signal_connect_object (priv->status_page,
                              "destroy",
                              G_CALLBACK (on_status_destroy),
+                             self,
+                             G_CONNECT_SWAPPED);
+    g_signal_connect_object (priv->status_page,
+                             "done",
+                             G_CALLBACK (on_status_page_done),
                              self,
                              G_CONNECT_SWAPPED);
   }
