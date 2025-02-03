@@ -1,6 +1,2 @@
 version=4
-opts="repacksuffix=+ds, \
-  uversionmangle=s/\.(alpha|beta|rc)/~$1/, \
-  pgpsigurlmangle=s%$%.asc%" \
-https://sources.phosh.mobi/releases/@PACKAGE@/ \
-  @PACKAGE@@ANY_VERSION@@ARCHIVE_EXT@
+opts="repacksuffix=+ds, uversionmangle=s/\.(alpha|beta|rc)/~$1/, pgpsigurlmangle=s%$%.asc%,pgpsigurlmangle=s/$/.asc/,pgpmode=mangle" https://sources.phosh.mobi/releases/@PACKAGE@/ @PACKAGE@@ANY_VERSION@@ARCHIVE_EXT@
