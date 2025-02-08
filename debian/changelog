@@ -1,8 +1,10 @@
-phosh (0.45~rc1-1) UNRELEASED; urgency=medium
+phosh (0.45~rc1-1) unstable; urgency=medium
 
   * New upstream release
+  * Bump libfeedback-dev dependency.Needed for sound hint support
+  * Add symbols file
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 08 Feb 2025 09:16:03 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 08 Feb 2025 09:20:38 +0100
 
 phosh (0.45~beta1-1) experimental; urgency=medium
 
