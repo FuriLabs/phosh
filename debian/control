@@ -14,7 +14,7 @@ Build-Depends:
  libgmobile-dev,
  libsecret-1-dev,
  libsystemd-dev,
- libfeedback-dev (>= 0.2.0),
+ libfeedback-dev (>= 0.7.0),
  libgcr-3-dev,
  libgirepository1.0-dev <!nodoc>,
  libgnome-bluetooth-3.0-dev,
