@@ -9,6 +9,31 @@ phosh_enums_header_subdir = 'phosh'
 
 install_headers(schema_enum_headers, subdir : phosh_enums_header_subdir)
 
+plugin_exported_symbols = 'phosh-exported-symbols.txt'
+libphosh_exported_symbols = 'libphosh.syms'
+
+dynamic_list = custom_target(
+  'build-dynamic-list',
+  command: [ 'sh', '-c', 'echo "{"; cat @INPUT@; echo "};"' ],
+  capture: true,
+  input: '@0@.in'.format(plugin_exported_symbols),
+  output: plugin_exported_symbols,
+)
+
+symbols_file = custom_target(
+  'build-symbols-file',
+  command: [ '@0@/tools/build-symbols-file'.format(meson.project_source_root()),
+             '@0@'.format(libphosh_api_version.replace('.','_')),
+             '@0@/@INPUT0@'.format(meson.current_source_dir()),
+             '@0@/@INPUT1@'.format(meson.current_source_dir()),
+           ],
+  capture: true,
+  input: [ '@0@.in'.format(plugin_exported_symbols),
+           '@0@.in'.format(libphosh_exported_symbols),
+         ],
+  output: libphosh_exported_symbols,
+)
+
 pkgconfig.generate(
   requires : gsettings_desktop_schemas_dep,
   subdirs : phosh_enums_header_subdir,
@@ -479,13 +504,15 @@ phosh_tool_dep = declare_dependency(
   dependencies: phosh_deps)
 
 # A library containing everything
-phosh_lib = both_libraries('phosh-@0@'.format(libversion),
+phosh_lib = both_libraries('phosh-@0@'.format(libphosh_api_version),
   phosh_headers,
   phosh_sources,
   include_directories: phosh_lib_inc,
   dependencies: [phosh_tool_dep, phosh_deps],
   soversion: 0,
   install: bindings_lib,
+  link_args: '-Wl,--version-script,@0@'.format(symbols_file.full_path()),
+  link_depends: symbols_file,
 )
 
 phosh_static_lib_dep = declare_dependency(
@@ -518,7 +545,7 @@ if enable_introspection or bindings_lib
                 sources : phosh_gir_sources,
               nsversion : '0',
               namespace : 'Phosh',
-        export_packages : 'libphosh-@0@'.format(libversion),
+        export_packages : 'libphosh-@0@'.format(libphosh_api_version),
           symbol_prefix : 'phosh',
       identifier_prefix : 'Phosh',
               link_with : phosh_lib,
@@ -536,8 +563,8 @@ if bindings_lib
   pkgconfig.generate(
     phosh_lib,
     name: 'libphosh',
-    subdirs: 'libphosh-@0@'.format(libversion),
-    filebase: 'libphosh-@0@'.format(libversion),
+    subdirs: 'libphosh-@0@'.format(libphosh_api_version),
+    filebase: 'libphosh-@0@'.format(libphosh_api_version),
     version : meson.project_version(),
     description: 'Library for building components embedding Phosh',
     requires: 'phosh-settings',
@@ -553,11 +580,11 @@ if bindings_lib
   )
 endif
 
-phosh_export_sym_link_arg = '-Wl,--dynamic-list=@0@/phosh-exported-symbols.txt'.format(meson.current_source_dir())
+phosh_export_sym_link_arg = '-Wl,--dynamic-list=@0@'.format(dynamic_list.full_path())
 phosh = executable(
   'phosh', 'main.c',
   dependencies: phosh_static_lib_dep,
-  link_depends: ['phosh-exported-symbols.txt'],
+  link_depends: dynamic_list,
   link_args: phosh_export_sym_link_arg,
   install: true,
   install_dir: libexecdir

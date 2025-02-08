@@ -13,6 +13,7 @@
 #include "call-notification.h"
 #include "calls-manager.h"
 #include "keypad.h"
+#include "layersurface-priv.h"
 #include "lockscreen-priv.h"
 #include "notifications/notify-manager.h"
 #include "notifications/notification-frame.h"
@@ -1095,7 +1096,7 @@ phosh_lockscreen_init (PhoshLockscreen *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
-  /* LTR does't work for the deck
+  /* LTR doesn't work for the deck
    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1132 */
   gtk_widget_set_direction (GTK_WIDGET (priv->deck), GTK_TEXT_DIR_LTR);
 }
