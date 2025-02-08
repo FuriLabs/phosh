@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2018 Purism SPC
- *               2023-2024 The Phosh Develpoers
+ *               2023-2024 The Phosh Developers
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -50,6 +50,7 @@
 #include "idle-manager.h"
 #include "keyboard-events.h"
 #include "launcher-entry-manager.h"
+#include "layersurface-priv.h"
 #include "location-info.h"
 #include "layout-manager.h"
 #include "location-manager.h"
