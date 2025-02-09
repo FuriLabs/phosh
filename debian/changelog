@@ -1,3 +1,10 @@
+phosh (0.45~rc1-2) unstable; urgency=medium
+
+  * tests: Check that library pkgconf file has all dependencies
+  * Add libappstream-dev to libphosh-dev's dependencies
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 09 Feb 2025 15:24:13 +0100
+
 phosh (0.45~rc1-1) unstable; urgency=medium
 
   * New upstream release
