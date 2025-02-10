@@ -3,7 +3,7 @@ Section: x11
 Priority: optional
 Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-lists.debian.net>
 Uploaders:
- Arnaud Ferraris <arnaud.ferraris@gmail.com>,
+ Arnaud Ferraris <aferraris@debian.org>,
  Guido Günther <agx@sigxcpu.org>,
 Build-Depends:
  debhelper-compat (= 13),
@@ -64,6 +64,7 @@ Depends:
  gnome-shell-common,
  gsettings-desktop-schemas (>= 47),
  phoc (>= 0.45~beta1),
+ phosh-common (= ${source:Version}),
 Recommends:
  feedbackd (>= 0.5.0),
  gnome-session-bin,
@@ -104,6 +105,19 @@ Description: Pure Wayland shell for mobile devices - development documentation
  based inputs and small screens.
  .
  This package contains the development documentation.
+
+Package: phosh-common
+Architecture: all
+Multi-Arch: foreign
+Depends:
+ ${misc:Depends},
+Conflicts: phosh (<< 0.45~rc1-3~)
+Description: Pure Wayland shell for mobile devices - Common files
+ Phosh is a graphical shell for Wayland compositors speaking the layer-surface
+ protocol and aimed at mobile devices like smart phones and tablets using touch
+ based inputs and small screens.
+ .
+ This package contains arch-independent files needed by phosh and libphosh.
 
 Package: phosh-mobile-tweaks
 Architecture: all
@@ -189,6 +203,7 @@ Multi-Arch: same
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
+ phosh-common (= ${source:Version}),
 Description: Pure Wayland shell for mobile devices - binding shared library
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
