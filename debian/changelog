@@ -1,3 +1,16 @@
+phosh (0.45~rc1-3) experimental; urgency=medium
+
+  [ Guido Günther ]
+  * d/control: Mark libphosh Multi-arch: same.
+
+  [ Arnaud Ferraris ]
+  * phosh: move gschemas to new phosh-common.
+    Software linked against `libphosh-0.x` need those to execute properly.
+    Create a new `phosh-common` package for this purpose and move gschema
+    files there, making both `phosh` and `libphosh-0.x` depend on it.
+
+ -- Arnaud Ferraris <aferraris@debian.org>  Tue, 11 Feb 2025 21:25:28 +0100
+
 phosh (0.45~rc1-2) unstable; urgency=medium
 
   * tests: Check that library pkgconf file has all dependencies
