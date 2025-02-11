@@ -185,6 +185,7 @@ Description: Pure Wayland shell for mobile devices - binding developmen files
 Package: libphosh-0.45-0
 Architecture: any
 Section: libs
+Multi-Arch: same
 Depends:
  ${misc:Depends},
  ${shlibs:Depends},
