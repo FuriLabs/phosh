@@ -24,8 +24,8 @@ symbols_file = custom_target(
   'build-symbols-file',
   command: [ '@0@/tools/build-symbols-file'.format(meson.project_source_root()),
              '@0@'.format(libphosh_api_version.replace('.','_')),
-             '@0@/@INPUT0@'.format(meson.current_source_dir()),
-             '@0@/@INPUT1@'.format(meson.current_source_dir()),
+             '@INPUT0@',
+             '@INPUT1@',
            ],
   capture: true,
   input: [ '@0@.in'.format(plugin_exported_symbols),
@@ -513,7 +513,45 @@ phosh_lib = both_libraries('phosh-@0@'.format(libphosh_api_version),
   install: bindings_lib,
   link_args: '-Wl,--version-script,@0@'.format(symbols_file.full_path()),
   link_depends: symbols_file,
+  override_options: abi_check ? {'optimization': 'g'} : {},
 )
+
+if abi_check
+  abi_compliance_checker = find_program('abi-compliance-checker')
+  abi_dumper = find_program('abi-dumper')
+
+  abi_dump = custom_target(
+    'abi-dump',
+    input: phosh_lib,
+    output: 'libphosh-abi.dump',
+    command: [
+      abi_dumper,
+      '@INPUT@',
+      '-o',
+      '@OUTPUT@',
+      '-lver',
+      meson.project_version(),
+    ],
+  )
+
+  custom_target(
+    'abi-compliance',
+    input: [abi_dump, 'libphosh-abi.dump'],
+    output: 'abi-compliance-check-report.html',
+    command: [
+      abi_compliance_checker,
+      '-report-path',
+      '@OUTPUT@',
+      '-l',
+      meson.project_name(),
+      '-old',
+      '@INPUT0@',
+      '-new',
+      '@INPUT1@',
+    ],
+    build_by_default: true,
+  )
+endif
 
 phosh_static_lib_dep = declare_dependency(
   include_directories: phosh_lib_inc,
