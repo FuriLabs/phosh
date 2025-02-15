@@ -1,8 +1,10 @@
-phosh (0.45.0-1) UNRELEASED; urgency=medium
+phosh (0.45.0-1) unstable; urgency=medium
 
+  * Upload to unstable
   * New upstream release
+  * Depend on phoc 0.45.0. We want a phoc that supports `-v`.
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 15 Feb 2025 13:25:13 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 15 Feb 2025 13:30:56 +0100
 
 phosh (0.45~rc1-3) experimental; urgency=medium
 
