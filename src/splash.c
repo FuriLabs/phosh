@@ -11,7 +11,8 @@
 #include "phosh-config.h"
 
 #include "animation.h"
-#include "shell.h"
+#include "layersurface-priv.h"
+#include "shell-priv.h"
 #include "splash.h"
 
 #define PHOSH_APP_UNKNOWN_ICON "app-icon-unknown"
@@ -302,11 +303,6 @@ phosh_splash_hide (PhoshSplash *self)
 
   g_return_if_fail (PHOSH_IS_SPLASH (self));
   priv = phosh_splash_get_instance_private (self);
-
-  if (!phosh_layer_surface_has_alpha (PHOSH_LAYER_SURFACE (self))) {
-    gtk_widget_destroy (GTK_WIDGET (self));
-    return;
-  }
 
   priv->fadeout = phosh_animation_new (GTK_WIDGET (self),
                                        0.0,

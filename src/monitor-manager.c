@@ -16,7 +16,7 @@
 
 #include "wlr-gamma-control-unstable-v1-client-protocol.h"
 #include "phosh-wayland.h"
-#include "shell.h"
+#include "shell-priv.h"
 
 #include "util.h"
 
@@ -448,7 +448,7 @@ phosh_monitor_manager_handle_get_current_state (PhoshDBusDisplayConfig *skeleton
 
       g_variant_builder_init (&supported_scales_builder,
                               G_VARIANT_TYPE ("ad"));
-      scales = phosh_head_calculate_supported_mode_scales (head, mode, &n, TRUE);
+      scales = phosh_util_calculate_supported_mode_scales (mode->width, mode->height, &n, TRUE);
       for (int l = 0; l < n; l++) {
         g_variant_builder_add (&supported_scales_builder, "d",
                                (double)scales[l]);
@@ -1050,7 +1050,7 @@ static void
 phosh_monitor_manager_add_monitor (PhoshMonitorManager *self, PhoshMonitor *monitor)
 {
   g_ptr_array_add (self->monitors, monitor);
-  /* Delay emmission of 'monitor-added' until it's configured */
+  /* Delay emission of 'monitor-added' until it's configured */
   g_signal_connect_swapped (monitor,
                             "configured",
                             G_CALLBACK (on_monitor_configured),
@@ -1506,7 +1506,7 @@ phosh_monitor_manager_get_num_monitors (PhoshMonitorManager *self)
 /**
  * phosh_monitor_manager_set_monitor_transform:
  * @self: A #PhoshMonitor
- * @monitor: The #PhoshMonitor to set the tansform on
+ * @monitor: The #PhoshMonitor to set the transform on
  * @transform: The #PhoshMonitorTransform to set
  *
  * Sets monitor's transform. This will become active after the next
@@ -1529,6 +1529,31 @@ phosh_monitor_manager_set_monitor_transform (PhoshMonitorManager  *self,
   g_return_if_fail (PHOSH_IS_HEAD (head));
 
   phosh_head_set_pending_transform (head, transform, self->heads);
+}
+
+/**
+ * phosh_monitor_manager_set_monitor_scale:
+ * @self: A #PhoshMonitor
+ * @monitor: The #PhoshMonitor to set the scale for
+ * @scale: The scale to set
+ *
+ * Sets monitor's scale. This will become active after the next
+ * call to #phosh_monitor_manager_apply_monitor_config().
+ */
+void
+phosh_monitor_manager_set_monitor_scale (PhoshMonitorManager  *self,
+                                         PhoshMonitor         *monitor,
+                                         double                scale)
+{
+  PhoshHead *head;
+
+  g_return_if_fail (PHOSH_IS_MONITOR_MANAGER (self));
+  g_return_if_fail (PHOSH_IS_MONITOR (monitor));
+  g_return_if_fail (phosh_monitor_is_configured (monitor));
+  head = phosh_monitor_manager_get_head_from_monitor (self, monitor);
+  g_return_if_fail (PHOSH_IS_HEAD (head));
+
+  phosh_head_set_pending_scale (head, scale, self->heads);
 }
 
 /**

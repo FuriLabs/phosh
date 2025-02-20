@@ -10,7 +10,7 @@
 
 #include "screen-saver-manager.h"
 #include "session-presence.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "idle-manager.h"
 #include "login1-manager-dbus.h"
 #include "login1-session-dbus.h"
@@ -684,10 +684,6 @@ on_logind_get_session_proxy_finish  (GObject                 *object,
     "swapped-object-signal::lock", G_CALLBACK (on_logind_lock), self,
     "swapped-object-signal::unlock", G_CALLBACK (on_logind_unlock), self,
     NULL);
-
-  g_signal_connect_swapped (
-    self->logind_manager_proxy,
-    "prepare-for-sleep", G_CALLBACK (on_logind_prepare_for_sleep), self);
 }
 
 
@@ -776,6 +772,11 @@ on_logind_manager_proxy_new_for_bus_finish (GObject                 *source_obje
   }
 
   g_return_if_fail (PHOSH_IS_SCREEN_SAVER_MANAGER (self));
+
+  g_signal_connect_swapped (self->logind_manager_proxy,
+                            "prepare-for-sleep",
+                            G_CALLBACK (on_logind_prepare_for_sleep),
+                            self);
 
   /* If we find a session get it object path */
   if (phosh_find_systemd_session (&session_id)) {

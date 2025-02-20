@@ -8,11 +8,13 @@
 
 #include <glib.h>
 #include "phosh-wayland.h"
-#include "shell.h"
+#include "connectivity-manager.h"
+#include "shell-priv.h"
 
 static PhoshToplevelManager *toplevel_manager = NULL;
 static PhoshBackgroundManager *background_manager = NULL;
 static GObject *shell = NULL;
+static GObject *wifi_manager = NULL;
 
 PhoshShell *
 phosh_shell_get_default (void)
@@ -85,6 +87,23 @@ phosh_shell_get_app_tracker (PhoshShell *self)
 {
   return NULL;
 }
+
+
+PhoshWifiManager *
+phosh_shell_get_wifi_manager (PhoshShell *self)
+{
+  if (wifi_manager == NULL)
+    wifi_manager = g_object_new (G_TYPE_OBJECT, NULL);
+  return (PhoshWifiManager*)(wifi_manager);
+}
+
+
+PhoshConnectivityManager *
+phosh_shell_get_connectivity_manager (PhoshShell *self)
+{
+  return phosh_connectivity_manager_new ();
+}
+
 
 PhoshLockscreenManager *
 phosh_shell_get_lockscreen_manager (PhoshShell *self)

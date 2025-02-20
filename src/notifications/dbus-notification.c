@@ -11,7 +11,7 @@
 #include "phosh-config.h"
 #include "dbus-notification.h"
 #include "notify-manager.h"
-#include "shell.h"
+#include "shell-priv.h"
 
 #include <gio/gdesktopappinfo.h>
 #include <gio/gio.h>
@@ -20,7 +20,7 @@
 /**
  * PhoshDBusNotification:
  *
- * A notifiction submitted via the DBus notification interface
+ * A notification submitted via the DBus notification interface
  *
  * The #PhoshDBusNotification is a notification submitted via the
  * org.freedesktop.Notification interface.

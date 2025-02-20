@@ -7,6 +7,7 @@ Build-Depends:
  gi-docgen <!nodoc>,
  gsettings-desktop-schemas-dev (>= 47),
  libadwaita-1-dev,
+ libappstream-dev,
  libcallaudio-dev,
  libevince-dev,
  libgirepository1.0-dev,
@@ -16,6 +17,7 @@ Build-Depends:
  libfeedback-dev (>= 0.4.0),
  libfribidi-dev,
  libgcr-3-dev,
+ libgmobile-dev,
  libgnome-bluetooth-3.0-dev,
  libgnome-desktop-3-dev,
  libgtk-3-dev,
@@ -48,7 +50,9 @@ Build-Depends:
  gsettings-desktop-schemas <!nocheck>,
  gtk-4-examples <!nocheck>,
  librsvg2-common <!nocheck>,
- phoc (>= 0.33.0) <!nocheck>,
+ phoc (>= 0.44~) <!nocheck>,
+ python3-pytest <!nocheck>,
+ wlr-randr <!nocheck>,
  xauth <!nocheck>,
  xvfb <!nocheck>,
  xwayland <!nocheck>,
@@ -75,6 +79,7 @@ Recommends:
  gnome-settings-daemon,
  iio-sensor-proxy,
  librsvg2-common,
+ network-manager-config-connectivity-debian,
  phosh-mobile-tweaks,
  slurp,
  phosh-osk-stub | squeekboard,
@@ -175,4 +180,4 @@ Description: Pure Wayland shell for mobile devices - binding shared library
  protocol and aimed at mobile devices like smart phones and tablets using touch
  based inputs and small screens.
  .
- This package contains the shared libarary for language bindings.
+ This package contains the shared library for language bindings.

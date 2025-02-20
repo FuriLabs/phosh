@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2024-11-11 09:22+0000\n"
-"PO-Revision-Date: 2024-11-11 12:50+0300\n"
+"POT-Creation-Date: 2025-01-30 17:57+0000\n"
+"PO-Revision-Date: 2025-01-31 12:35+0300\n"
 "Last-Translator: Artur So <arturios2005@mail.ru>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -17,11 +17,6 @@ msgstr ""
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 3.5\n"
 
-#. Translators: this is the session name, no need to translate it
-#: data/phosh.session.desktop.in.in:4 data/wayland-sessions/phosh.desktop:3
-msgid "Phosh"
-msgstr "Phosh"
-
 #: data/mobi.phosh.Shell.desktop.in.in:4 data/wayland-sessions/phosh.desktop:4
 msgid "Phone Shell"
 msgstr "Оболочка телефона"
@@ -29,6 +24,11 @@ msgstr "Оболочка телефона"
 #: data/mobi.phosh.Shell.desktop.in.in:5
 msgid "Window management and application launching for mobile"
 msgstr "Управление окнами и запуск приложений для мобильных устройств"
+
+#. Translators: this is the session name, no need to translate it
+#: data/phosh.session.desktop.in.in:4 data/wayland-sessions/phosh.desktop:3
+msgid "Phosh"
+msgstr "Phosh"
 
 #: data/wayland-sessions/phosh.desktop:5
 msgid "This session logs you into Phosh"
@@ -121,15 +121,15 @@ msgstr "Предстоящие события"
 msgid "Show upcoming calendar events"
 msgstr "Показать предстоящие события календаря"
 
-#: src/app-grid-button.c:153
+#: src/app-grid-button.c:154
 msgid "Add to Folder"
 msgstr "Добавить в папку"
 
-#: src/app-grid-button.c:177
+#: src/app-grid-button.c:178
 msgid "Create new folder"
 msgstr "Создать новую папку"
 
-#: src/app-grid-button.c:692 src/app-grid-button.c:749
+#: src/app-grid-button.c:731 src/app-grid-button.c:788
 msgid "Application"
 msgstr "Приложение"
 
@@ -142,7 +142,7 @@ msgid "Show Only Mobile Friendly Apps"
 msgstr "Показать приложения только для мобильных устройств"
 
 #. Translators: a battery level in percent
-#: src/bt-device-row.c:72
+#: src/bt-device-row.c:81
 #, c-format
 msgid "Battery %.0f%%"
 msgstr "Батарея %.0f%%"
@@ -156,17 +156,30 @@ msgctxt "bluetooth:enabled"
 msgid "On"
 msgstr "Вкл"
 
-#: src/bt-status-page.c:95
+#: src/bt-status-page.c:123
 msgid "No connectable Bluetooth Devices found"
 msgstr "Подключаемых устройств Bluetooth не найдено"
 
-#: src/bt-status-page.c:99
+#: src/bt-status-page.c:127
 msgid "Bluetooth disabled"
 msgstr "Bluetooth отключен"
 
 #: src/call-notification.c:63
 msgid "Unknown caller"
 msgstr "Неизвестный абонент"
+
+#: src/connectivity-manager.c:114
+#, c-format
+msgid "Wi-Fi network '%s' uses a captive portal"
+msgstr "Сеть Wi-Fi '%s' использует автономный портал"
+
+#: src/connectivity-manager.c:116
+msgid "The Wi-Fi network uses a captive portal"
+msgstr "Сеть Wi-Fi использует автономный портал"
+
+#: src/connectivity-manager.c:123
+msgid "Sign into Wi-Fi network"
+msgstr "Войдите в сеть Wi-Fi"
 
 #: src/docked-info.c:81
 msgid "Docked"
@@ -177,7 +190,7 @@ msgid "Undocked"
 msgstr "Откреплено"
 
 #: src/emergency-menu.c:97 src/ui/app-auth-prompt.ui:71
-#: src/ui/end-session-dialog.ui:71
+#: src/ui/cell-broadcast-prompt.ui:23 src/ui/end-session-dialog.ui:71
 msgid "Ok"
 msgstr "Хорошо"
 
@@ -189,11 +202,11 @@ msgstr "Невозможно сделать экстренный вызов"
 msgid "Internal error"
 msgstr "Внутренняя ошибка"
 
-#: src/end-session-dialog.c:174
+#: src/end-session-dialog.c:173
 msgid "Log Out"
 msgstr "Выйти"
 
-#: src/end-session-dialog.c:177
+#: src/end-session-dialog.c:176
 #, c-format
 msgid "%s will be logged out automatically in %d second."
 msgid_plural "%s will be logged out automatically in %d seconds."
@@ -201,11 +214,11 @@ msgstr[0] "%s автоматически выйдет из системы чер
 msgstr[1] "%s автоматически выйдет из системы через %d секунды."
 msgstr[2] "%s автоматически выйдет из системы через %d секунд."
 
-#: src/end-session-dialog.c:183 src/ui/power-menu.ui:72
+#: src/end-session-dialog.c:182 src/ui/power-menu.ui:72
 msgid "Power Off"
 msgstr "Выключить"
 
-#: src/end-session-dialog.c:184
+#: src/end-session-dialog.c:183
 #, c-format
 msgid "The system will power off automatically in %d second."
 msgid_plural "The system will power off automatically in %d seconds."
@@ -213,11 +226,11 @@ msgstr[0] "Система автоматически выключится чер
 msgstr[1] "Система автоматически выключится через %d секунды."
 msgstr[2] "Система автоматически выключится через %d секунд."
 
-#: src/end-session-dialog.c:190
+#: src/end-session-dialog.c:189
 msgid "Restart"
 msgstr "Перезапустить"
 
-#: src/end-session-dialog.c:191
+#: src/end-session-dialog.c:190
 #, c-format
 msgid "The system will restart automatically in %d second."
 msgid_plural "The system will restart automatically in %d seconds."
@@ -263,48 +276,48 @@ msgid "No"
 msgstr "Нет"
 
 #. give visual feedback on error
-#: src/lockscreen.c:293 src/ui/lockscreen.ui:290
+#: src/lockscreen.c:292 src/ui/lockscreen.ui:290
 msgid "Enter Passcode"
 msgstr "Введите код доступа"
 
-#: src/lockscreen.c:949
+#: src/lockscreen.c:948
 msgid "Checking…"
 msgstr "Проверка…"
 
 #. Translators: '%s' is the filename of a screenshot
-#: src/screenshot-manager.c:235
+#: src/screenshot-manager.c:238
 #, c-format
 msgid "Screenshot saved to '%s'"
 msgstr "Снимок экрана сохранен в '%s'"
 
-#: src/screenshot-manager.c:237
+#: src/screenshot-manager.c:240
 msgid "Failed to save screenshot"
 msgstr "Не удалось сохранить снимок экрана"
 
-#: src/screenshot-manager.c:241 src/ui/power-menu.ui:192
+#: src/screenshot-manager.c:244 src/ui/power-menu.ui:192
 msgid "Screenshot"
 msgstr "Снимок экрана"
 
 #. Translators: name of the folder beneath ~/Pictures used to store screenshots
-#: src/screenshot-manager.c:416
+#: src/screenshot-manager.c:527
 msgid "Screenshots"
 msgstr "Снимки экрана"
 
 #. Translators: Name of a screenshot file. The first '%s' is a timestamp
 #. * like "2017-05-21 12-24-03" the 2nd '%s' is a possible suffix in case
 #. * the file already exists like '-3'
-#: src/screenshot-manager.c:436
+#: src/screenshot-manager.c:547
 #, c-format
 msgid "Screenshot from %s%s.png"
 msgstr "Снимок экрана от %s%s.png"
 
 #. Translators: Used when the title of a song is unknown
-#: src/media-player.c:446 src/ui/media-player.ui:213
+#: src/media-player.c:450 src/ui/media-player.ui:213
 msgid "Unknown Title"
 msgstr "Неизвестное название"
 
 #. Translators: Used when the artist of a song is unknown
-#: src/media-player.c:454 src/ui/media-player.ui:201
+#: src/media-player.c:458 src/ui/media-player.ui:201
 msgid "Unknown Artist"
 msgstr "Неизвестный исполнитель"
 
@@ -469,7 +482,7 @@ msgid "Authentication dialog was dismissed by the user"
 msgstr "Диалог аутентификации был отклонен пользователем"
 
 #: src/polkit-auth-prompt.c:278 src/ui/gtk-mount-prompt.ui:20
-#: src/ui/network-auth-prompt.ui:82 src/ui/polkit-auth-prompt.ui:56
+#: src/ui/network-auth-prompt.ui:83 src/ui/polkit-auth-prompt.ui:56
 #: src/ui/system-prompt.ui:32
 msgid "Password:"
 msgstr "Пароль:"
@@ -526,8 +539,7 @@ msgid "Remember decision"
 msgstr "Запомнить решение"
 
 #: src/ui/app-auth-prompt.ui:62 src/ui/end-session-dialog.ui:62
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:29
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:293
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:27
 msgid "Cancel"
 msgstr "Отменить"
 
@@ -543,11 +555,15 @@ msgstr "Добавить в _Избранное"
 msgid "View _Details"
 msgstr "_Подробности"
 
-#: src/ui/app-grid-button.ui:41
+#: src/ui/app-grid-button.ui:38
+msgid "Uninstall"
+msgstr "Удалить"
+
+#: src/ui/app-grid-button.ui:46
 msgid "_Remove from Folder"
 msgstr "_Удалить из папки"
 
-#: src/ui/app-grid.ui:24
+#: src/ui/app-grid.ui:25
 msgid "Search apps…"
 msgstr "Поиск приложений…"
 
@@ -563,11 +579,11 @@ msgstr "Устройства ввода"
 msgid "Sound Settings"
 msgstr "Настройки звука"
 
-#: src/ui/bt-status-page.ui:31
+#: src/ui/bt-status-page.ui:32
 msgid "Enable Bluetooth"
 msgstr "Включить Bluetooth"
 
-#: src/ui/bt-status-page.ui:55
+#: src/ui/bt-status-page.ui:56
 msgid "Bluetooth Settings"
 msgstr "Настройки Bluetooth"
 
@@ -592,7 +608,7 @@ msgid "Owner unknown"
 msgstr "Владелец неизвестен"
 
 #: src/ui/emergency-menu.ui:124 plugins/emergency-info/emergency-info.ui:195
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:234
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:190
 msgid "Emergency Contacts"
 msgstr "Контакты для экстренной помощи"
 
@@ -628,16 +644,16 @@ msgstr "Проведите вверх для разблокировки"
 msgid "Unlock"
 msgstr "Разблокировать"
 
-#: src/ui/network-auth-prompt.ui:5 src/ui/polkit-auth-prompt.ui:6
+#: src/ui/network-auth-prompt.ui:6 src/ui/polkit-auth-prompt.ui:6
 msgid "Authentication required"
 msgstr "Требуется аутентификация"
 
-#: src/ui/network-auth-prompt.ui:40
-#: plugins/ticket-box/prefs/ticket-box-prefs.c:90
+#: src/ui/network-auth-prompt.ui:41
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:235
 msgid "_Cancel"
 msgstr "_Отменить"
 
-#: src/ui/network-auth-prompt.ui:58
+#: src/ui/network-auth-prompt.ui:59
 msgid "C_onnect"
 msgstr "П_одключить"
 
@@ -697,7 +713,7 @@ msgstr "_Выйти…"
 msgid "Wi-Fi"
 msgstr "Wi-Fi"
 
-#: src/ui/wifi-status-page.ui:72
+#: src/ui/wifi-status-page.ui:73
 msgid "Wi-Fi Settings"
 msgstr "Настройки Wi-Fi"
 
@@ -720,27 +736,27 @@ msgstr "Модуль не найден"
 msgid "The plugin '%s' could not be loaded."
 msgstr "Модуль '%s' не может быть загружен."
 
-#: src/wifi-status-page.c:51
+#: src/wifi-status-page.c:52
 msgid "No Wi-Fi Device Found"
 msgstr "Устройство Wi-Fi не найдено"
 
-#: src/wifi-status-page.c:55
+#: src/wifi-status-page.c:56
 msgid "Wi-Fi Disabled"
 msgstr "Wi-Fi отключен"
 
-#: src/wifi-status-page.c:56
+#: src/wifi-status-page.c:57
 msgid "Enable Wi-Fi"
 msgstr "Включить Wi-Fi"
 
-#: src/wifi-status-page.c:59
+#: src/wifi-status-page.c:60
 msgid "Wi-Fi Hotspot Active"
 msgstr "Точка доступа Wi-Fi активна"
 
-#: src/wifi-status-page.c:60
+#: src/wifi-status-page.c:61
 msgid "Turn Off"
 msgstr "Выключить"
 
-#: src/wifi-status-page.c:63
+#: src/wifi-status-page.c:64
 msgid "No Wi-Fi Hotspots"
 msgstr "Нет точек доступа Wi-Fi"
 
@@ -777,52 +793,46 @@ msgid "Light mode"
 msgstr "Светлый стиль"
 
 #: plugins/emergency-info/emergency-info.ui:39
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:70
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:68
 msgid "Personal Information"
 msgstr "Личная информация"
 
 #: plugins/emergency-info/emergency-info.ui:47
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:88
 msgid "Date of Birth"
 msgstr "Дата рождения"
 
 #: plugins/emergency-info/emergency-info.ui:65
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:100
 msgid "Preferred Language"
 msgstr "Предпочтительный язык"
 
 #: plugins/emergency-info/emergency-info.ui:83
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:112
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:92
 msgid "Home Address"
 msgstr "Домашний адрес"
 
 #: plugins/emergency-info/emergency-info.ui:91
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:130
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:110
 msgid "Medical Information"
 msgstr "Медицинская информация"
 
 #: plugins/emergency-info/emergency-info.ui:99
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:136
 msgid "Age"
 msgstr "Возраст"
 
 #: plugins/emergency-info/emergency-info.ui:117
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:148
 msgid "Blood Type"
 msgstr "Группа крови"
 
 #: plugins/emergency-info/emergency-info.ui:135
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:160
 msgid "Height"
 msgstr "Рост"
 
 #: plugins/emergency-info/emergency-info.ui:153
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:172
 msgid "Weight"
 msgstr "Вес"
 
 #: plugins/emergency-info/emergency-info.ui:171
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:184
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:140
 msgid "Allergies"
 msgstr "Аллергии"
 
@@ -831,50 +841,74 @@ msgid "Medications & Conditions"
 msgstr "Лекарства и условия"
 
 #: plugins/emergency-info/emergency-info.ui:187
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:216
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:172
 msgid "Other Information"
 msgstr "Прочая информация"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:6
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:19
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:17
 msgid "Emergency Info Preferences"
 msgstr "Параметры инфо экстренной помощи"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:40
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:38
 msgid "Done"
 msgstr "Готово"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:76
-msgid "Owner Name"
-msgstr "Имя владельца"
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:73
+msgid "_Owner Name"
+msgstr "Имя в_ладельца"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:200
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:79
+msgid "_Date of Birth"
+msgstr "_Дата рождения"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:85
+msgid "_Preferred Language"
+msgstr "_Предпочтительный язык"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:115
+msgid "_Age"
+msgstr "В_озраст"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:121
+msgid "_Blood Type"
+msgstr "Группа _крови"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:127
+msgid "_Height"
+msgstr "_Рост"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:133
+msgid "_Weight"
+msgstr "_Вес"
+
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:156
 msgid "Medications and Conditions"
 msgstr "Лекарства и условия"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:243
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:199
 msgid "Add Contact"
 msgstr "Добавить контакт"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:288
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:226
 msgid "Add New Contact"
 msgstr "Добавить новый контакт"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:298
-msgid "Add"
-msgstr "Добавить"
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:243
+msgid "_Add"
+msgstr "_Добавить"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:319
-msgid "New Contact Name"
-msgstr "Новое имя контакта"
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:263
+msgid "_Contact Name"
+msgstr "Имя _контакта"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:333
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:269
 msgid "Relationship"
 msgstr "Родство"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:346
-msgid "Number"
-msgstr "Номер"
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:275
+msgid "_Contact Number"
+msgstr "Контактный _номер"
 
 #: plugins/launcher-box/launcher-box.ui:15
 msgid "No launchers configured"
@@ -934,23 +968,23 @@ msgstr "Pomodoro выключен"
 msgid "Pomodoro Quick Setting Preferences"
 msgstr "Параметры быстрой настройки Pomodoro"
 
-#: plugins/pomodoro-quick-setting/prefs/prefs.ui:14
+#: plugins/pomodoro-quick-setting/prefs/prefs.ui:11
 msgid "Pomodoro Technique"
 msgstr "Методика Pomodoro"
 
-#: plugins/pomodoro-quick-setting/prefs/prefs.ui:17
+#: plugins/pomodoro-quick-setting/prefs/prefs.ui:14
 msgid "_Active Duration"
 msgstr "Длительность _активности"
 
-#: plugins/pomodoro-quick-setting/prefs/prefs.ui:18
+#: plugins/pomodoro-quick-setting/prefs/prefs.ui:15
 msgid "Duration of the focus session"
 msgstr "Длительность сеанса фокусировки"
 
-#: plugins/pomodoro-quick-setting/prefs/prefs.ui:32
+#: plugins/pomodoro-quick-setting/prefs/prefs.ui:29
 msgid "_Break Duration"
 msgstr "Длительность _перерыва"
 
-#: plugins/pomodoro-quick-setting/prefs/prefs.ui:33
+#: plugins/pomodoro-quick-setting/prefs/prefs.ui:30
 msgid "Duration of the break between sessions"
 msgstr "Длительность перерыва между сеансами"
 
@@ -962,31 +996,31 @@ msgstr "Нет документов для отображения"
 msgid "Tickets"
 msgstr "Билеты"
 
-#: plugins/ticket-box/prefs/ticket-box-prefs.c:86
-msgid "Choose Folder"
-msgstr "Выбрать папку"
-
-#: plugins/ticket-box/prefs/ticket-box-prefs.c:89
+#: plugins/ticket-box/prefs/ticket-box-prefs.c:94
 msgid "_Open"
 msgstr "О_ткрыть"
+
+#: plugins/ticket-box/prefs/ticket-box-prefs.c:95
+msgid "Choose Folder"
+msgstr "Выбрать папку"
 
 #: plugins/ticket-box/prefs/ticket-box-prefs.ui:6
 msgid "Ticket Box Preferences"
 msgstr "Параметры билетного бокса"
 
-#: plugins/ticket-box/prefs/ticket-box-prefs.ui:13
+#: plugins/ticket-box/prefs/ticket-box-prefs.ui:10
 msgid "Paths"
 msgstr "Пути"
 
-#: plugins/ticket-box/prefs/ticket-box-prefs.ui:18
+#: plugins/ticket-box/prefs/ticket-box-prefs.ui:15
 msgid "Folder Settings"
 msgstr "Настройки папки"
 
-#: plugins/ticket-box/prefs/ticket-box-prefs.ui:19
+#: plugins/ticket-box/prefs/ticket-box-prefs.ui:16
 msgid "Where Phosh looks for your tickets"
 msgstr "Где Phosh ищет ваши билеты"
 
-#: plugins/ticket-box/prefs/ticket-box-prefs.ui:22
+#: plugins/ticket-box/prefs/ticket-box-prefs.ui:19
 msgid "Ticket Folder"
 msgstr "Папка с билетами"
 
@@ -1039,18 +1073,29 @@ msgstr "Безымянное событие"
 msgid "Upcoming Events Preferences"
 msgstr "Параметры предстоящих событий"
 
-#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:13
-#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:20
+#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:10
+#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:17
 msgid "Days"
 msgstr "Дни"
 
-#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:16
+#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:13
 msgid "Date Range"
 msgstr "Интервал дат"
 
-#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:17
+#: plugins/upcoming-events/prefs/upcoming-events-prefs.ui:14
 msgid "Number of days to show events for"
 msgstr "Количество дней для показа событий"
+
+#: plugins/scaling-quick-setting/qs.ui:15
+msgid "Monitor scales"
+msgstr "Масштаб экрана"
+
+#. Translators: This is scale factor of a monitor in percent
+#: plugins/scaling-quick-setting/scale-row.c:48
+#: plugins/scaling-quick-setting/scaling-quick-setting.c:93
+#, c-format
+msgid "%d%%"
+msgstr "%d%%"
 
 #: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:79
 msgid "Hotspot On"
@@ -1059,6 +1104,12 @@ msgstr "Точка доступа включена"
 #: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:81
 msgid "Hotspot Off"
 msgstr "Точка доступа выключена"
+
+#~ msgid "Add"
+#~ msgstr "Добавить"
+
+#~ msgid "Number"
+#~ msgstr "Номер"
 
 #~ msgid "Screenshot copied to clipboard"
 #~ msgstr "Снимок экрана скопирован в буфер обмена"

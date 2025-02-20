@@ -12,10 +12,11 @@
 #include "background-manager.h"
 #include "background.h"
 #include "background-cache.h"
+#include "layersurface-priv.h"
 #include "manager.h"
 #include "monitor/monitor.h"
 #include "phosh-wayland.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "util.h"
 
 #define GNOME_DESKTOP_USE_UNSTABLE_API
@@ -364,6 +365,7 @@ phosh_background_manager_idle_init (PhoshManager *manager)
   self->settings = g_settings_new ("org.gnome.desktop.background");
   g_object_connect (self->settings,
                     "swapped_signal::changed::" BG_KEY_PICTURE_URI, on_settings_changed, self,
+                    "swapped_signal::changed::" BG_KEY_PICTURE_URI_DARK, on_settings_changed, self,
                     "swapped_signal::changed::" BG_KEY_PICTURE_OPTIONS, on_settings_changed, self,
                     "swapped_signal::changed::" BG_KEY_PRIMARY_COLOR, on_settings_changed, self,
                     NULL);

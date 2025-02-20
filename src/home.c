@@ -10,9 +10,10 @@
 #define G_LOG_DOMAIN "phosh-home"
 
 #include "phosh-config.h"
+#include "layersurface-priv.h"
 #include "overview.h"
 #include "home.h"
-#include "shell.h"
+#include "shell-priv.h"
 #include "phosh-enums.h"
 #include "osk-manager.h"
 #include "style-manager.h"
@@ -60,6 +61,7 @@ struct _PhoshHome
   GtkWidget *home_bar;
   GtkWidget *rev_powerbar;
   GtkWidget *powerbar;
+  GtkWidget *evbox_home_bar;
 
   guint      debounce_handle;
   gboolean   focus_app_search;
@@ -95,7 +97,8 @@ phosh_home_update_home_bar (PhoshHome *self)
 
   if (self->use_background)
     solid = !!(self->state == PHOSH_HOME_STATE_FOLDED && drag_state != PHOSH_DRAG_SURFACE_STATE_DRAGGED);
-  phosh_util_toggle_style_class (GTK_WIDGET (self), "p-solid", solid);
+
+  phosh_util_toggle_style_class (self->evbox_home_bar, "p-solid", solid);
 }
 
 
@@ -145,7 +148,7 @@ phosh_home_get_property (GObject    *object,
 
 
 static void
-update_drag_handle (PhoshHome *self, gboolean commit)
+update_drag_handle (PhoshHome *self, gboolean queue_draw)
 {
   gboolean success;
   gint handle = 0;
@@ -153,7 +156,7 @@ update_drag_handle (PhoshHome *self, gboolean commit)
   PhoshDragSurfaceDragMode drag_mode = PHOSH_DRAG_SURFACE_DRAG_MODE_HANDLE;
   PhoshDragSurfaceState drag_state = phosh_drag_surface_get_drag_state (PHOSH_DRAG_SURFACE (self));
 
-  /* reset osk_toggle_long_press to prevent OSK from unfolding accidently */
+  /* reset osk_toggle_long_press to prevent OSK from unfolding accidentally */
   gtk_event_controller_reset (GTK_EVENT_CONTROLLER (self->osk_toggle_long_press));
 
   /* Update the handle's and dragability */
@@ -175,8 +178,9 @@ update_drag_handle (PhoshHome *self, gboolean commit)
 
   g_debug ("Drag Handle: %d", handle);
   phosh_drag_surface_set_drag_handle (PHOSH_DRAG_SURFACE (self), handle);
-  if (commit)
-    phosh_layer_surface_wl_surface_commit (PHOSH_LAYER_SURFACE (self));
+  /* Trigger redraw and surface commit */
+  if (queue_draw)
+    gtk_widget_queue_draw (GTK_WIDGET (self));
 }
 
 
@@ -198,14 +202,12 @@ on_configure_event (PhoshHome *self, GdkEventConfigure *event)
   if (gtk_widget_get_window (GTK_WIDGET (self)) != event->window)
     return FALSE;
 
-  g_debug ("%s: %dx%d,  margin: %d", __func__, event->height, event->width, margin);
+  g_debug ("%s: %dx%d, margin: %d", __func__, event->height, event->width, margin);
 
   /* If the size changes we need to update the folded margin */
   phosh_drag_surface_set_margin (PHOSH_DRAG_SURFACE (self), margin, 0);
   /* Update drag handle since overview size might have changed */
-  update_drag_handle (self, FALSE);
-  /* Trigger redraw and surface commit */
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  update_drag_handle (self, TRUE);
 
   return FALSE;
 }
@@ -303,14 +305,13 @@ fold_cb (PhoshHome *self, PhoshOverview *overview)
 }
 
 
-static gboolean
+static void
 delayed_handle_resize (gpointer data)
 {
   PhoshHome *self = PHOSH_HOME (data);
 
   self->debounce_handle = 0;
   update_drag_handle (self, TRUE);
-  return G_SOURCE_REMOVE;
 }
 
 
@@ -322,7 +323,7 @@ on_has_activities_changed (PhoshHome *self)
   /* TODO: we need to debounce the handle resize a little until all
      the queued resizing is done, would be nicer to have that tied to
      a signal */
-  self->debounce_handle = g_timeout_add (200, delayed_handle_resize, self);
+  self->debounce_handle = g_timeout_add_once (200, delayed_handle_resize, self);
   g_source_set_name_by_id (self->debounce_handle, "[phosh] delayed_handle_resize");
 }
 
@@ -515,8 +516,7 @@ on_drag_state_changed (PhoshHome *self)
   phosh_home_update_home_bar (self);
 
   phosh_layer_surface_set_kbd_interactivity (PHOSH_LAYER_SURFACE (self), kbd_interactivity);
-  update_drag_handle (self, FALSE);
-  gtk_widget_queue_draw (GTK_WIDGET (self));
+  update_drag_handle (self, TRUE);
 }
 
 
@@ -536,7 +536,8 @@ phosh_home_add_background (PhoshHome *self)
                                          /* Span over whole display */
                                          FALSE,
                                          ZWLR_LAYER_SHELL_V1_LAYER_TOP));
-  gtk_widget_show (GTK_WIDGET (self->background));
+  g_object_bind_property (self, "visible", self->background, "visible", G_BINDING_SYNC_CREATE);
+
   g_signal_connect_object (phosh_shell_get_background_manager (shell),
                            "config-changed",
                            G_CALLBACK (phosh_background_needs_update),
@@ -556,6 +557,10 @@ on_theme_name_changed (PhoshHome  *self, GParamSpec *pspec, PhoshStyleManager *s
   g_assert (PHOSH_IS_STYLE_MANAGER (style_manager));
 
   self->use_background = !phosh_style_manager_is_high_contrast (style_manager);
+  phosh_util_toggle_style_class (GTK_WIDGET (self), "p-solid", !self->use_background);
+  if (gtk_widget_get_visible (GTK_WIDGET (self)))
+    gtk_widget_set_visible (GTK_WIDGET (self->background), self->use_background);
+
   phosh_home_update_home_bar (self);
 }
 
@@ -663,6 +668,7 @@ phosh_home_class_init (PhoshHomeClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/ui/home.ui");
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, click_gesture);
+  gtk_widget_class_bind_template_child (widget_class, PhoshHome, evbox_home_bar);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, home_bar);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, osk_toggle_long_press);
   gtk_widget_class_bind_template_child (widget_class, PhoshHome, overview);

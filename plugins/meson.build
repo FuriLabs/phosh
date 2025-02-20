@@ -8,7 +8,7 @@ gtk4_ver_str = 'ADW_VERSION_@0@'.format(gtk4_ver.replace('.','_'))
 adw_ver_cmp = '>=@0@'.format(adw_ver)
 gtk4_ver_cmp = '>=@0@'.format(gtk4_ver)
 
-# Pubilc header that can also be used by out of tree plugins
+# Public header that can also be used by out of tree plugins
 phosh_plugin_config = configuration_data()
 phosh_plugin_config.set_quoted('PHOSH_PLUGIN_EXTENSION_POINT_LOCKSCREEN_WIDGET',
                                'phosh-lockscreen-widget')
@@ -54,6 +54,7 @@ quick_setting_plugins = [
   'mobile-data-quick-setting',
   'night-light-quick-setting',
   'pomodoro-quick-setting',
+  'scaling-quick-setting',
 #  'simple-custom-quick-setting',
   'wifi-hotspot-quick-setting',
 

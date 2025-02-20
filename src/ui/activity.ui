@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.24"/>
   <template class="PhoshActivity" parent="GtkEventBox">
     <property name="visible">1</property>
     <property name="can-focus">1</property>
-    <property name="valign">fill</property>
     <child>
       <object class="PhoshSwipeAwayBin" id="swipe_bin">
-        <property name="visible">True</property>
+        <property name="visible">1</property>
         <property name="orientation">vertical</property>
         <signal name="removed" handler="removed_cb" swapped="true"/>
         <child>

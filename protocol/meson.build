@@ -24,6 +24,7 @@ wl_protos = [
 ]
 
 wl_proto_headers = []
+wl_proto_headers = []
 wl_proto_sources = []
 
 foreach p : wl_protos
@@ -39,8 +40,6 @@ foreach p : wl_protos
 					      'client-header',
 					      '@INPUT@',
 					      '@OUTPUT@'],
-                                    install_dir: lib_inc_dir,
-                                    install: bindings_lib,
 				   )
   wl_proto_sources += custom_target('@0@ source'.format(proto),
 				    input: xml,

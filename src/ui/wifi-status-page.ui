@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <interface>
-  <requires lib="gtk+" version="3.20"/>
+  <requires lib="gtk+" version="3.24"/>
   <template class="PhoshWifiStatusPage" parent="PhoshStatusPage">
-    <property name="visible">True</property>
+    <property name="visible">1</property>
     <property name="title" translatable="yes">Wi-Fi</property>
     <property name="header">wifi_scan</property>
     <property name="footer">footer</property>
@@ -10,14 +10,15 @@
       <object class="GtkStack" id="stack">
         <property name="visible">1</property>
         <property name="transition-type">crossfade</property>
+        <property name="vhomogeneous">0</property>
         <child>
           <object class="PhoshStatusPagePlaceholder" id="empty_state">
-            <property name="visible">True</property>
+            <property name="visible">1</property>
             <child>
               <object class="GtkButton" id="empty_state_btn">
                 <property name="visible">1</property>
                 <property name="halign">center</property>
-                <property name="focus-on-click">False</property>
+                <property name="focus-on-click">0</property>
                 <signal name="clicked" handler="on_placeholder_clicked" object="PhoshWifiStatusPage" swapped="yes"/>
               </object>
             </child>
@@ -34,7 +35,7 @@
             <style>
               <class name="content"/>
             </style>
-            <signal name="row-activated" handler="on_network_activated_cb" object="PhoshWifiStatusPage" swapped="yes"/>
+            <signal name="row-activated" handler="on_network_activated" object="PhoshWifiStatusPage" swapped="yes"/>
           </object>
           <packing>
             <property name="name">list_box</property>
@@ -46,7 +47,7 @@
   <object class="GtkButton" id="wifi_scan">
     <property name="visible">1</property>
     <property name="valign">center</property>
-    <property name="focus-on-click">False</property>
+    <property name="focus-on-click">0</property>
     <signal name="clicked" handler="on_wifi_scan_clicked" object="PhoshWifiStatusPage" swapped="yes"/>
     <style>
       <class name="flat"/>
@@ -55,14 +56,13 @@
       <object class="GtkImage">
         <property name="visible">1</property>
         <property name="icon-name">view-refresh-symbolic</property>
-        <property name="icon-size">4</property>
       </object>
     </child>
   </object>
   <object class="GtkButton" id="footer">
     <property name="visible">1</property>
     <property name="hexpand">1</property>
-    <property name="focus-on-click">False</property>
+    <property name="focus-on-click">0</property>
     <property name="action-name">settings.launch-panel</property>
     <property name="action-target">&quot;wifi&quot;</property>
     <child>
