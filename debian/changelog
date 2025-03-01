@@ -828,7 +828,7 @@ phosh (0.8.0-1) unstable; urgency=medium
     upstream tarball since it includes the gvc submodule.
   * Build-depend libsystemd-dev.
     Needed for logind support
-  * debian: Pick phosh.service from data/ for less downstream chanegs
+  * debian: Pick phosh.service from data/ for less downstream changes
   * debian: Pick schema overrides from data/ for less downstream changes
 
  -- Guido Günther <agx@sigxcpu.org>  Tue, 19 Jan 2021 10:34:47 +0100
@@ -939,7 +939,7 @@ phosh (0.4.3-3) unstable; urgency=medium
     `debian/<number>-<revision>'.
   * Add mobile tweaks.
     This adds GSettings overrides to properly configure phosh
-    and applictions in adaptive environments.
+    and applications in adaptive environments.
 
  -- Guido Günther <agx@sigxcpu.org>  Sun, 30 Aug 2020 09:15:23 +0200
 
@@ -1020,7 +1020,7 @@ phosh (0.3.1-1) unstable; urgency=medium
 
   [ Guido Günther ]
   * debian: Add phoc-doc
-    This makes the documentation useable via devhelp.
+    This makes the documentation usable via devhelp.
 
   [ Arnaud Ferraris ]
   * debian: add salsa-ci
