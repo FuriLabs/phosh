@@ -27,11 +27,12 @@
 #include <gmobile.h>
 
 #ifdef PHOSH_HAVE_MEMFD_CREATE
-#include <sys/mman.h>
 #include <linux/memfd.h>
 #include <linux/mman.h>
-#include <fcntl.h>
 #endif
+
+#include <sys/mman.h>
+#include <fcntl.h>
 
 #include <math.h>
 
@@ -592,6 +593,44 @@ phosh_util_data_uri_to_pixbuf (const char *uri, GError **error)
   g_object_ref (pixbuf);
   return g_steal_pointer (&pixbuf);
 }
+
+
+GdkPixbuf *
+phosh_utils_pixbuf_scale_to_min (GdkPixbuf *src, int min_width, int min_height)
+{
+  double factor;
+  int src_width, src_height;
+  int new_width, new_height;
+  GdkPixbuf *dest;
+
+  g_return_val_if_fail (GDK_IS_PIXBUF (src), NULL);
+
+  src_width = gdk_pixbuf_get_width (src);
+  src_height = gdk_pixbuf_get_height (src);
+
+  factor = MAX (min_width / (double) src_width, min_height / (double) src_height);
+
+  new_width = floor (src_width * factor + 0.5);
+  new_height = floor (src_height * factor + 0.5);
+
+  dest = gdk_pixbuf_new (GDK_COLORSPACE_RGB,
+                         gdk_pixbuf_get_has_alpha (src),
+                         8, min_width, min_height);
+  if (!dest)
+    return NULL;
+
+  /* crop the result */
+  gdk_pixbuf_scale (src, dest,
+                    0, 0,
+                    min_width, min_height,
+                    (new_width - min_width) / -2,
+                    (new_height - min_height) / -2,
+                    factor,
+                    factor,
+                    GDK_INTERP_BILINEAR);
+  return dest;
+}
+
 
 static const char *(*app_attr[]) (GAppInfo *info) = {
   g_app_info_get_display_name,

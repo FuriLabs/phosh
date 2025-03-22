@@ -56,7 +56,7 @@ variables:
                     libadwaita-dev json-glib-dev gnome-bluetooth-dev modemmanager-dev gmobile-dev gsettings-desktop-schemas
   RUST_BINDINGS_BRANCH: main
   LIBPHOSH: libphosh-0.45
-  SID_PKGS: phoc
+  SID_PKGS: universal-ctags
 
 .trixie_vars: &trixie_vars
   variables:
@@ -173,7 +173,6 @@ asan-test:native-debian-trixie:
   <<: *test_before_script
   script:
     - meson setup -Dphoc_tests=enabled -Dtools=false -Db_sanitize=address -Dbuildtype=debug _build-asan
-    - meson compile -C _build-asan ./data/glib-compile-schemas:custom
     - ${XVFB_RUN} meson test --print-errorlogs -C _build-asan --suite unit --timeout-multiplier 5
   allow_failure: true
 
@@ -244,8 +243,30 @@ build-doc:
       - _reference
 
 check-po:
+  # Checks .ui files for simplification
   stage: test+docs
   extends: .phosh-check-po
+
+check-ui:
+  stage: test+docs
+  image: ${DEBIAN_IMAGE}
+  variables:
+    PHOSH_ADDITIONAL_PKGS: >
+      libgtk-3-bin
+      libgtk-4-bin
+  needs: []
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        paths:
+          - "**/*.ui"
+  script:
+    - !reference [.phosh-prepare-apt]
+    - |
+      git remote add target $CI_MERGE_REQUEST_PROJECT_URL.git
+      echo "Fetching MR target branch $CI_MERGE_REQUEST_TARGET_BRANCH_NAME from $CI_MERGE_REQUEST_PROJECT_URL"
+      git fetch target "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME"
+    - ${XVFB_RUN} ./.gitlab-ci/check-ui target/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME $CI_COMMIT_SHA
 
 check-license-headers:
   stage: test+docs
@@ -354,6 +375,7 @@ abi-compliance-checker:
     paths:
       - _build/src/libphosh-abi.dump
       - _build/src/abi-compliance-check-report.html
+    when: always
   rules:
     - if: $CI_COMMIT_TAG
     - changes:

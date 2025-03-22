@@ -209,7 +209,6 @@ static void
 close_settings_menu (PhoshSettings *self)
 {
   g_signal_emit (self, signals[SETTING_DONE], 0);
-  phosh_trigger_feedback ("button-pressed");
 }
 
 static void
@@ -242,7 +241,7 @@ on_launch_panel_activated (GSimpleAction *action, GVariant *param, gpointer data
   panel = g_variant_get_string (param, NULL);
 
   open_settings_panel (self, panel);
-  phosh_audio_settings_hide_details (self->audio_settings);
+  phosh_settings_hide_details (self);
 }
 
 
@@ -288,6 +287,7 @@ on_notifications_clear_all_clicked (PhoshSettings *self)
 static GtkWidget *
 create_notification_row (gpointer item, gpointer data)
 {
+  PhoshShell *shell = phosh_shell_get_default ();
   GtkWidget *row = NULL;
   GtkWidget *frame = NULL;
 
@@ -299,7 +299,9 @@ create_notification_row (gpointer item, gpointer data)
   frame = phosh_notification_frame_new (TRUE, NULL);
   phosh_notification_frame_bind_model (PHOSH_NOTIFICATION_FRAME (frame), item);
 
-  gtk_widget_show (frame);
+  if (!(phosh_shell_get_state (shell) & PHOSH_STATE_SETTINGS))
+    phosh_notification_frame_set_animate_show (PHOSH_NOTIFICATION_FRAME (frame), FALSE);
+  gtk_widget_set_visible (frame, TRUE);
 
   gtk_container_add (GTK_CONTAINER (row), frame);
 
@@ -585,4 +587,14 @@ phosh_settings_get_drag_handle_offset (PhoshSettings *self)
   g_return_val_if_fail (PHOSH_IS_SETTINGS (self), 0);
 
   return self->drag_handle_offset;
+}
+
+
+void
+phosh_settings_hide_details (PhoshSettings *self)
+{
+  g_return_if_fail (PHOSH_IS_SETTINGS (self));
+
+  phosh_audio_settings_hide_details (self->audio_settings);
+  phosh_quick_settings_hide_status (PHOSH_QUICK_SETTINGS (self->quick_settings));
 }
