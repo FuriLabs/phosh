@@ -497,11 +497,12 @@ on_drag_state_changed (PhoshHome *self)
   case PHOSH_DRAG_SURFACE_STATE_FOLDED:
     state = PHOSH_HOME_STATE_FOLDED;
     phosh_home_set_background_alpha (self, 0.0);
+    phosh_overview_reset (PHOSH_OVERVIEW (self->overview));
     break;
   case PHOSH_DRAG_SURFACE_STATE_DRAGGED:
     state = PHOSH_HOME_STATE_TRANSITION;
     if (self->state == PHOSH_HOME_STATE_FOLDED)
-      phosh_overview_reset (PHOSH_OVERVIEW (self->overview));
+      phosh_overview_refresh (PHOSH_OVERVIEW (self->overview));
     break;
   default:
     g_return_if_reached ();
@@ -531,7 +532,7 @@ phosh_home_add_background (PhoshHome *self)
 
   monitor = phosh_shell_get_primary_monitor (shell);
   self->background = PHOSH_BACKGROUND (phosh_background_new (
-                                         phosh_wayland_get_zwlr_layer_shell_v1(wl),
+                                         phosh_wayland_get_zwlr_layer_shell_v1 (wl),
                                          monitor,
                                          /* Span over whole display */
                                          FALSE,
@@ -544,7 +545,7 @@ phosh_home_add_background (PhoshHome *self)
                            self->background,
                            G_CONNECT_SWAPPED);
 
-  region = cairo_region_create_rectangle(&rect);
+  region = cairo_region_create_rectangle (&rect);
   gtk_widget_input_shape_combine_region (GTK_WIDGET (self->background), region);
   cairo_region_destroy (region);
 }

@@ -12,6 +12,7 @@
 #include "notification-content.h"
 
 #include <gio/gdesktopappinfo.h>
+#include <gmobile.h>
 
 /**
  * PhoshNotificationContent:
@@ -34,6 +35,7 @@ struct _PhoshNotificationContent {
 
   PhoshNotification *notification;
 
+  GtkWidget *msg_body;
   GtkWidget *lbl_summary;
   GtkWidget *lbl_body;
   GtkWidget *img_image;
@@ -74,11 +76,7 @@ set_summary (GBinding     *binding,
   PhoshNotificationContent *self = user_data;
   const char* summary = g_value_get_string (from_value);
 
-  if (summary != NULL && g_strcmp0 (summary, "")) {
-    gtk_widget_show (self->lbl_summary);
-  } else {
-    gtk_widget_hide (self->lbl_summary);
-  }
+  gtk_widget_set_visible (self->lbl_summary, !gm_str_is_null_or_empty (summary));
 
   g_value_set_string (to_value, summary);
 
@@ -173,6 +171,8 @@ set_actions (PhoshNotificationContent *self,  PhoshNotification *notification)
 
     /* The default action is already triggered by the notification body */
     if (g_strcmp0 (actions[i], "default") == 0) {
+      GtkStyleContext *context = gtk_widget_get_style_context (GTK_WIDGET (self->msg_body));
+      gtk_style_context_add_class (context, "phosh-notification-body");
       continue;
     }
 
@@ -380,6 +380,7 @@ phosh_notification_content_class_init (PhoshNotificationContentClass *klass)
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/ui/notification-content.ui");
 
+  gtk_widget_class_bind_template_child (widget_class, PhoshNotificationContent, msg_body);
   gtk_widget_class_bind_template_child (widget_class, PhoshNotificationContent, lbl_summary);
   gtk_widget_class_bind_template_child (widget_class, PhoshNotificationContent, lbl_body);
   gtk_widget_class_bind_template_child (widget_class, PhoshNotificationContent, img_image);

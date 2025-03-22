@@ -295,6 +295,25 @@ on_top_panel_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshTopPanel *
   phosh_shell_set_state (self, PHOSH_STATE_SETTINGS, state == PHOSH_TOP_PANEL_STATE_UNFOLDED);
 }
 
+static void
+update_top_bar_transparency (PhoshShell *self)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  PhoshHomeState state;
+
+  if (!priv->top_panel)
+    return;
+
+  if (priv->locked) {
+    phosh_top_panel_set_bar_transparent (PHOSH_TOP_PANEL (priv->top_panel), TRUE);
+    return;
+  }
+
+  state = phosh_home_get_state (PHOSH_HOME (priv->home));
+  phosh_top_panel_set_bar_transparent (PHOSH_TOP_PANEL (priv->top_panel),
+                                       (state != PHOSH_HOME_STATE_FOLDED));
+}
+
 
 static void
 on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
@@ -304,14 +323,11 @@ on_home_state_changed (PhoshShell *self, GParamSpec *pspec, PhoshHome *home)
 
   g_return_if_fail (PHOSH_IS_SHELL (self));
   g_return_if_fail (PHOSH_IS_HOME (home));
-
   priv = phosh_shell_get_instance_private (self);
 
+  update_top_bar_transparency (self);
+
   state = phosh_home_get_state (PHOSH_HOME (priv->home));
-
-  phosh_top_panel_set_bar_transparent (PHOSH_TOP_PANEL (priv->top_panel),
-                                       (state != PHOSH_HOME_STATE_FOLDED));
-
   phosh_shell_set_state (self, PHOSH_STATE_OVERVIEW, state == PHOSH_HOME_STATE_UNFOLDED);
 }
 
@@ -385,7 +401,7 @@ panels_create (PhoshShell *self)
                                           phosh_wayland_get_zphoc_layer_shell_effects_v1 (wl),
                                           monitor,
                                           top_layer));
-  gtk_widget_show (GTK_WIDGET (priv->top_panel));
+  gtk_widget_set_visible (GTK_WIDGET (priv->top_panel), TRUE);
 
   /* Home is created after the top-panel so it honors its exclusive zone */
   priv->home = PHOSH_DRAG_SURFACE (phosh_home_new (phosh_wayland_get_zwlr_layer_shell_v1 (wl),
@@ -445,6 +461,7 @@ set_locked (PhoshShell *self, gboolean locked)
     phosh_top_panel_fold (PHOSH_TOP_PANEL (priv->top_panel));
 
   update_top_level_layer (self);
+  update_top_bar_transparency (self);
 }
 
 
@@ -645,7 +662,7 @@ on_new_notification (PhoshShell         *self,
     g_set_weak_pointer (&priv->notification_banner,
                         phosh_notification_banner_new (notification));
 
-    gtk_widget_show (GTK_WIDGET (priv->notification_banner));
+    gtk_widget_set_visible (GTK_WIDGET (priv->notification_banner), TRUE);
   }
 }
 
@@ -801,6 +818,8 @@ setup_idle_cb (PhoshShell *self)
   priv->cell_broadcast_manager = phosh_cell_broadcast_manager_new ();
 
   setup_primary_monitor_signal_handlers (self);
+  /* Setup event hooks late so state changes in UI files don't trigger feedback */
+  phosh_feedback_manager_setup_event_hooks (priv->feedback_manager);
 
   /* Delay signaling to the compositor a bit so that idle handlers get a chance to run and
      the user can unlock right away. Ideally we'd not need this */
@@ -2183,7 +2202,7 @@ phosh_shell_fade_out (PhoshShell *self, guint timeout)
 
     fader = phosh_fader_new (monitor);
     g_ptr_array_add (priv->faders, fader);
-    gtk_widget_show (GTK_WIDGET (fader));
+    gtk_widget_set_visible (GTK_WIDGET (fader), TRUE);
     if (timeout > 0) {
       guint id;
 
