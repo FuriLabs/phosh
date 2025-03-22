@@ -1,8 +1,13 @@
-phosh (0.46~rc1-1) UNRELEASED; urgency=medium
+phosh (0.46~rc1-1) unstable; urgency=medium
 
   * New upstream release
+  * Relax phosh-common dependency.
+    We don't drop gsettings without further notice and this eases partial
+    upgrades.
+  * Ship new manpage
+  * Add two new symbols used by our plugins
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 22 Mar 2025 09:43:01 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 22 Mar 2025 10:03:34 +0100
 
 phosh (0.45.0-1) unstable; urgency=medium
 
