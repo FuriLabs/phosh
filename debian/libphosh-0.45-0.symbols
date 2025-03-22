@@ -93,6 +93,7 @@ libphosh-0.45.so.0 libphosh-0.45-0 #MINVER#
  phosh_status_icon_set_icon_name@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_icon_set_icon_size@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_icon_set_info@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_status_page_get_content@LIBPHOSH_0_45_0 0.46~rc1
  phosh_status_page_get_footer@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_get_header@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_get_title@LIBPHOSH_0_45_0 0.45~rc1
@@ -103,6 +104,7 @@ libphosh-0.45.so.0 libphosh-0.45-0 #MINVER#
  phosh_status_page_placeholder_get_type@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_placeholder_set_icon_name@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_placeholder_set_title@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_status_page_set_content@LIBPHOSH_0_45_0 0.46~rc1
  phosh_status_page_set_footer@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_set_header@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_set_title@LIBPHOSH_0_45_0 0.45~rc1
