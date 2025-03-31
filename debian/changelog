@@ -1,8 +1,23 @@
-phosh (0.46.0-1) UNRELEASED; urgency=medium
+phosh (0.46.0-1) unstable; urgency=medium
 
   * New upstream release
+    * lockscreen: Allow to set background image. Off by default, can be
+      enabled via mobile-settings (or `gsettings`).
+    * Close quick-settings status pages when closing the top panel
+    * Notifications: Use slide down animation in the message tray and allow to
+      focus default action
+    * media-player: Use `can-play` to device whether we should show the widget
+    * media-player: Download cover-art when possible
+    * layout-manager: Handle notches/cutouts in the indicator areas. This
+      helps devices with a e.g. camera in the left display corner (like
+      the Nothing Phone).
+    * Use more consistent button press feedback
+    * wifi-quick-setting: Indicate ongoing Wi-Fi scans in the status page
+    * Add `phosh.gsettings(5)` manpage.
+    * Set more wallpaper friendly defaults and improve legibility, reduce
+      flicker, fix thumbnail scaling and other fixes.
 
- -- Guido Günther <agx@sigxcpu.org>  Mon, 31 Mar 2025 11:34:16 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 31 Mar 2025 11:41:46 +0200
 
 phosh (0.46~rc1-1) unstable; urgency=medium
 
