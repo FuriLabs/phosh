@@ -1,3 +1,10 @@
+phosh (0.46.0-3) unstable; urgency=medium
+
+  * Backport patches from phosh's 0.46 branch. This fixes icons in the app
+    launch splash and app grid broken by the GNOME 48 update.
+
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 03 May 2025 09:38:50 +0200
+
 phosh (0.46.0-2) unstable; urgency=medium
 
   * d/control: Bump libmm-glib build-dependency.
