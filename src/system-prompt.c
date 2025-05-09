@@ -446,7 +446,7 @@ on_password_changed (PhoshSystemPrompt *self,
                      GtkEditable *editable)
 {
   PhoshSystemPromptPrivate *priv;
-  int upper, lower, digit, misc;
+  int upper, digit, misc;
   const char *password;
   double pwstrength;
   int length, i;
@@ -471,18 +471,15 @@ on_password_changed (PhoshSystemPrompt *self,
 
   length = strlen (password);
   upper = 0;
-  lower = 0;
   digit = 0;
   misc = 0;
 
   for ( i = 0; i < length ; i++) {
     if (g_ascii_isdigit (password[i]))
       digit++;
-    else if (g_ascii_islower (password[i]))
-      lower++;
     else if (g_ascii_isupper (password[i]))
       upper++;
-    else
+    else if (!g_ascii_islower (password[i]))
       misc++;
   }
 
@@ -643,7 +640,9 @@ phosh_system_prompt_class_init (PhoshSystemPromptClass *klass)
    */
   g_object_class_install_property (object_class, PROP_PASSWORD_VISIBLE,
                                    g_param_spec_boolean ("password-visible", "", "",
-                                                         FALSE, G_PARAM_READABLE));
+                                                         FALSE,
+                                                         G_PARAM_READABLE |
+                                                         G_PARAM_STATIC_STRINGS));
 
   /**
    * GcrPromptDialog:confirm-visible:
@@ -652,7 +651,9 @@ phosh_system_prompt_class_init (PhoshSystemPromptClass *klass)
    */
   g_object_class_install_property (object_class, PROP_CONFIRM_VISIBLE,
                                    g_param_spec_boolean ("confirm-visible", "", "",
-                                                         FALSE, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+                                                         FALSE,
+                                                         G_PARAM_READABLE |
+                                                         G_PARAM_STATIC_STRINGS));
 
   /**
    * PhoshSystemPrompt:warning-visible:
@@ -661,7 +662,9 @@ phosh_system_prompt_class_init (PhoshSystemPromptClass *klass)
    */
   g_object_class_install_property (object_class, PROP_WARNING_VISIBLE,
                                    g_param_spec_boolean ("warning-visible", "", "",
-                                                         FALSE, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+                                                         FALSE,
+                                                         G_PARAM_READABLE |
+                                                         G_PARAM_STATIC_STRINGS));
 
   /**
    * PhoshSystemPrompt:choice-visible:
@@ -670,7 +673,9 @@ phosh_system_prompt_class_init (PhoshSystemPromptClass *klass)
    */
   g_object_class_install_property (object_class, PROP_CHOICE_VISIBLE,
                                    g_param_spec_boolean ("choice-visible", "", "",
-                                                         FALSE, G_PARAM_READABLE | G_PARAM_STATIC_STRINGS));
+                                                         FALSE,
+                                                         G_PARAM_READABLE |
+                                                         G_PARAM_STATIC_STRINGS));
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/ui/system-prompt.ui");

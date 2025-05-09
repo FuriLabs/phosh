@@ -62,6 +62,7 @@
           <object class="PhoshQuickSetting">
             <property name="visible" bind-source="feedbackinfo" bind-property="present" bind-flags="sync-create"/>
             <property name="status-icon">feedbackinfo</property>
+            <property name="status-page">feedback_status_page</property>
             <property name="long-press-action-name">settings.launch-panel</property>
             <property name="long-press-action-target">&quot;notifications&quot;</property>
             <signal name="clicked" handler="on_feedback_clicked" object="PhoshQuickSettings" swapped="yes"/>
@@ -99,44 +100,47 @@
   </template>
   <object class="PhoshWWanInfo" id="wwaninfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshWifiInfo" id="wifiinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshBtInfo" id="btinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshBatteryInfo" id="batteryinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshRotateInfo" id="rotateinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshFeedbackInfo" id="feedbackinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshTorchInfo" id="torchinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshDockedInfo" id="dockedinfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshVpnInfo" id="vpninfo">
     <property name="visible">1</property>
-    <property name="icon-size">1</property>
+    <property name="pixel-size">16</property>
   </object>
   <object class="PhoshWifiStatusPage" id="wifi_status_page">
     <property name="visible">1</property>
   </object>
   <object class="PhoshBtStatusPage" id="bt_status_page">
+    <property name="visible">1</property>
+  </object>
+  <object class="PhoshFeedbackStatusPage" id="feedback_status_page">
     <property name="visible">1</property>
   </object>
 </interface>
