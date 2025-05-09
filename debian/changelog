@@ -1,3 +1,9 @@
+phosh (0.47~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 09 May 2025 15:34:41 +0200
+
 phosh (0.46.0-3) unstable; urgency=medium
 
   * Backport patches from phosh's 0.46 branch. This fixes icons in the app
