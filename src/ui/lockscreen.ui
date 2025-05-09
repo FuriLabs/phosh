@@ -3,6 +3,7 @@
   <requires lib="gtk+" version="3.24"/>
   <requires lib="libhandy" version="1.8"/>
   <template class="PhoshLockscreen" parent="PhoshLayerSurface">
+    <initial-focus name="btn_submit"/>
     <child>
       <object class="HdyCarousel" id="carousel">
         <property name="visible">1</property>
@@ -46,7 +47,7 @@
                       <object class="GtkImage">
                         <property name="visible">1</property>
                         <property name="icon-name">go-next-symbolic</property>
-                        <property name="icon-size">1</property>
+                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
@@ -69,7 +70,8 @@
               <object class="GtkBox" id="box_info">
                 <property name="visible">1</property>
                 <property name="orientation">vertical</property>
-                <property name="expand">1</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
                 <child>
                   <object class="GtkBox">
                     <property name="visible">1</property>
@@ -247,7 +249,7 @@
                       <object class="GtkImage">
                         <property name="visible">1</property>
                         <property name="icon-name">go-previous-symbolic</property>
-                        <property name="icon-size">1</property>
+                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
@@ -272,7 +274,7 @@
             <property name="spacing">12</property>
             <property name="margin-top">100</property>
             <style>
-                <class name="phosh-lockscreen-unlocker"/>
+              <class name="phosh-lockscreen-unlocker"/>
             </style>
             <child>
               <object class="GtkLabel" id="lbl_unlock_status">

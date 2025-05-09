@@ -13,6 +13,8 @@
 
 #include "phosh-config.h"
 
+#include "app-list-model.h"
+
 #include "util.h"
 #include <gtk/gtk.h>
 
@@ -65,21 +67,9 @@ phosh_get_desktop_app_info_for_app_id (const char *app_id)
   g_autofree char *lowercase = NULL;
   GDesktopAppInfo *app_info = NULL;
   char *last_component;
-  static char *mappings[][2] = {
-    { "Audacity", "org.audacityteam.Audacity" }, /* flatpak,X11 */
-    { "Gimp-2.10", "gimp" }, /* X11 */
-    { "krita", "org.kde.krita" }, /* X11 */
-  };
+  PhoshAppListModel *model = phosh_app_list_model_get_default ();
 
   g_assert (app_id);
-
-  /* fix up applications with known broken app-id */
-  for (int i = 0; i < G_N_ELEMENTS (mappings); i++) {
-    if (strcmp (app_id, mappings[i][0]) == 0) {
-      app_id = mappings[i][1];
-      break;
-    }
-  }
 
   desktop_id = g_strdup_printf ("%s.desktop", app_id);
   g_return_val_if_fail (desktop_id, NULL);
@@ -87,6 +77,10 @@ phosh_get_desktop_app_info_for_app_id (const char *app_id)
 
   if (app_info)
     return app_info;
+
+  app_info = phosh_app_list_model_lookup_by_startup_wm_class (model, app_id);
+  if (app_info)
+    return g_object_ref (app_info);
 
   /* try to handle the case where app-id is rev-DNS, but desktop file is not */
   last_component = strrchr(app_id, '.');
@@ -103,15 +97,14 @@ phosh_get_desktop_app_info_for_app_id (const char *app_id)
 
   /* X11 WM_CLASS is often capitalized, so try in lowercase as well */
   lowercase = g_utf8_strdown (last_component ?: app_id, -1);
-  g_free (desktop_id);
-  desktop_id = g_strdup_printf ("%s.desktop", lowercase);
-  g_return_val_if_fail (desktop_id, NULL);
-  app_info = g_desktop_app_info_new (desktop_id);
+  g_clear_pointer (&desktop_id, g_free);
 
-  if (!app_info)
-    g_message ("Could not find application for app-id '%s'", app_id);
+  app_info = phosh_app_list_model_lookup_by_startup_wm_class (model, lowercase);
+  if (app_info)
+    return g_object_ref (app_info);
 
-  return app_info;
+  g_message ("Could not find application for app-id '%s'", app_id);
+  return NULL;
 }
 
 /**
@@ -809,6 +802,76 @@ phosh_util_open_settings_panel (const char *panel)
                             "org.gtk.Actions",
                             NULL,
                             (GAsyncReadyCallback) on_dbus_proxy_new_ready,
+                            g_strdup (panel));
+}
+
+
+static void
+on_mobile_settings_activate_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
+{
+  g_autoptr (GDBusProxy) proxy = G_DBUS_PROXY (source_object);
+  g_autoptr (GError) err = NULL;
+  g_autoptr (GVariant) output = NULL;
+  g_autofree char* panel = user_data;
+
+  output = g_dbus_proxy_call_finish (proxy, res, &err);
+  if (output == NULL)
+    g_warning ("Can't open %s panel: %s", panel, err->message);
+}
+
+
+static void
+on_mobile_settings_dbus_proxy_new_ready (GObject *source_object, GAsyncResult *res, gpointer data)
+{
+  GDBusProxy *proxy;
+  g_autoptr (GError) err = NULL;
+  g_autofree char *panel = data;
+  GVariantBuilder builder;
+  GVariant *params[3];
+  GVariant *array[1];
+
+  proxy = g_dbus_proxy_new_for_bus_finish (res, &err);
+  if (!proxy) {
+    g_warning ("Can't open panel %s: %s", panel, err->message);
+    return;
+  }
+
+  g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+  g_variant_builder_add (&builder, "v", g_variant_new_string (""));
+
+  array[0] = g_variant_new ("v", g_variant_new ("(sav)", panel, &builder));
+
+  params[0] = g_variant_new_string ("set-panel");
+  params[1] = g_variant_new_array (G_VARIANT_TYPE ("v"), array, 1);
+  params[2] = g_variant_new_array (G_VARIANT_TYPE ("{sv}"), NULL, 0);
+
+  g_dbus_proxy_call (proxy,
+                     "Activate",
+                     g_variant_new_tuple (params, 3),
+                     G_DBUS_CALL_FLAGS_NONE,
+                     -1,
+                     NULL,
+                     on_mobile_settings_activate_ready,
+                     g_steal_pointer (&panel));
+}
+
+/**
+ * phosh_util_open_mobile_settings_panel:
+ * @panel: A settings panel name
+ *
+ * Open the settings panel corresponding to the given name.
+ */
+void
+phosh_util_open_mobile_settings_panel (const char *panel)
+{
+  g_dbus_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                            G_DBUS_PROXY_FLAGS_NONE,
+                            NULL,
+                            "mobi.phosh.MobileSettings",
+                            "/mobi/phosh/MobileSettings",
+                            "org.gtk.Actions",
+                            NULL,
+                            on_mobile_settings_dbus_proxy_new_ready,
                             g_strdup (panel));
 }
 

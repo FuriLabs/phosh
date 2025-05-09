@@ -74,21 +74,21 @@ end_notify_feedback (PhoshNotifyFeedback *self)
 static const char *
 find_event_inactive (const char *category)
 {
-  const char *ret = NULL;
+  const char *ret = "notification-missed-generic";
 
-  if (g_strcmp0 (category, "email.arrived") == 0) {
+  if (gm_str_is_null_or_empty (category))
+    return ret;
+
+  if (g_str_equal (category, "email.arrived")) {
     ret = "message-missed-email";
-  } else if (g_strcmp0 (category, "im.received") == 0) {
+  } else if (g_str_equal (category, "im.received")) {
     ret = "message-missed-instant";
-  } else if (g_strcmp0 (category, "x-phosh.sms.received") == 0) {
+  } else if (g_str_equal (category, "x-phosh.sms.received")) {
     ret = "message-missed-sms";
-  } else if (g_strcmp0 (category, "x-gnome.call.unanswered") == 0) {
+  } else if (g_str_equal (category, "x-gnome.call.unanswered")) {
     ret = "phone-missed-call";
-  } else if (g_strcmp0 (category, "call.unanswered") == 0) {
+  } else if (g_str_equal (category, "call.unanswered")) {
     ret = "phone-missed-call";
-  } else {
-    /* TODO: notification-missed-generic */
-    ret = "message-missed-notification";
   }
 
   return ret;
@@ -97,6 +97,7 @@ find_event_inactive (const char *category)
 /**
  * find_event_active:
  * @category: The category to look up the event for
+ * @important:(out): Whether the event is considered important
  *
  * Look up an event when for a notification category when the device
  * is in active use.
@@ -104,26 +105,32 @@ find_event_inactive (const char *category)
  * Returns:(nullable): The event name
  */
 static const char *
-find_event_active (const char *category)
+find_event_active (const char *category, gboolean *important)
 {
-  const char *ret = NULL;
+  const char *ret = "notification-new-generic";
 
-  if (g_strcmp0 (category, "email.arrived") == 0)
+  if (gm_str_is_null_or_empty (category))
+    return ret;
+
+  if (g_str_equal (category, "email.arrived"))
     ret = "message-new-email";
-  else if (g_strcmp0 (category, "im.received") == 0)
+  else if (g_str_equal (category, "im.received"))
     ret = "message-new-instant";
-  else if (g_strcmp0 (category, "x-phosh.sms.received") == 0)
+  else if (g_str_equal (category, "x-phosh.sms.received"))
     ret = "message-new-sms";
-  else if (g_strcmp0 (category, "x-gnome.call.unanswered") == 0)
+  else if (g_str_equal (category, "x-gnome.call.unanswered"))
     ret = "phone-missed-call";
-  else if (g_strcmp0 (category, "call.ended") == 0)
+  else if (g_str_equal (category, "call.ended"))
     ret = "phone-hangup";
-  else if (g_strcmp0 (category, "call.incoming") == 0)
+  else if (g_str_equal (category, "call.incoming"))
     ret = "phone-incoming-call";
-  else if (g_strcmp0 (category, "call.unanswered") == 0)
+  else if (g_str_equal (category, "call.unanswered"))
     ret = "phone-missed-call";
-  else
-    ret = "notification-new-generic";
+  else if (g_str_has_prefix (category, "x-phosh-cellbroadcast.")) {
+    ret = "message-new-cellbroadcast";
+    if (important)
+      *important = TRUE;
+  }
 
   return ret;
 }
@@ -202,22 +209,21 @@ maybe_trigger_feedback (PhoshNotifyFeedback     *self,
     /* The default event */
     if (!inactive_only) {
       const char *name;
+      gboolean important = FALSE;
 
-      name = find_event_active (category);
+      name = find_event_active (category, &important);
       if (name) {
         g_autoptr (LfbEvent) event = event = lfb_event_new (name);
 
         lfb_event_set_feedback_profile (event, profile);
-        if (sound_file) {
-#ifdef PHOSH_HAVE_LFB_SOUND_FILE
+        if (sound_file)
           lfb_event_set_sound_file (event, sound_file);
-#else
-          g_warning_once ("Lfb lacks sound-file support");
-#endif
-        }
+
         if (app_id)
           lfb_event_set_app_id (event, app_id);
         g_debug ("Emitting event %s for %s, profile: %s", name, app_id ?: "unknown", profile);
+        if (important && app_id)
+          lfb_event_set_important (event, TRUE);
         lfb_event_trigger_feedback_async (event, NULL, NULL, NULL);
         /* TODO: we should better track that on the notification */
         g_set_object (&self->active_event, event);

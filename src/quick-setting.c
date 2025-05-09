@@ -425,9 +425,9 @@ phosh_quick_setting_set_active (PhoshQuickSetting *self, gboolean active)
   priv->active = active;
 
   if (priv->active)
-    gtk_widget_set_state_flags (GTK_WIDGET (self), GTK_STATE_FLAG_ACTIVE, FALSE);
+    gtk_widget_set_state_flags (GTK_WIDGET (self), GTK_STATE_FLAG_CHECKED, FALSE);
   else
-    gtk_widget_unset_state_flags (GTK_WIDGET (self), GTK_STATE_FLAG_ACTIVE);
+    gtk_widget_unset_state_flags (GTK_WIDGET (self), GTK_STATE_FLAG_CHECKED);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_ACTIVE]);
 }
@@ -466,7 +466,7 @@ phosh_quick_setting_set_showing_status (PhoshQuickSetting *self, gboolean showin
   else
     icon_name = "go-next-symbolic";
 
-  gtk_image_set_from_icon_name (priv->arrow, icon_name, GTK_ICON_SIZE_BUTTON);
+  gtk_image_set_from_icon_name (priv->arrow, icon_name, -1);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_SHOWING_STATUS]);
 }
