@@ -36,6 +36,7 @@ Build-Depends:
  libxml2-utils,
  meson,
  python3-docutils <!nodoc>,
+ valac,
 # for the plugins
  libecal2.0-dev,
  evolution-data-server-dev,
@@ -56,6 +57,7 @@ Build-Depends:
  python3-pytest <!nocheck>,
  wlr-randr <!nocheck>,
  xauth <!nocheck>,
+ xmlstarlet <!nocheck>,
  xvfb <!nocheck>,
 Standards-Version: 4.7.0
 Homepage: https://phosh.mobi/
