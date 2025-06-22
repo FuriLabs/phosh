@@ -38,12 +38,17 @@ libphosh-0.45.so.0 libphosh-0.45-0 #MINVER#
  phosh_lockscreen_set_page@LIBPHOSH_0_45_0 0.45~rc1
  phosh_lockscreen_set_unlock_status@LIBPHOSH_0_45_0 0.45~rc1
  phosh_lockscreen_shake_pin_entry@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_media_player_get_type@LIBPHOSH_0_45_0 0.48~rc1
+ phosh_media_player_new@LIBPHOSH_0_45_0 0.48~rc1
+ phosh_media_player_set_player@LIBPHOSH_0_45_0 0.48~rc1
  phosh_monitor_get_fractional_scale@LIBPHOSH_0_45_0 0.45~rc1
  phosh_monitor_get_type@LIBPHOSH_0_45_0 0.45~rc1
  phosh_monitor_manager_apply_monitor_config@LIBPHOSH_0_45_0 0.45~rc1
  phosh_monitor_manager_get_night_light_supported@LIBPHOSH_0_45_0 0.45~rc1
  phosh_monitor_manager_get_type@LIBPHOSH_0_45_0 0.45~rc1
  phosh_monitor_manager_set_monitor_scale@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_mpris_manager_get_known_players@LIBPHOSH_0_45_0 0.48~rc1
+ phosh_mpris_manager_get_type@LIBPHOSH_0_45_0 0.48~rc1
  phosh_notification_get_type@LIBPHOSH_0_45_0 0.45~rc1
  phosh_notify_manager_add_shell_notification@LIBPHOSH_0_45_0 0.45~rc1
  phosh_notify_manager_get_default@LIBPHOSH_0_45_0 0.45~rc1
@@ -74,6 +79,7 @@ libphosh-0.45.so.0 libphosh-0.45-0 #MINVER#
  phosh_shell_get_lockscreen_manager@LIBPHOSH_0_45_0 0.45~rc1
  phosh_shell_get_lockscreen_type@LIBPHOSH_0_45_0 0.45~rc1
  phosh_shell_get_monitor_manager@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_shell_get_mpris_manager@LIBPHOSH_0_45_0 0.48~rc1
  phosh_shell_get_primary_monitor@LIBPHOSH_0_45_0 0.45~rc1
  phosh_shell_get_screenshot_manager@LIBPHOSH_0_45_0 0.45~rc1
  phosh_shell_get_session_manager@LIBPHOSH_0_45_0 0.45~rc1
