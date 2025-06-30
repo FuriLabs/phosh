@@ -1,8 +1,16 @@
-phosh (0.48.0-1) UNRELEASED; urgency=medium
+phosh (0.48.0-1) experimental; urgency=medium
 
   * New upstream release
+    * New lockscreen plugin that allows to interact with all currently
+      running media players that use the MPRIS protocol.
+    * Build VAPI files so one can also write plugins in vala (See
+      https://gitlab.gnome.org/guidog/phosh-vala-plugins) for an example
+    * Enable Cell Broadcast dialogs by default. Mobile Settings has the
+      needed UI bits now.
+    * Update list of adaptive apps
+    * Various bug fixes
 
- -- Guido Günther <agx@sigxcpu.org>  Mon, 30 Jun 2025 16:38:10 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 30 Jun 2025 16:39:58 +0200
 
 phosh (0.48~rc1-1) experimental; urgency=medium
 
