@@ -983,6 +983,7 @@ on_nmclient_devices_changed (PhoshWifiManager *self, GParamSpec *pspec, NMClient
   const GPtrArray *devs;
   NMDevice *dev;
   NMDeviceWifi *wifi_dev = NULL;
+  const char *iface;
 
   g_return_if_fail (PHOSH_IS_WIFI_MANAGER (self));
   g_return_if_fail (NM_IS_CLIENT (nmclient));
@@ -1002,6 +1003,14 @@ on_nmclient_devices_changed (PhoshWifiManager *self, GParamSpec *pspec, NMClient
   for (int i = 0; i < devs->len; i++) {
     dev = g_ptr_array_index (devs, i);
     if (NM_IS_DEVICE_WIFI (dev)) {
+      iface = nm_device_get_iface (dev);
+
+      /* Check if the interface is "ap*" or "p2p*" and ignore it */
+      if (g_str_has_prefix (iface, "ap") || g_str_has_prefix (iface, "p2p")) {
+        g_debug ("Ignoring device with interface: %s", iface);
+        continue;
+      }
+
       g_debug ("Wi-Fi device connected at %d", i);
       have_wifi_dev = TRUE;
       wifi_dev = NM_DEVICE_WIFI (dev);
