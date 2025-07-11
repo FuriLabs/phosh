@@ -51,7 +51,7 @@ Build-Depends:
  xauth <!nocheck>,
  xmlstarlet <!nocheck>,
  xvfb <!nocheck>,
-Standards-Version: 4.7.0
+Standards-Version: 4.7.2
 Homepage: https://phosh.mobi/
 Vcs-Browser: https://salsa.debian.org/DebianOnMobile-team/phosh
 Vcs-Git: https://salsa.debian.org/DebianOnMobile-team/phosh.git
