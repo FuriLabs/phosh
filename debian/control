@@ -32,6 +32,7 @@ Build-Depends:
  libupower-glib-dev,
  libwayland-dev,
  meson,
+ valac,
  python3-docutils <!nodoc>,
 # for the plugins
  libecal2.0-dev,

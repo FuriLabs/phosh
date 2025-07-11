@@ -2,7 +2,7 @@
 
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
-CONFIGURE_OPTS=-Dphoc_tests=disabled -Dbindings-lib=true
+CONFIGURE_OPTS=-Dphoc_tests=disabled -Dbindings-lib=true -Dvapi=true
 TEST = LC_ALL=C.UTF-8 xvfb-run -a -s "-noreset" dbus-run-session -- dh_auto_test -- --no-suite manual --print-errorlogs
 
 ifeq ($(filter nodoc,$(DEB_BUILD_PROFILES)),)
