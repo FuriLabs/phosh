@@ -1,1 +1,4 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+search-Link-statically.patch
+search-Don-t-install-library.patch
+searchd-Honor-meson-option.patch
