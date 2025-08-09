@@ -1,7 +1,7 @@
 ---
 include:
   - project: 'guidog/meta-phosh'
-    ref: '5e3667e2e4d3f23a5dcadaa2a4aadc8824a9e565'
+    ref: '7e4c54478a07dfa3df0867a3c7be067cd254165d'
     file: '/ci/phosh-common-jobs.yml'
   - project: 'Infrastructure/freedesktop-ci-templates'
     ref: 'd03cddbcff35f26861429fc816c00323f48e99af'
@@ -60,7 +60,7 @@ variables:
 
 .trixie_vars: &trixie_vars
   variables:
-    BUILD_OPTS: -Dcallui-i18n=true -Dphoc_tests=enabled ${COMMON_BUILD_OPTS}
+    BUILD_OPTS: -Dcallui-i18n=true -Dphoc_tests=enabled -Dsearchd=true ${COMMON_BUILD_OPTS}
 
 .test_before_script: &test_before_script
   before_script:
@@ -131,7 +131,7 @@ build:lib-debian-trixie:
   stage: build
   image: ${DEBIAN_IMAGE}
   variables:
-    BUILD_OPTS: --werror -Dtests=false -Dtools=false -Dbindings-lib=true -Dvapi=true
+    BUILD_OPTS: --werror -Dtests=false -Dtools=false -Dbindings-lib=true -Dvapi=true -Dsearchd=true
   <<: *build_before_script
   script:
     - meson setup ${BUILD_OPTS} _build
@@ -164,7 +164,7 @@ asan-test:native-debian-trixie:
   <<: *trixie_vars
   <<: *test_before_script
   script:
-    - meson setup -Dphoc_tests=enabled -Dtools=false -Db_sanitize=address -Dbuildtype=debug _build-asan
+    - meson setup -Dphoc_tests=enabled -Dtools=false -Db_sanitize=address -Dbuildtype=debug -Dsearchd=true _build-asan
     - ${XVFB_RUN} meson test --print-errorlogs -C _build-asan --suite unit --timeout-multiplier 5
   allow_failure: true
 
@@ -246,6 +246,7 @@ check-ui:
     PHOSH_ADDITIONAL_PKGS: >
       libgtk-3-bin
       libgtk-4-bin
+      xvfb
   needs: []
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
@@ -333,6 +334,11 @@ check-markdown:
         paths:
           - "*.md"
           - "docs/*.md"
+
+check-meson:
+  stage: style-checks
+  extends:
+    - .phosh-check-meson
 
 check-style:
   stage: style-checks
