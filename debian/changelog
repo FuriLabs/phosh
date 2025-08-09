@@ -1,8 +1,15 @@
-phosh (0.49~rc1-1) UNRELEASED; urgency=medium
+phosh (0.49~rc1-1) experimental; urgency=medium
 
   * New upstream release
+    * upcoming-events: Allow to exclude days without events
+    * Use phrosh portal when available
+    * overview: Don't let search entry take the whole width
+    * Cellbroadcast related fixes
+    * Add searchd
+  * Backport searchd related build system fixes
+  * Enable searchd (not yet used by phosh itself)
 
- -- Guido Günther <agx@sigxcpu.org>  Sat, 09 Aug 2025 19:30:30 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sat, 09 Aug 2025 20:07:27 +0200
 
 phosh (0.48.0-2) experimental; urgency=medium
 
