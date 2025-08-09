@@ -4,6 +4,7 @@ usr/lib/systemd/user/mobi.phosh.Shell.service
 usr/lib/systemd/user/mobi.phosh.Shell.target
 usr/libexec/phosh
 usr/libexec/phosh-calendar-server
+usr/libexec/phosh-searchd
 usr/share/icons/hicolor/symbolic/apps/mobi.phosh.Shell-symbolic.svg
 usr/share/locale
 usr/share/wayland-sessions/phosh.desktop
@@ -11,5 +12,6 @@ usr/share/phosh/phoc.ini
 usr/share/gnome-session/sessions/phosh.session
 usr/share/applications/mobi.phosh.Shell.desktop
 usr/share/dbus-1/services/mobi.phosh.Shell.CalendarServer.service
+usr/share/dbus-1/services/mobi.phosh.Shell.Search.service
 usr/share/xdg-desktop-portal/phosh-portals.conf
 usr/share/xdg-desktop-portal/portals/phosh-shell.portal
