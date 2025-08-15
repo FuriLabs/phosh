@@ -1,12 +1,16 @@
-phosh (0.49.0-1) UNRELEASED; urgency=medium
+phosh (0.49.0-1) unstable; urgency=medium
 
+  * Upload to unstable
   * New upstream release
+    * Improve media widget's cover art thumbnails
+    * Improve keypad and search bar style
+  * Drop patches. Applied upstream
 
- -- Guido Günther <agx@sigxcpu.org>  Fri, 15 Aug 2025 12:21:56 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 15 Aug 2025 12:24:54 +0200
 
 phosh (0.49~rc1-1) experimental; urgency=medium
 
-  * New upstream release
+  * New upstream release candidate
     * upcoming-events: Allow to exclude days without events
     * Use phrosh portal when available
     * overview: Don't let search entry take the whole width
