@@ -85,21 +85,15 @@ foreach p : dbus_client_protos + dbus_server_protos
   name = p[0]
   xml = p[1]
   prefix = p[2]
-  is_libphosh_header = p[3]
   targets = gnome.gdbus_codegen(
     name,
     xml,
     interface_prefix: prefix,
-    install_header: bindings_lib and is_libphosh_header,
     install_dir: dbus_inc_dir,
     namespace: dbus_prefix,
   )
   generated_dbus_sources += targets[0]
   generated_dbus_headers += targets[1]
-  if is_libphosh_header
-    libphosh_generated_dbus_sources += targets[0]
-    libphosh_generated_dbus_headers += targets[1]
-  endif
 endforeach
 
 #
