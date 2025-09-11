@@ -1,3 +1,7 @@
 tests-Skip-symbol-check-on-some-architectures.patch
 splash-Use-larger-icon-again.patch
 app-grid-Fix-missing-icon.patch
+cell-broadcast-prompt-Strip-whitespace.patch
+cell-broadcast-prompt-Close-dialog-on-swipe.patch
+wifi-network-row-Don-t-set-active-indicator-visible.patch
+wifi-network-Don-t-unconditionally-overwrite-active-acces.patch

@@ -1,0 +1,30 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Wed, 23 Apr 2025 11:47:08 +0200
+Subject: wifi-network-row: Don't set active indicator visible
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+We sync it with a property in `init` so save that extra setup step.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+(cherry picked from commit b428c746c5819dc52cf2705da023a88980cbecf9)
+
+Part-of: <https://gitlab.gnome.org/World/Phosh/phosh/-/merge_requests/1772>
+(cherry picked from commit 20d1f03b8fa37884bab71cc7015fa6d9f71da0d0)
+---
+ src/ui/wifi-network-row.ui | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/src/ui/wifi-network-row.ui b/src/ui/wifi-network-row.ui
+index 3ba5ec1..3a048c0 100644
+--- a/src/ui/wifi-network-row.ui
++++ b/src/ui/wifi-network-row.ui
+@@ -27,7 +27,6 @@
+     </child>
+     <child>
+       <object class="GtkImage" id="active_indicator">
+-        <property name="visible">1</property>
+         <property name="icon-name">object-select</property>
+       </object>
+     </child>

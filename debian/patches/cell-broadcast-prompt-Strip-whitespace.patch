@@ -1,0 +1,33 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Wed, 6 Aug 2025 18:52:02 +0200
+Subject: cell-broadcast-prompt: Strip whitespace
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Some messages (e.g. Vodafone test messages) have excessive
+whitespace at the end of the message, strip that.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+(cherry picked from commit 6ad2078632f5d2350d6b5424160e5f82bae7b393)
+
+Part-of: <https://gitlab.gnome.org/World/Phosh/phosh/-/merge_requests/1771>
+(cherry picked from commit 6d72802f3f254c9a0ce0635c0cc118f2a6ccd22d)
+---
+ src/cell-broadcast-prompt.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/cell-broadcast-prompt.c b/src/cell-broadcast-prompt.c
+index 7336db0..d6d0c72 100644
+--- a/src/cell-broadcast-prompt.c
++++ b/src/cell-broadcast-prompt.c
+@@ -61,7 +61,8 @@ set_message (PhoshCellBroadcastPrompt *self, const char *message)
+   g_clear_pointer (&self->message, g_free);
+   self->message = g_strdup (message);
+ 
+-  gtk_label_set_label (self->lbl_msg, message);
++  g_strstrip (self->message);
++  gtk_label_set_label (self->lbl_msg, self->message);
+ 
+   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_MESSAGE]);
+ }

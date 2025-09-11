@@ -1,0 +1,42 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Wed, 23 Apr 2025 11:55:30 +0200
+Subject: wifi-network: Don't unconditionally overwrite active access point
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+We mustn't overwrite the active access point with an inactive one.
+
+This fixes the missing tick mark in the UI when a network has more than
+one access point.
+
+The network is still marked as inactive via `reset_active_wifi_network`
+-> `phosh_wifi_network_update_active`.
+
+Fixes 7b83747fc ("wifi-network: Create PhoshWifiNetwork class")
+
+Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1180
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+(cherry picked from commit 7e71e9dca836750f9093a794d6ba891d16961424)
+
+Part-of: <https://gitlab.gnome.org/World/Phosh/phosh/-/merge_requests/1772>
+(cherry picked from commit 9d0bac0305caf49be2320469a7c522144b4c5dc5)
+---
+ src/wifi-network.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/wifi-network.c b/src/wifi-network.c
+index 4b74ed3..dbf2fd7 100644
+--- a/src/wifi-network.c
++++ b/src/wifi-network.c
+@@ -346,7 +346,8 @@ void
+ phosh_wifi_network_add_access_point (PhoshWifiNetwork *self, NMAccessPoint *ap, gboolean active)
+ {
+   g_ptr_array_add (self->access_points, g_object_ref (ap));
+-  update_active (self, active);
++  if (active)
++    update_active (self, TRUE);
+   g_signal_connect_swapped (ap, "notify::strength", G_CALLBACK (update_best_access_point), self);
+   update_best_access_point (self, NULL, ap);
+ }
