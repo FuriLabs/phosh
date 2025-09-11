@@ -1,3 +1,11 @@
+phosh (0.46.0-3+deb13u1) trixie; urgency=medium
+
+  * Backport patches from upstream's 0.46 branch.
+    This gets us in sync with upstream's 0.46 branch bringing in
+    some Wi-Fi and Cell Broadcast related fixes.
+
+ -- Guido Günther <agx@sigxcpu.org>  Thu, 11 Sep 2025 08:58:18 +0200
+
 phosh (0.46.0-3) unstable; urgency=medium
 
   * Backport patches from phosh's 0.46 branch. This fixes icons in the app
