@@ -1,8 +1,19 @@
-phosh (0.50~rc1-1) UNRELEASED; urgency=medium
+phosh (0.50~rc1-1) experimental; urgency=medium
 
+  * Upload to experimental until GNOME 49 core components
+    move to unstable.
   * New upstream release
+  * d/control: Prefer stevia.
+    Let's make this match the rest of the stack
+  * d/control: Remove ancient breaks.
+    These versions aren't in Debian stable anymore
+  * Wrap and sort most files.
+    We don't wrap-and-sort the build-dependencies to keep the
+    separation between regular, plugin and test deps
+  * d/control: Version g-s-d dependency.
+    We need it for the new brightness handling
 
- -- Guido Günther <agx@sigxcpu.org>  Tue, 30 Sep 2025 14:35:46 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 30 Sep 2025 14:45:59 +0200
 
 phosh (0.49.0-1) unstable; urgency=medium
 
