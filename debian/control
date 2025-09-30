@@ -70,7 +70,7 @@ Recommends:
  feedbackd (>= 0.5.0),
  gnome-session-bin,
  gnome-session-common,
- gnome-settings-daemon,
+ gnome-settings-daemon (>= 49),
  iio-sensor-proxy,
  kbd,
  phosh-mobile-tweaks,
@@ -81,6 +81,7 @@ Provides:
  notification-daemon,
  polkit-1-auth-agent,
 Breaks:
+ gnome-settings-daemon (<< 49),
 Description: Pure Wayland shell for mobile devices
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
