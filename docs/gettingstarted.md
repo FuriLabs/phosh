@@ -34,8 +34,9 @@ It uses [GTK](https://www.gtk.org/) as it's GUI toolkit and
 widgets.
 
 Although targeted at touch devices Phosh does not implement a
-on screen keyboard (OSK) but leaves this to
-[squeekboard](https://gitlab.gnome.org/World/Phosh/squeekboard).
+on screen keyboard (OSK) but leaves this to separate on-screen
+keyboards like [stevia](https://gitlab.gnome.org/World/Phosh/stevia)
+or [squeekboard](https://gitlab.gnome.org/World/Phosh/squeekboard).
 
 The above combination of software is also often (a bit imprecisely)
 named Phosh. For a high level overview see [Phosh Overview](https://honk.sigxcpu.org/con/phosh_overview.html).

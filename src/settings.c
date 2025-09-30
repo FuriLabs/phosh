@@ -206,59 +206,12 @@ update_drag_handle_offset (PhoshSettings *self)
 
 
 static void
-close_settings_menu (PhoshSettings *self)
-{
-  g_signal_emit (self, signals[SETTING_DONE], 0);
-}
-
-static void
 brightness_value_changed_cb (GtkScale *scale_brightness, gpointer unused)
 {
   int brightness;
 
   brightness = (int)gtk_range_get_value (GTK_RANGE (scale_brightness));
   brightness_set (brightness);
-}
-
-
-static void
-open_settings_panel (PhoshSettings *self, gboolean mobile, const char *panel)
-{
-  if (self->on_lockscreen)
-    return;
-
-  if (mobile)
-    phosh_util_open_mobile_settings_panel (panel);
-  else
-    phosh_util_open_settings_panel (panel);
-
-  close_settings_menu (self);
-}
-
-
-static void
-on_launch_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
-{
-  PhoshSettings *self = PHOSH_SETTINGS (data);
-  const char *panel;
-
-  panel = g_variant_get_string (param, NULL);
-
-  open_settings_panel (self, FALSE, panel);
-  phosh_settings_hide_details (self);
-}
-
-
-static void
-on_launch_mobile_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
-{
-  PhoshSettings *self = PHOSH_SETTINGS (data);
-  const char *panel;
-
-  panel = g_variant_get_string (param, NULL);
-
-  open_settings_panel (self, TRUE, panel);
-  phosh_settings_hide_details (self);
 }
 
 
@@ -523,10 +476,6 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
-  signals[SETTING_DONE] = g_signal_new ("setting-done",
-                                        G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-                                        NULL, G_TYPE_NONE, 0);
-
   g_type_ensure (PHOSH_TYPE_AUDIO_SETTINGS);
   g_type_ensure (PHOSH_TYPE_QUICK_SETTINGS);
 
@@ -551,35 +500,10 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 }
 
 
-static const GActionEntry entries[] = {
-  { .name = "launch-panel", .activate = on_launch_panel_activated, .parameter_type = "s" },
-  { .name = "launch-mobile-panel",
-    .activate = on_launch_mobile_panel_activated,
-    .parameter_type = "s" },
-};
-
-
 static void
 phosh_settings_init (PhoshSettings *self)
 {
-  g_autoptr (GActionMap) map = NULL;
-  GAction *action;
-
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  map = G_ACTION_MAP (g_simple_action_group_new ());
-  g_action_map_add_action_entries (map,
-                                   entries,
-                                   G_N_ELEMENTS (entries),
-                                   self);
-  gtk_widget_insert_action_group (GTK_WIDGET (self),
-                                  "settings",
-                                  G_ACTION_GROUP (map));
-
-  action = g_action_map_lookup_action (map, "launch-panel");
-  g_object_bind_property (self, "on-lockscreen",
-                          action, "enabled",
-                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
 
   g_signal_connect (self, "size-allocate", G_CALLBACK (on_size_allocate), NULL);
 }

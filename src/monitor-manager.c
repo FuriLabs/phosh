@@ -298,21 +298,6 @@ phosh_monitor_manager_handle_get_resources (PhoshDBusDisplayConfig *skeleton,
 
 
 static gboolean
-phosh_monitor_manager_handle_change_backlight (PhoshDBusDisplayConfig *skeleton,
-                                               GDBusMethodInvocation  *invocation,
-                                               guint                   serial,
-                                               guint                   output_index,
-                                               int                     value)
-{
-  g_debug ("Unimplemented DBus call %s", __func__);
-  g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                         G_DBUS_ERROR_NOT_SUPPORTED,
-                                         "Changing backlight not supported");
-  return TRUE;
-}
-
-
-static gboolean
 phosh_monitor_manager_handle_get_crtc_gamma (PhoshDBusDisplayConfig *skeleton,
                                              GDBusMethodInvocation  *invocation,
                                              guint                   serial,
@@ -853,7 +838,6 @@ static void
 phosh_monitor_manager_display_config_init (PhoshDBusDisplayConfigIface *iface)
 {
   iface->handle_get_resources = phosh_monitor_manager_handle_get_resources;
-  iface->handle_change_backlight = phosh_monitor_manager_handle_change_backlight;
   iface->handle_get_crtc_gamma = phosh_monitor_manager_handle_get_crtc_gamma;
   iface->handle_set_crtc_gamma = phosh_monitor_manager_handle_set_crtc_gamma;
   iface->handle_get_current_state = phosh_monitor_manager_handle_get_current_state;
@@ -1262,10 +1246,12 @@ on_gsd_color_temperature_changed (PhoshMonitorManager*self,
 
 
 static void
-on_gsd_color_proxy_new_for_bus_finish (GObject             *source_object,
-                                       GAsyncResult        *res,
-                                       PhoshMonitorManager *self)
+on_gsd_color_proxy_new_for_bus_finish (GObject      *source_object,
+                                       GAsyncResult *res,
+                                       gpointer      user_data)
+
 {
+  PhoshMonitorManager *self = PHOSH_MONITOR_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
   PhoshDBusColor *proxy;
 
@@ -1306,7 +1292,7 @@ on_idle (PhoshMonitorManager *self)
                                       GSD_COLOR_BUS_NAME,
                                       GSD_COLOR_OBJECT_PATH,
                                       self->cancel,
-                                      (GAsyncReadyCallback) on_gsd_color_proxy_new_for_bus_finish,
+                                      on_gsd_color_proxy_new_for_bus_finish,
                                       self);
 
   return FALSE;

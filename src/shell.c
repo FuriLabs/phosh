@@ -92,6 +92,7 @@
 #include "top-panel-bg.h"
 #include "torch-manager.h"
 #include "torch-info.h"
+#include "udev-manager.h"
 #include "util.h"
 #include "vpn-info.h"
 #include "wifi-info.h"
@@ -144,6 +145,7 @@ typedef struct
 
   GtkWidget *notification_banner;
 
+  PhoshUdevManager *udev_manager;
   PhoshAppTracker *app_tracker;
   PhoshSessionManager *session_manager;
   PhoshBackgroundManager *background_manager;
@@ -588,6 +590,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->suspend_manager);
   g_clear_object (&priv->layout_manager);
   g_clear_object (&priv->style_manager);
+  g_clear_object (&priv->udev_manager);
 
   /* sensors */
   g_clear_object (&priv->proximity);
@@ -1012,15 +1015,10 @@ phosh_shell_constructed (GObject *object)
 {
   PhoshShell *self = PHOSH_SHELL (object);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  g_autoptr (GError) err = NULL;
   guint id;
 
   G_OBJECT_CLASS (phosh_shell_parent_class)->constructed (object);
-
-  priv->settings = g_settings_new ("sm.puri.phosh");
-
-  /* We bind this early since a wl_display_roundtrip () would make us miss
-     existing toplevels */
-  priv->toplevel_manager = phosh_toplevel_manager_new ();
 
   priv->monitor_manager = phosh_monitor_manager_new (NULL);
   g_signal_connect_swapped (priv->monitor_manager,
@@ -1057,9 +1055,6 @@ phosh_shell_constructed (GObject *object)
     g_error ("Need at least one monitor");
   }
 
-  gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (),
-                                    "/mobi/phosh/icons");
-
   priv->calls_manager = phosh_calls_manager_new ();
   priv->launcher_entry_manager = phosh_launcher_entry_manager_new ();
 
@@ -1076,11 +1071,15 @@ phosh_shell_constructed (GObject *object)
   priv->polkit_auth_agent = phosh_polkit_auth_agent_new ();
 
   priv->feedback_manager = phosh_feedback_manager_new ();
-  priv->keyboard_events = phosh_keyboard_events_new ();
-  g_signal_connect_swapped (priv->keyboard_events,
-                            "pressed",
-                            G_CALLBACK (on_keyboard_events_pressed),
-                            self);
+  priv->keyboard_events = phosh_keyboard_events_new (&err);
+  if (priv->keyboard_events) {
+    g_signal_connect_swapped (priv->keyboard_events,
+                              "pressed",
+                              G_CALLBACK (on_keyboard_events_pressed),
+                              self);
+  } else {
+    g_warning ("Failed to initialize keyboard events: %s", err->message);
+  }
 
   id = g_idle_add ((GSourceFunc) setup_idle_cb, self);
   g_source_set_name_by_id (id, "[PhoshShell] idle");
@@ -1088,7 +1087,7 @@ phosh_shell_constructed (GObject *object)
 
 /* {{{ Action Map/Group */
 
-static gchar **
+static char **
 phosh_shell_list_actions (GActionGroup *group)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1103,7 +1102,7 @@ phosh_shell_list_actions (GActionGroup *group)
 
 static gboolean
 phosh_shell_query_action (GActionGroup        *group,
-                          const gchar         *action_name,
+                          const char          *action_name,
                           gboolean            *enabled,
                           const GVariantType **parameter_type,
                           const GVariantType **state_type,
@@ -1128,7 +1127,7 @@ phosh_shell_query_action (GActionGroup        *group,
 
 static void
 _phosh_shell_activate_action (GActionGroup *group,
-                              const gchar  *action_name,
+                              const char   *action_name,
                               GVariant     *parameter)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1143,7 +1142,7 @@ _phosh_shell_activate_action (GActionGroup *group,
 
 static void
 phosh_shell_change_action_state (GActionGroup *group,
-                                 const gchar  *action_name,
+                                 const char   *action_name,
                                  GVariant     *state)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1167,7 +1166,7 @@ phosh_shell_action_group_iface_init (GActionGroupInterface *iface)
 
 
 static GAction *
-phosh_shell_lookup_action (GActionMap *action_map, const gchar *action_name)
+phosh_shell_lookup_action (GActionMap *action_map, const char *action_name)
 {
   PhoshShell *self = PHOSH_SHELL (action_map);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
@@ -1191,7 +1190,7 @@ phosh_shell_add_action (GActionMap *action_map, GAction *action)
 }
 
 static void
-phosh_shell_remove_action (GActionMap *action_map, const gchar *action_name)
+phosh_shell_remove_action (GActionMap *action_map, const char *action_name)
 {
   PhoshShell *self = PHOSH_SHELL (action_map);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
@@ -1339,6 +1338,7 @@ phosh_shell_init (PhoshShell *self)
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   cui_init (TRUE);
+  gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (), "/mobi/phosh/icons");
 
   priv->overview_visible = TRUE;
 
@@ -1352,6 +1352,12 @@ phosh_shell_init (PhoshShell *self)
   priv->style_manager = phosh_style_manager_new ();
   priv->shell_state = PHOSH_STATE_SETTINGS;
   priv->action_map = g_simple_action_group_new ();
+  priv->settings = g_settings_new ("sm.puri.phosh");
+
+  /* We bind this early since a wl_display_roundtrip () would make us miss
+     existing toplevels */
+  priv->toplevel_manager = phosh_toplevel_manager_new ();
+  priv->udev_manager = phosh_udev_manager_get_default ();
 }
 
 /* }}} */
@@ -2396,8 +2402,8 @@ phosh_shell_set_state (PhoshShell          *self,
 {
   PhoshShellPrivate *priv;
   PhoshShellStateFlags old_state;
-  g_autofree gchar *str_state = NULL;
-  g_autofree gchar *str_new_flags = NULL;
+  g_autofree char *str_state = NULL;
+  g_autofree char *str_new_flags = NULL;
 
   g_return_if_fail (PHOSH_IS_SHELL (self));
   priv = phosh_shell_get_instance_private (self);

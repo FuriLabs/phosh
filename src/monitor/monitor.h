@@ -9,6 +9,7 @@
 
 #include "phosh-enums.h"
 #include "phosh-wayland.h"
+#include "backlight-sysfs.h"
 
 #include <gdk/gdk.h>
 #include <glib-object.h>
@@ -139,6 +140,8 @@ struct _PhoshMonitor {
 
   struct zwlr_gamma_control_v1 *gamma_control;
   guint32 n_gamma_entries;
+
+  PhoshBacklight *backlight;
 };
 
 G_DECLARE_FINAL_TYPE (PhoshMonitor, phosh_monitor, PHOSH, MONITOR, GObject)

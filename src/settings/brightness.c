@@ -11,35 +11,35 @@
 #include <gio/gio.h>
 #include <gtk/gtk.h>
 
+#include "backlight.h"
+#include "monitor/monitor.h"
+#include "shell-priv.h"
 #include "settings/brightness.h"
-#include "util.h"
 
 
-static GDBusProxy *brightness_proxy;
-static GCancellable *gsd_power_cancel;
+static PhoshBacklight *backlight;
 static gboolean setting_brightness;
 static gulong scale_handler_id;
 
 
 static void
-brightness_changed_cb (GDBusProxy *proxy,
-                       GVariant   *changed_props,
-                       GVariant   *invalidated_props,
-                       gpointer   *user_data)
+on_brightness_changed (PhoshBacklight *backlight_,
+                       GParamSpec     *pspec,
+                       gpointer        user_data)
 {
   GtkScale *scale = GTK_SCALE (user_data);
-  int value;
-  gboolean ret;
+  int brightness, min = 0, max = 0;
+  double value;
+
+  g_assert (backlight == backlight_);
 
   if (setting_brightness)
     return;
 
-  ret = g_variant_lookup (changed_props,
-                          "Brightness",
-                          "i", &value);
-  g_return_if_fail (ret);
-  if (value < 0 || value > 100)
-    value = 100.0;
+  brightness = phosh_backlight_get_brightness (backlight);
+  phosh_backlight_get_range (backlight, &min, &max);
+
+  value = 100.0 * (brightness - min) / (max - min);
 
   g_signal_handler_block (G_OBJECT (scale), scale_handler_id);
   gtk_range_set_value (GTK_RANGE (scale), value);
@@ -47,36 +47,20 @@ brightness_changed_cb (GDBusProxy *proxy,
 }
 
 
-static void
-brightness_init_cb (GObject      *source_object,
-                    GAsyncResult *res,
-                    GtkScale     *scale)
+static PhoshBacklight *
+find_backlight (void)
 {
-  g_autoptr (GError) err = NULL;
-  g_autoptr (GVariant) var = NULL;
-  int value;
+  PhoshShell *shell = phosh_shell_get_default ();
+  PhoshMonitor *monitor = phosh_shell_get_primary_monitor (shell);
 
-  brightness_proxy = g_dbus_proxy_new_finish (res, &err);
-  if (brightness_proxy == NULL) {
-    phosh_async_error_warn (err, "Could not connect to brightness service");
-    return;
-  }
+  if (monitor->backlight)
+    return g_object_ref (PHOSH_BACKLIGHT (monitor->backlight));
 
-  g_return_if_fail (GTK_IS_SCALE (scale));
+  monitor = phosh_shell_get_builtin_monitor (shell);
+  if (monitor && monitor->backlight)
+    return g_object_ref (PHOSH_BACKLIGHT (monitor->backlight));
 
-  /* Set scale to current brightness */
-  var = g_dbus_proxy_get_cached_property (brightness_proxy, "Brightness");
-  if (var) {
-    g_variant_get (var, "i", &value);
-    setting_brightness = TRUE;
-    gtk_range_set_value (GTK_RANGE (scale), value);
-    setting_brightness = FALSE;
-  }
-
-  g_signal_connect (brightness_proxy,
-                    "g-properties-changed",
-                    G_CALLBACK (brightness_changed_cb),
-                    scale);
+  return NULL;
 }
 
 
@@ -85,73 +69,55 @@ brightness_init (GtkScale *scale, gulong handler_id)
 {
   g_autoptr (GError) err = NULL;
   g_autoptr (GDBusConnection) session_con = NULL;
+  int brightness;
 
   scale_handler_id = handler_id;
 
-  session_con = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, &err);
-  if (err != NULL) {
-    g_warning ("Can not connect to session bus: %s", err->message);
+  backlight = find_backlight ();
+  if (!backlight) {
+    /* TODO: should hide UI element in that case */
     return;
   }
 
-  gsd_power_cancel = g_cancellable_new ();
-  g_dbus_proxy_new (session_con,
-                    G_DBUS_PROXY_FLAGS_NONE,
-                    NULL,
-                    "org.gnome.SettingsDaemon.Power",
-                    "/org/gnome/SettingsDaemon/Power",
-                    "org.gnome.SettingsDaemon.Power.Screen",
-                    gsd_power_cancel,
-                    (GAsyncReadyCallback)brightness_init_cb,
-                    scale);
-}
-
-
-static void
-on_brightness_set_ready (GDBusProxy *proxy, GAsyncResult *res, gpointer unused)
-{
-  g_autoptr (GError) err = NULL;
-  g_autoptr (GVariant) var = NULL;
-
-  var = g_dbus_proxy_call_finish (proxy, res, &err);
-  if (err) {
-    g_warning ("Could not set brightness %s", err->message);
-    return;
-  }
-
+  g_debug ("Found backlight %s", phosh_backlight_get_name (backlight));
+  brightness = phosh_backlight_get_brightness (backlight);
+  setting_brightness = TRUE;
+  gtk_range_set_value (GTK_RANGE (scale), brightness);
   setting_brightness = FALSE;
+
+  g_signal_connect (backlight,
+                    "notify::brightness",
+                    G_CALLBACK (on_brightness_changed),
+                    scale);
+  on_brightness_changed (backlight, NULL, scale);
+
+  /* TODO: Need to track monitor changes */
 }
 
 
 void
-brightness_set (int brightness)
+brightness_set (int value)
 {
-  if (!brightness_proxy)
+  int brightness, min = 0, max = 0;
+
+  if (!backlight)
     return;
 
   if (setting_brightness)
     return;
 
   setting_brightness = TRUE;
-  g_dbus_proxy_call (brightness_proxy,
-                     "org.freedesktop.DBus.Properties.Set",
-                     g_variant_new (
-                       "(ssv)",
-                       "org.gnome.SettingsDaemon.Power.Screen",
-                       "Brightness",
-                       g_variant_new ("i", brightness)),
-                     G_DBUS_CALL_FLAGS_NONE,
-                     2000,
-                     NULL,
-                     (GAsyncReadyCallback)on_brightness_set_ready,
-                     NULL);
+
+  phosh_backlight_get_range (backlight, &min, &max);
+
+  brightness = min + ((max - min) * (value * 0.01));
+  phosh_backlight_set_brightness (backlight, brightness);
+  setting_brightness = FALSE;
 }
 
 
 void
 brightness_dispose (void)
 {
-  g_cancellable_cancel (gsd_power_cancel);
-  g_clear_object (&gsd_power_cancel);
-  g_clear_object (&brightness_proxy);
+  g_clear_object (&backlight);
 }

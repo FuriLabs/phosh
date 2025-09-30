@@ -78,6 +78,7 @@ typedef struct _PhoshTopPanel {
 
   GtkWidget *stack;
   GtkWidget *arrow;
+  GtkWidget *launch_settings_revealer;
 
   GtkWidget *top_bar_bin;
   GtkWidget *box_top_bar;
@@ -253,6 +254,47 @@ on_logout_action (GSimpleAction *action,
 
 
 static void
+open_settings_panel (PhoshTopPanel *self, gboolean mobile, const char *panel)
+{
+  if (self->on_lockscreen)
+    return;
+
+  if (mobile)
+    phosh_util_open_mobile_settings_panel (panel);
+  else
+    phosh_util_open_settings_panel (panel);
+
+  phosh_top_panel_fold (self);
+}
+
+
+static void
+on_launch_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
+{
+  PhoshTopPanel *self = PHOSH_TOP_PANEL (data);
+  const char *panel;
+
+  panel = g_variant_get_string (param, NULL);
+
+  open_settings_panel (self, FALSE, panel);
+  phosh_settings_hide_details (PHOSH_SETTINGS (self->settings));
+}
+
+
+static void
+on_launch_mobile_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
+{
+  PhoshTopPanel *self = PHOSH_TOP_PANEL (data);
+  const char *panel;
+
+  panel = g_variant_get_string (param, NULL);
+
+  open_settings_panel (self, TRUE, panel);
+  phosh_settings_hide_details (PHOSH_SETTINGS (self->settings));
+}
+
+
+static void
 wall_clock_notify_cb (PhoshTopPanel  *self,
                       GParamSpec     *pspec,
                       PhoshWallClock *wall_clock)
@@ -395,25 +437,26 @@ toggle_message_tray_action (GSimpleAction *action, GVariant *param, gpointer dat
 static void
 add_keybindings (PhoshTopPanel *self)
 {
-  g_auto (GStrv) keybindings = NULL;
+  g_autoptr (GStrvBuilder) builder = g_strv_builder_new ();
   g_autoptr (GArray) actions = g_array_new (FALSE, TRUE, sizeof (GActionEntry));
 
-  keybindings = g_settings_get_strv (self->kb_settings, KEYBINDING_KEY_TOGGLE_MESSAGE_TRAY);
-  for (int i = 0; i < g_strv_length (keybindings); i++) {
-    GActionEntry entry = { .name = keybindings[i], .activate = toggle_message_tray_action };
-    g_array_append_val (actions, entry);
-  }
+  PHOSH_UTIL_BUILD_KEYBINDING (actions,
+                               builder,
+                               self->kb_settings,
+                               KEYBINDING_KEY_TOGGLE_MESSAGE_TRAY,
+                               toggle_message_tray_action);
+
   phosh_shell_add_global_keyboard_action_entries (phosh_shell_get_default (),
                                                   (GActionEntry*) actions->data,
                                                   actions->len,
                                                   self);
-  self->action_names = g_steal_pointer (&keybindings);
+  self->action_names = g_strv_builder_end (builder);
 }
 
 
 static void
 on_keybindings_changed (PhoshTopPanel *self,
-                        gchar         *key,
+                        char          *key,
                         GSettings     *settings)
 {
   /* For now just redo all keybindings */
@@ -495,6 +538,9 @@ on_drag_state_changed (PhoshTopPanel *self)
   if (self->state == PHOSH_TOP_PANEL_STATE_FOLDED)
     phosh_settings_hide_details (PHOSH_SETTINGS (self->settings));
 
+  gtk_revealer_set_reveal_child (GTK_REVEALER (self->launch_settings_revealer),
+                                 progress <= 0.0);
+
   phosh_layer_surface_set_kbd_interactivity (PHOSH_LAYER_SURFACE (self), kbd_interactivity);
   phosh_layer_surface_wl_surface_commit (PHOSH_LAYER_SURFACE (self));
 }
@@ -554,6 +600,10 @@ static GActionEntry entries[] = {
   { .name = "suspend", .activate = on_suspend_action },
   { .name = "lockscreen", .activate = on_lockscreen_action },
   { .name = "logout", .activate = on_logout_action },
+  { .name = "launch-panel", .activate = on_launch_panel_activated, .parameter_type = "s" },
+  { .name = "launch-mobile-panel",
+    .activate = on_launch_mobile_panel_activated,
+    .parameter_type = "s" },
 };
 
 
@@ -564,6 +614,7 @@ phosh_top_panel_constructed (GObject *object)
   GdkDisplay *display = gdk_display_get_default ();
   PhoshWallClock *wall_clock = phosh_wall_clock_get_default ();
   PhoshShell *shell = phosh_shell_get_default ();
+  GAction *action;
 
   g_autoptr (GSettings) phosh_settings = g_settings_new ("sm.puri.phosh");
 
@@ -620,7 +671,7 @@ phosh_top_panel_constructed (GObject *object)
                                    entries, G_N_ELEMENTS (entries),
                                    self);
   if (!phosh_shell_started_by_display_manager (phosh_shell_get_default ())) {
-    GAction *action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "logout");
+    action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "logout");
     g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
   }
 
@@ -630,6 +681,20 @@ phosh_top_panel_constructed (GObject *object)
                    "enabled",
                    G_SETTINGS_BIND_GET);
 
+  action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "launch-panel");
+  g_object_bind_property (self, "on-lockscreen",
+                          action, "enabled",
+                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
+
+  action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "launch-mobile-panel");
+  g_object_bind_property (self, "on-lockscreen",
+                          action, "enabled",
+                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
+
+  g_object_bind_property (self, "on-lockscreen",
+                          self->launch_settings_revealer,
+                          "visible",
+                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
 
   self->interface_settings = g_settings_new ("org.gnome.desktop.interface");
   g_settings_bind (self->interface_settings,
@@ -790,6 +855,7 @@ phosh_top_panel_class_init (PhoshTopPanelClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, btn_lock);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, btn_power);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, click_gesture);
+  gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, launch_settings_revealer);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, lbl_clock);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, lbl_clock2);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, lbl_date);

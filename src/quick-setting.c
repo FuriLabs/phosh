@@ -48,7 +48,7 @@
  * When a quick-setting is clicked, [signal@Phosh.QuickSetting::clicked] is emitted. When it is
  * long-pressed or right-clicked, [signal@PhoshQuickSetting::long-pressed] is emitted.
  *
- * The common usecase of `long-pressed` is to launch an action (like `settings.launch-panel`). So to
+ * The common usecase of `long-pressed` is to launch an action (like `panel.launch-panel`). So to
  * avoid duplicating this process for each quick-setting, the user can set
  * [property@Phosh.QuickSetting:long-press-action-name] and
  * [property@Phosh.QuickSetting:long-press-action-target]. The quick-setting then launches that
