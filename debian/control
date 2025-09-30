@@ -76,7 +76,7 @@ Recommends:
  phosh-mobile-tweaks,
  phosh-plugins,
  slurp,
- squeekboard | phosh-osk-stub,
+ phosh-osk-stevia | squeekboard,
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
