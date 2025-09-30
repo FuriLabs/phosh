@@ -242,6 +242,15 @@ phosh-status-page-placeholder > box > label.title {
 }
 
 /*
+ * Settings gear button
+ */
+#settings-gear {
+  background: none;
+  padding-right: 6px;
+}
+
+
+/*
  * phosh-home
  */
 

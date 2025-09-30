@@ -1,3 +1,25 @@
+phosh 0.50~rc1
+--------------
+Released September 2025
+* Allow to open the top-bar settings panel easily
+* Fix brightness slider with GNOME 49
+* Issues fixed:
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1261
+* Contributors:
+    * Anna (cybertailor) Vyalkova
+    * Evangelos Ribeiro Tzaras
+    * Guido Günther
+* UI translations:
+    * Emin Tufan Çetin (tr)
+    * Jiri Grönroos (fi)
+    * Jordi Mas i Hernandez (ca)
+    * Kristjan SCHMIDT (eo)
+    * Nathan Follens (nl)
+    * Philipp Kiemle (de)
+    * Sabri Ünal (tr)
+    * twlvnn kraftwerk (bg)
+    * Yaron Shahrabani (he)
+
 phosh 0.49.0
 ------------
 Released August 2025

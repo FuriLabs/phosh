@@ -1,3 +1,140 @@
+phosh (0.50~rc1) experimental; urgency=medium
+
+  [ Yaron Shahrabani ]
+  * Update Hebrew translation
+
+  [ Philipp Kiemle ]
+  * Update German translation
+
+  [ Guido Günther ]
+  * treewide: Prefer char over gchar.
+  * tests: Use g_timout_add_once.
+    Our on_waited never acturally returned `FALSE` to stop the
+    timeout.
+  * wifi-network-row: Use correct type for transform func
+  * wifi-status-page: Use correct function signature.
+  * build: Fix indent.
+    We can use a list so that the automatic formatter doesn't get confused.
+    Fixes: b2fcd0dcf ("build: Format meson files")
+  * doc: Update issue template.
+    Some information is nowadays easier to maintain, debugging
+    is better documented.
+  * quick-settings: Enable wifi-hotspot and mobile data by default.
+  * settings: Disable launching mobile panels on lockscreen too.
+    Fixes: af37b2c74 ("settings: Add action to open mobile settings")
+  * top-panel: Move launching settings here.
+    This allows us to use it from all places in the top panel
+  * icons: Add settings icon. Taken from org.gnome.design.IconLibrary.
+  * top-panel: Add gear button. This gives us easy access to the top panel
+    configuration
+  * treewide: Use stevia. phosh-osk-stub is no more.
+  * location-manager: Avoid cast. This gives us more type safety
+  * location-manager: Use cancellable more. Cancel these calls too on shutdown
+  * proximity-manager: Use cancellable. Fixes a test suite crash
+  * location-manager: Dispose connection on shutdown.
+    The object returned by `g_bus_get_finish()` is a singleton
+    but we need to unref it nevertheless.
+  * wwan-mm: Avoid cast.
+    This gives us more type safety
+  * wwan-mm: Avoid cast.
+    This gives us more type safety
+  * wwan-mm: Dispose connection on shutdown
+  * monitor-manager: Avoid cast.
+    This gives us more type safety
+  * tests: Make sure gvfs doesn't spawn in tests.
+    We don't want it to take any DBus connection that could block
+    GTestDBus shutdown.
+  * util: Improve phosh_dbus_service_error_warn()
+    We usually want to special case "cancelled" and
+    "doesn't exist" in the tests.
+  * feedback-manager: Ignore service unknown errors.
+    These can happen in tests
+  * tests: Set XDG_CURRENT_DESKTOP.
+    This ensures we pick up Phosh's gsettings defaults
+  * ci: Udpate image.
+    Let's update to Trixie before we switch to Forky soon.
+  * ci: Shuffle dockerfile a bit.
+    Update everything first rather than in between. The
+    removal of the comment ensures we actuall get the build-deps
+    installed again thus speeing up the build.
+  * keyboard-events: Check for error.
+    It is an initable so lets use it
+  * util: Add helper to construct keybindings.
+    This happens in different places of the shell and is repetitive
+  * top-panel: Use keybindings builder
+  * home: Use keybindings builder
+  * home: Don't forget to add the super key entries.
+    We want to have them in the keybinding names as well so they
+    get removed on dispose.
+  * run-command-manager: Use keybindings builder
+  * screenshot-manager: Use keybindings builder
+  * gitignore: Ignore wraplock
+  * monitor-manager: Drop change_backlight helper.
+    No longer invoked by g-s-d
+  * keyboard-events: Drop protocol version check.
+    We require a recent enough version since ages
+  * shell: Init settings early.
+    We want to do as little as possible in constructed
+  * shell: Move toplevel manager to init.
+    We want to do as little as possible in constructed
+  * shell: Set resource path in init.
+    We want to do as little as possible in constructed
+  * udev-manager: New class to handle udev interaction.
+    We need a client for torch and backlight. Track it in a common class
+    and add the helpers we'll need for backlight handling.
+  * udev-manager: Get us a login session proxy.
+    While not strictly udev related torch and backlight both need it
+    and there's no point in introducing yet another class.
+    We might want to turn that into a more generic "ShellBackend" class that
+    could e.g. also track gsettings.
+  * shell: Instantiate udev manager.
+    It's a singleton but lets give it clear life cycle
+  * packaging: Version g-s-d dependency.
+    We want one entity to control brightness
+  * backlight-sysfs: New class to manage sysfs based backlights.
+    There might be others later, e.g. ddc and thus introduce a
+    `PhocBacklight` base class. This is inspired by what g-s-d 48 did and
+    what mutter 49 does now so we can continue to interact with g-s-d power.
+  * monitor: Create backlight.
+    The backlight is attached to the monitor so we can look it up
+    for brightness handling.
+  * settings/brightness: Use built in brightness handling.
+    Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1261
+  * udev-manager: Support torch subsystem too.
+    Use that from the torch-manager
+
+  [ Jordi Mas i Hernandez ]
+  * Update Catalan translation
+
+  [ Emin Tufan Çetin ]
+  * Update Turkish translation
+
+  [ Jiri Grönroos ]
+  * Update Finnish translation
+
+  [ Anna (cybertailor) Vyalkova ]
+  * tests: Don't assume build directory is inside source directory.
+    Fixes: 4c58fc4fb ("searchd: Add deamon to gather search results")
+
+  [ Evangelos Ribeiro Tzaras ]
+  * meson: Require rst2man for building manpages.
+    The build option description already specifies that rst2man is
+    required, but it's not codified in the build files.
+
+  [ Nathan Follens ]
+  * Update Dutch translation
+
+  [ Sabri Ünal ]
+  * Update Turkish translation
+
+  [ Kristjan SCHMIDT ]
+  * Update Esperanto translation
+
+  [ twlvnn kraftwerk ]
+  * Update Bulgarian translation
+
+ -- Guido Günther <agx@sigxcpu.org>  Mon, 29 Sep 2025 18:05:54 +0200
+
 phosh (0.49.0) experimental; urgency=medium
 
   [ Guido Günther ]

@@ -198,7 +198,6 @@
           <object class="PhoshSettings" id="settings">
             <property name="visible">1</property>
             <signal name="notify::drag-handle-offset" handler="on_settings_drag_handle_offset_changed" swapped="true"/>
-            <signal name="setting-done" handler="phosh_top_panel_fold" swapped="true"/>
           </object>
         </child>
         <child>
@@ -341,14 +340,48 @@
               </packing>
             </child>
             <child>
-              <object class="PhoshArrow" id="arrow">
+              <object class="GtkBox">
                 <property name="visible">1</property>
-                <property name="vexpand">1</property>
-                <property name="valign">end</property>
-                <property name="margin-bottom">6</property>
-                <!-- place initial focus -->
-                <property name="has-focus">1</property>
-                <property name="can-focus">1</property>
+                <child type="center">
+                  <object class="PhoshArrow" id="arrow">
+                    <property name="visible">1</property>
+                    <property name="vexpand">1</property>
+                    <property name="valign">end</property>
+                    <property name="margin-bottom">6</property>
+                    <!-- place initial focus -->
+                    <property name="has-focus">1</property>
+                    <property name="can-focus">1</property>
+                  </object>
+                  <packing>
+                    <property name="name">arrow</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkRevealer" id="launch_settings_revealer">
+                    <property name="visible">1</property>
+                    <property name="transition-type">crossfade</property>
+                    <child>
+                      <object class="GtkButton">
+                        <property name="visible">1</property>
+                        <property name="action-name">panel.launch-mobile-panel</property>
+                        <property name="action-target">&quot;topbar&quot;</property>
+                        <property name="valign">end</property>
+                        <property name="halign">end</property>
+                        <property name="name">settings-gear</property>
+                        <child>
+                          <object class="GtkImage">
+                            <property name="visible">1</property>
+                            <property name="icon-name">settings-symbolic</property>
+                            <property name="pixel-size">24</property>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="pack-type">end</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="name">arrow</property>

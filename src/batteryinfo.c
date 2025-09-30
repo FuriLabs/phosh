@@ -14,7 +14,6 @@
 
 #include "batteryinfo.h"
 #include "upower.h"
-#include "util.h"
 
 #include <math.h>
 
@@ -88,15 +87,15 @@ phosh_battery_info_get_property (GObject    *object,
 
 
 static void
-on_property_changed (PhoshBatteryInfo     *self,
-                     GParamSpec           *pspec,
-                     UpDevice             *device)
+on_property_changed (PhoshBatteryInfo *self,
+                     GParamSpec       *pspec,
+                     UpDevice         *device)
 {
-  UpDeviceState    state;
-  gdouble          percentage;
-  gint             smallest_ten;
-  gboolean         is_charging;
-  gboolean         is_charged;
+  UpDeviceState state;
+  gdouble percentage;
+  gint smallest_ten;
+  gboolean is_charging;
+  gboolean is_charged;
   g_autofree char *icon_name = NULL;
   g_autofree char *info = NULL;
 
@@ -110,11 +109,10 @@ on_property_changed (PhoshBatteryInfo     *self,
   if (is_charged) {
     icon_name = g_strdup ("battery-level-100-charged-symbolic");
   } else {
-    if (is_charging) {
+    if (is_charging)
       icon_name = g_strdup_printf ("battery-level-%d-charging-symbolic", smallest_ten);
-    } else {
+    else
       icon_name = g_strdup_printf ("battery-level-%d-symbolic", smallest_ten);
-    }
   }
   phosh_status_icon_set_icon_name (PHOSH_STATUS_ICON (self), icon_name);
   phosh_status_icon_set_info (PHOSH_STATUS_ICON (self), info);

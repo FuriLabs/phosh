@@ -117,7 +117,7 @@ This is handled via GNOMEs infra, see
 ## Getting in Touch
 
 * Issue tracker: <https://gitlab.gnome.org/World/Phosh/phosh/issues>
-* Matrix: <https://im.puri.sm/#/room/#phosh:talk.puri.sm>
+* Matrix: <https://matrix.to/#/#phosh:phosh.mobi>
 
 ## Development Documentation
 
