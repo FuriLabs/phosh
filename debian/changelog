@@ -1,14 +1,22 @@
-phosh (0.50.0-1) UNRELEASED; urgency=medium
+phosh (0.50.0-1) experimental; urgency=medium
 
   * New upstream release
+    * Allow to open the top-bar settings panel easily
+    * Move brightness handling to phosh, it got dropped from g-s-d 49.
+    * Mark demo plugins as `NoDisplay` so they don't show in p-m-s
+    * Don't crash g-c-c when running nested
+    * Reset them when auto-HighContrast is turned off
+  * Install the OSK related systemd unit
+  * d/control: Add Breaks on stevia.
+    We want a version with that starts via systemd unit.
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 05 Oct 2025 17:32:30 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 05 Oct 2025 17:42:58 +0200
 
 phosh (0.50~rc1-1) experimental; urgency=medium
 
   * Upload to experimental until GNOME 49 core components
     move to unstable.
-  * New upstream release
+  * New upstream release snapshot
   * d/control: Prefer stevia.
     Let's make this match the rest of the stack
   * d/control: Remove ancient breaks.
