@@ -13,8 +13,8 @@
 
 G_DECLARE_FINAL_TYPE (PhoshOsdWindow, phosh_osd_window, PHOSH, OSD_WINDOW, PhoshSystemModal)
 
-GtkWidget *phosh_osd_window_new (char *connector,
-                                 char *label,
-                                 char *icon_name,
-                                 double level,
-                                 double max_level);
+GtkWidget *phosh_osd_window_new (const char *connector,
+                                 const char *label,
+                                 const char *icon_name,
+                                 double      level,
+                                 double      max_level);

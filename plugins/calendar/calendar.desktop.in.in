@@ -5,3 +5,4 @@ Name=Calendar
 Types=lockscreen;
 Comment=A simple calendar widget
 Plugin=@plugins_dir@/libphosh-plugin-@name@.so
+NoDisplay=true

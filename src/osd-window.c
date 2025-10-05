@@ -276,11 +276,11 @@ phosh_osd_window_init (PhoshOsdWindow *self)
 
 
 GtkWidget *
-phosh_osd_window_new (char  *connector,
-                      char  *label,
-                      char  *icon_name,
-                      double level,
-                      double max_level)
+phosh_osd_window_new (const char *connector,
+                      const char *label,
+                      const char *icon_name,
+                      double      level,
+                      double      max_level)
 {
   return g_object_new (PHOSH_TYPE_OSD_WINDOW,
                        "anchor", ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP,

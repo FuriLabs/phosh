@@ -252,6 +252,43 @@ phosh_backlight_set_brightness (PhoshBacklight *self, int brightness)
   }
 }
 
+/**
+ * phosh_backlight_set_relative:
+ * @self: The backlight
+ * @val: The relative brightness
+ *
+ * The relative brightness value between `[0.0, 1.0]` is applied
+ * linearly between the backlight's min and max brightness.
+ */
+void
+phosh_backlight_set_relative (PhoshBacklight *self, double val)
+{
+  PhoshBacklightPrivate *priv = phosh_backlight_get_instance_private (self);
+  int brightness;
+
+  g_return_if_fail (PHOSH_IS_BACKLIGHT (self));
+  g_return_if_fail (val >= 0.0 && val <= 1.0);
+
+  brightness = priv->min_brightness + ((priv->max_brightness - priv->min_brightness) * val);
+  phosh_backlight_set_brightness (self, brightness);
+}
+
+/**
+ * phosh_backlight_get_relative:
+ * @self: The backlight
+ * @val: The relative brightness
+ *
+ * Get the relative brightness value between `[0.0, 1.0]`.
+ */
+double
+phosh_backlight_get_relative (PhoshBacklight *self)
+{
+  PhoshBacklightPrivate *priv = phosh_backlight_get_instance_private (self);
+
+  return 1.0 * (priv->target_brightness - priv->min_brightness) /
+    (priv->max_brightness - priv->min_brightness);
+}
+
 
 const char *
 phosh_backlight_get_name (PhoshBacklight *self)

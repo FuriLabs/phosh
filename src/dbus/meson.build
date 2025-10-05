@@ -59,6 +59,12 @@ dbus_server_protos = [
   ],
   ['phosh-screen-saver-dbus', 'org.gnome.ScreenSaver.xml', 'org.gnome', false],
   [
+    'phosh-brightness-dbus',
+    'org.gnome.Shell.Brightness.xml',
+    'org.gnome.Shell',
+    false,
+  ],
+  [
     'phosh-screenshot-dbus',
     'org.gnome.Shell.Screenshot.xml',
     'org.gnome.Shell',

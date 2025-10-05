@@ -422,7 +422,7 @@ rust-bindings:
     UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
   needs: []
   trigger:
-    project: guidog/libphosh-rs
+    project: World/Phosh/libphosh-rs
     branch: $RUST_BINDINGS_BRANCH
   rules:
     - if: $CI_COMMIT_BRANCH == $RUST_BINDINGS_BRANCH

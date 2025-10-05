@@ -1,3 +1,68 @@
+phosh (0.50.0) experimental; urgency=medium
+
+  [ Guido Günther ]
+  * shell: Move osd window here.
+    This allows us to use the osd window not only via DBus and
+    it doesn't warrant its own manager object.
+  * backlight-manager: New object to manage backlight brightness.
+    This manages keybindings, OSD, etc as we don't want that put into
+    a brightness slider. We can later on use it to manage the brightness
+    of different backlights (instead of just the primary one).
+  * shell: Instantiate backlight manager
+  * brightness-manager: Make keybindings optional.
+    The corresponding schema is not very wide spread yet so don't error
+    out if the schema isn't recent.
+  * simple-custom-quick-setting: Hide in settings by default.
+    We don't want to show demo plugins there
+  * calendar: Hide in settings by default.
+    We don't want to show demo plugins there
+  * ci: Trigger libphosh-rs pipeline.
+    Adjust to the new repo location
+  * monitor-manager: Move mode building to separate function.
+    We'll make use of this in the next commit
+  * monitor-manager: Only skip unnamed mode if not the current one.
+    This helps e.g. when running nested as those configs only have
+    a single unnamed mode.
+  * monitor-manager: Add default mode when there's no mode list
+  * data: Depend on OSK target
+    gnome-session >= 49 no longer handles `RequiredComponents`
+    in session files. We hence need start the OSK via systemd.
+    Do so by providing a target unit. The OSK implementations then
+    merely need to fill in the service unit.
+  * ambient: Reset theme when turning of auto-hc.
+    We want to make sure the users has back its default theme
+    when they disable automatic high contrast.
+  * session: Start the OSK later.
+    We want the layer ordering to happen after the shell is up.
+  * brightness: Remove unused variables.
+    Fixes: aa0066c5a ("settings/brightness: Use built in brightness handling")
+  * backlight: Add and use methods to get and set relative brightness.
+    No need to make the calculations in multiple places
+  * shell: Allow to get brightness manager.
+    We want to get it in `PhoshSettings`
+  * brightness-manager: Maintain an adjustment.
+    Maintain an adjustment of brightness percentage as model. That frees
+    other parts of the shell from doing so.
+  * settings: Use brightness manager's adjustment.
+    That way we don't need to worry about any monitor changes
+    and while at that can get rid of the somewhat arcane code
+    (the brightness slider was one of our first features :)).
+  * brightness-manager: Add Brightness DBus interface.
+    The DBus API XML is from gnome-shell as of:
+      e54aa588c ("slider: Use the sprite of the touch event, not the pointer")
+  * brightness-manager: Move keybindings schema check to end of init.
+    Otherwise we exit early with older schema disabling brightness
+    handling completely.
+    This allows us to run with schemas < 49.0.
+  * settings: Only show brightness slider when useful.
+    For now we show it when we have brightness control. We might
+    also hide it later on when automatic brightness is enabled.
+
+  [ Jordi Mas i Hernandez ]
+  * Update Catalan translation
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 05 Oct 2025 17:02:58 +0200
+
 phosh (0.50~rc1) experimental; urgency=medium
 
   [ Yaron Shahrabani ]

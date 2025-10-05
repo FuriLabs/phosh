@@ -31,7 +31,7 @@
                         <property name="margin-top">6</property>
                         <property name="margin-bottom">6</property>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkBox" id="box_brightness">
                             <property name="visible">1</property>
                             <child>
                               <object class="GtkImage">

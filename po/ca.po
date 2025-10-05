@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-08-16 19:16+0000\n"
-"PO-Revision-Date: 2025-08-17 16:20+0200\n"
+"POT-Creation-Date: 2025-10-04 10:04+0000\n"
+"PO-Revision-Date: 2025-10-04 16:20+0200\n"
 "Last-Translator: Marc Riera <marcriera@softcatala.org>\n"
 "Language-Team: Catalan\n"
 "Language: ca\n"
@@ -265,20 +265,20 @@ msgctxt "feedback:enabled"
 msgid "On"
 msgstr "Activat"
 
-#: src/location-manager.c:268
+#: src/location-manager.c:269
 #, c-format
 msgid "Allow '%s' to access your location information?"
 msgstr "Voleu permetre que «%s» accedeixi a la informació de la ubicació?"
 
-#: src/location-manager.c:273
+#: src/location-manager.c:274
 msgid "Geolocation"
 msgstr "Geolocalització"
 
-#: src/location-manager.c:274
+#: src/location-manager.c:275
 msgid "Yes"
 msgstr "Sí"
 
-#: src/location-manager.c:274
+#: src/location-manager.c:275
 msgid "No"
 msgstr "No"
 
@@ -328,18 +328,18 @@ msgstr "Títol desconegut"
 msgid "Unknown Artist"
 msgstr "Artista desconegut"
 
-#: src/monitor-manager.c:127
+#: src/monitor-manager.c:128
 msgid "Built-in display"
 msgstr "Pantalla interna"
 
-#: src/monitor-manager.c:145
+#: src/monitor-manager.c:146
 #, c-format
 msgctxt ""
 "This is a monitor vendor name, followed by a size in inches, like 'Dell 15\"'"
 msgid "%s %s"
 msgstr "%s %s"
 
-#: src/monitor-manager.c:152
+#: src/monitor-manager.c:153
 #, c-format
 msgctxt ""
 "This is a monitor vendor name followed by product/model name where size in "
@@ -348,7 +348,7 @@ msgid "%s %s"
 msgstr "%s %s"
 
 #. Translators: An unknown monitor type
-#: src/monitor-manager.c:161
+#: src/monitor-manager.c:162
 msgid "Unknown"
 msgstr "Desconegut"
 
@@ -511,7 +511,7 @@ msgstr "Activada"
 
 #: src/run-command-dialog.c:129
 msgid "Press ESC to close"
-msgstr "Premeu Esc per a sortir"
+msgstr "Premeu Esc per a tancar"
 
 #: src/run-command-manager.c:89
 #, c-format
@@ -912,7 +912,7 @@ msgstr "_Afegeix"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"
-msgstr "_Contacte nou"
+msgstr "_Nom de contacte"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:246
 msgid "Relationship"
