@@ -8,6 +8,7 @@
 
 #include "app-tracker.h"
 #include "background-manager.h"
+#include "brightness-manager.h"
 #include "bt-manager.h"
 #include "calls-manager.h"
 #include "connectivity-manager.h"
@@ -80,6 +81,7 @@ void                 phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMon
 /* Created by the shell on startup */
 PhoshAppTracker        *phosh_shell_get_app_tracker        (PhoshShell *self);
 PhoshBackgroundManager *phosh_shell_get_background_manager (PhoshShell *self);
+PhoshBrightnessManager *phosh_shell_get_brightness_manager (PhoshShell *self);
 PhoshCallsManager      *phosh_shell_get_calls_manager (PhoshShell *self);
 PhoshFeedbackManager   *phosh_shell_get_feedback_manager   (PhoshShell *self);
 PhoshGtkMountManager   *phosh_shell_get_gtk_mount_manager  (PhoshShell *self);
@@ -121,5 +123,11 @@ gboolean             phosh_shell_activate_action (PhoshShell *self,
                                                   GVariant   *parameter);
 
 void                 phosh_shell_set_bg_alpha    (PhoshShell *self, double alpha);
+void                 phosh_shell_show_osd (PhoshShell *self,
+                                           const char *connector,
+                                           const char *icon,
+                                           const char *label,
+                                           double      level,
+                                           double      max_level);
 
 G_END_DECLS

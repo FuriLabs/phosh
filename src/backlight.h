@@ -16,6 +16,8 @@ G_DECLARE_DERIVABLE_TYPE (PhoshBacklight, phosh_backlight, PHOSH, BACKLIGHT, GOb
 
 int          phosh_backlight_get_brightness (PhoshBacklight *self);
 void         phosh_backlight_set_brightness (PhoshBacklight *self, int brightness);
+double       phosh_backlight_get_relative (PhoshBacklight *self);
+void         phosh_backlight_set_relative (PhoshBacklight *self, double val);
 void         phosh_backlight_get_range (PhoshBacklight *self,
                                         int            *min_brightness,
                                         int            *max_brightness);
