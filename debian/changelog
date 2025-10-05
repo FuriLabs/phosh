@@ -1,3 +1,9 @@
+phosh (0.50.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 05 Oct 2025 17:32:30 +0200
+
 phosh (0.50~rc1-1) experimental; urgency=medium
 
   * Upload to experimental until GNOME 49 core components
