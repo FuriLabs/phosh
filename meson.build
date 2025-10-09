@@ -1,7 +1,7 @@
 project(
   'phosh',
   'c',
-  version: '0.49.0',
+  version: '0.50.0',
   license: 'GPL-3.0-or-later',
   meson_version: '>= 1.2.0',
   default_options: [
@@ -218,8 +218,7 @@ struct rfkill_event_ext e;
 have_rfkill_event_ext = cc.compiles(code, name: 'Have rfkill_event_ext')
 have_memfd_create = cc.has_function(
   'memfd_create',
-  prefix: '''#define _GNU_SOURCE
-                                                               #include <sys/mman.h>''',
+  prefix: ['#define _GNU_SOURCE', '#include <sys/mman.h>'],
 )
 
 config_h = configuration_data()

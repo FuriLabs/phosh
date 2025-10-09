@@ -56,6 +56,7 @@ typedef struct _PhoshSettings {
   guint      debounce_handle;
 
   GtkWidget *scrolled_window;
+  GtkWidget *box_brightness;
   GtkWidget *box_sliders;
   GtkWidget *box_settings;
   GtkWidget *quick_settings;
@@ -206,63 +207,6 @@ update_drag_handle_offset (PhoshSettings *self)
 
 
 static void
-close_settings_menu (PhoshSettings *self)
-{
-  g_signal_emit (self, signals[SETTING_DONE], 0);
-}
-
-static void
-brightness_value_changed_cb (GtkScale *scale_brightness, gpointer unused)
-{
-  int brightness;
-
-  brightness = (int)gtk_range_get_value (GTK_RANGE (scale_brightness));
-  brightness_set (brightness);
-}
-
-
-static void
-open_settings_panel (PhoshSettings *self, gboolean mobile, const char *panel)
-{
-  if (self->on_lockscreen)
-    return;
-
-  if (mobile)
-    phosh_util_open_mobile_settings_panel (panel);
-  else
-    phosh_util_open_settings_panel (panel);
-
-  close_settings_menu (self);
-}
-
-
-static void
-on_launch_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
-{
-  PhoshSettings *self = PHOSH_SETTINGS (data);
-  const char *panel;
-
-  panel = g_variant_get_string (param, NULL);
-
-  open_settings_panel (self, FALSE, panel);
-  phosh_settings_hide_details (self);
-}
-
-
-static void
-on_launch_mobile_panel_activated (GSimpleAction *action, GVariant *param, gpointer data)
-{
-  PhoshSettings *self = PHOSH_SETTINGS (data);
-  const char *panel;
-
-  panel = g_variant_get_string (param, NULL);
-
-  open_settings_panel (self, TRUE, panel);
-  phosh_settings_hide_details (self);
-}
-
-
-static void
 on_is_headphone_changed (PhoshSettings      *self,
                          GParamSpec         *pspec,
                          PhoshAudioSettings *audio_settings)
@@ -384,18 +328,21 @@ on_notification_frames_items_changed (PhoshSettings *self,
 
 
 static void
-setup_brightness_range (PhoshSettings *self)
+setup_brightness_scale (PhoshSettings *self)
 {
-  gulong value_changed_handler_id;
+  PhoshShell *shell = phosh_shell_get_default ();
+  PhoshBrightnessManager *brightness_manager;
+  GtkAdjustment *adj;
 
-  gtk_range_set_range (GTK_RANGE (self->scale_brightness), 0, 100);
-  gtk_range_set_round_digits (GTK_RANGE (self->scale_brightness), 0);
-  gtk_range_set_increments (GTK_RANGE (self->scale_brightness), 1, 10);
-  value_changed_handler_id = g_signal_connect (self->scale_brightness,
-                                               "value-changed",
-                                               G_CALLBACK (brightness_value_changed_cb),
-                                               NULL);
-  brightness_init (GTK_SCALE (self->scale_brightness), value_changed_handler_id);
+  brightness_manager = phosh_shell_get_brightness_manager (shell);
+  adj = phosh_brightness_manager_get_adjustment (brightness_manager);
+  gtk_range_set_adjustment (GTK_RANGE (self->scale_brightness), adj);
+
+  g_object_bind_property (brightness_manager,
+                          "has-brightness-control",
+                          self->box_brightness,
+                          "visible",
+                          G_BINDING_SYNC_CREATE);
 }
 
 
@@ -431,7 +378,7 @@ phosh_settings_constructed (GObject *object)
 
   G_OBJECT_CLASS (phosh_settings_parent_class)->constructed (object);
 
-  setup_brightness_range (self);
+  setup_brightness_scale (self);
   setup_torch (self);
 
   manager = phosh_notify_manager_get_default ();
@@ -460,8 +407,6 @@ static void
 phosh_settings_dispose (GObject *object)
 {
   PhoshSettings *self = PHOSH_SETTINGS (object);
-
-  brightness_dispose ();
 
   g_clear_object (&self->torch_manager);
 
@@ -523,15 +468,12 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
-  signals[SETTING_DONE] = g_signal_new ("setting-done",
-                                        G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
-                                        NULL, G_TYPE_NONE, 0);
-
   g_type_ensure (PHOSH_TYPE_AUDIO_SETTINGS);
   g_type_ensure (PHOSH_TYPE_QUICK_SETTINGS);
 
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, audio_settings);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_bottom_half);
+  gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_brightness);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_sliders);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_settings);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, list_notifications);
@@ -551,35 +493,10 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 }
 
 
-static const GActionEntry entries[] = {
-  { .name = "launch-panel", .activate = on_launch_panel_activated, .parameter_type = "s" },
-  { .name = "launch-mobile-panel",
-    .activate = on_launch_mobile_panel_activated,
-    .parameter_type = "s" },
-};
-
-
 static void
 phosh_settings_init (PhoshSettings *self)
 {
-  g_autoptr (GActionMap) map = NULL;
-  GAction *action;
-
   gtk_widget_init_template (GTK_WIDGET (self));
-
-  map = G_ACTION_MAP (g_simple_action_group_new ());
-  g_action_map_add_action_entries (map,
-                                   entries,
-                                   G_N_ELEMENTS (entries),
-                                   self);
-  gtk_widget_insert_action_group (GTK_WIDGET (self),
-                                  "settings",
-                                  G_ACTION_GROUP (map));
-
-  action = g_action_map_lookup_action (map, "launch-panel");
-  g_object_bind_property (self, "on-lockscreen",
-                          action, "enabled",
-                          G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
 
   g_signal_connect (self, "size-allocate", G_CALLBACK (on_size_allocate), NULL);
 }

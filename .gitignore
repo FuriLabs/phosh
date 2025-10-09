@@ -7,6 +7,7 @@ vgdump
 *~
 \#*#
 .\#*
+/subprojects/.wraplock
 /subprojects/glib
 /subprojects/gmobile
 /subprojects/gvc

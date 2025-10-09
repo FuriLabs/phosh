@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022 Purism SPC
+ *               2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -198,7 +199,7 @@ on_ambient_light_level_changed (PhoshAmbient            *self,
 
   if (g_ascii_strcasecmp (unit , "lux") != 0) {
     /* For vendor values we don't know if small or large values mean bright or dark so be conservative */
-    g_warning_once ("Unknown unit light level unit %s", unit);
+    g_warning_once ("Unknown light level unit %s", unit);
     return;
   }
 
@@ -309,6 +310,8 @@ on_automatic_high_contrast_changed (PhoshAmbient *self,
       phosh_ambient_claim_light (self, TRUE);
   } else {
     phosh_ambient_claim_light (self, FALSE);
+    /* Switch back to normal theme */
+    switch_theme (self, FALSE);
   }
 }
 

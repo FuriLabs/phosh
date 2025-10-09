@@ -42,6 +42,8 @@ typedef struct _PhoshProximity {
   PhoshSensorProxyManager *sensor_proxy_manager;
   PhoshCallsManager *calls_manager;
   PhoshFader *fader;
+
+  GCancellable *cancel;
 } PhoshProximity;
 
 G_DEFINE_TYPE (PhoshProximity, phosh_proximity, G_TYPE_OBJECT);
@@ -139,13 +141,13 @@ phosh_proximity_claim_proximity (PhoshProximity *self, gboolean claim)
   if (claim) {
     phosh_dbus_sensor_proxy_call_claim_proximity (
       PHOSH_DBUS_SENSOR_PROXY (self->sensor_proxy_manager),
-      NULL,
+      self->cancel,
       (GAsyncReadyCallback)on_proximity_claimed,
       self);
   } else {
     phosh_dbus_sensor_proxy_call_release_proximity (
       PHOSH_DBUS_SENSOR_PROXY (self->sensor_proxy_manager),
-      NULL,
+      self->cancel,
       (GAsyncReadyCallback)on_proximity_released,
       self);
   }
@@ -289,6 +291,9 @@ phosh_proximity_dispose (GObject *object)
 {
   PhoshProximity *self = PHOSH_PROXIMITY (object);
 
+  g_cancellable_cancel (self->cancel);
+  g_clear_object (&self->cancel);
+
   if (self->sensor_proxy_manager) {
     g_signal_handlers_disconnect_by_data (self->sensor_proxy_manager,
                                           self);
@@ -353,6 +358,7 @@ phosh_proximity_class_init (PhoshProximityClass *klass)
 static void
 phosh_proximity_init (PhoshProximity *self)
 {
+  self->cancel = g_cancellable_new ();
 }
 
 

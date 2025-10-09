@@ -128,7 +128,7 @@
                 <child>
                   <object class="GtkButton">
                     <property name="visible">1</property>
-                    <property name="action-name">settings.launch-panel</property>
+                    <property name="action-name">panel.launch-panel</property>
                     <property name="action-target">&quot;sound&quot;</property>
                     <child>
                       <object class="GtkLabel">

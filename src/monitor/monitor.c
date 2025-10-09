@@ -80,11 +80,18 @@ output_handle_done (void             *data,
                     struct wl_output *wl_output)
 {
   PhoshMonitor *self = PHOSH_MONITOR (data);
+  g_autoptr (GError) err = NULL;
 
   if (phosh_monitor_is_configured (self))
     return;
 
   self->wl_output_done = TRUE;
+
+  if (!self->backlight && self->name) {
+    self->backlight = PHOSH_BACKLIGHT (phosh_backlight_sysfs_new (self->name, &err));
+    if (!self->backlight)
+      g_debug ("Failed to get backlight for %s: %s", self->name, err->message);
+  }
 
   g_signal_emit (self, signals[SIGNAL_CONFIGURED], 0);
 }
@@ -352,6 +359,8 @@ phosh_monitor_dispose (GObject *object)
   g_clear_pointer (&self->wlr_output_power, zwlr_output_power_v1_destroy);
   g_clear_pointer (&self->gamma_control, zwlr_gamma_control_v1_destroy);
 
+  g_clear_object (&self->backlight);
+
   G_OBJECT_CLASS (phosh_monitor_parent_class)->dispose (object);
 }
 
@@ -376,6 +385,7 @@ phosh_monitor_constructed (GObject *object)
 {
   PhoshMonitor *self = PHOSH_MONITOR (object);
   struct zwlr_output_power_manager_v1 *zwlr_output_power_manager_v1;
+  g_autoptr (GError) err = NULL;
 
   wl_output_add_listener (self->wl_output, &output_listener, self);
 
