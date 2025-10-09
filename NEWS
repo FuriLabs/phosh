@@ -1,3 +1,28 @@
+phosh 0.50.0
+------------
+Released October 2025
+* Allow to open the top-bar settings panel easily
+* Move brightness handling to phosh, it got dropped from g-s-d 49.
+* Mark demo plugins as `NoDisplay` so they don't show in p-m-s
+* Don't crash g-c-c when running nested
+* Reset them when auto-HighContrast is turned off
+* Issues fixed:
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1261
+* Contributors:
+    * Anna (cybertailor) Vyalkova
+    * Evangelos Ribeiro Tzaras
+    * Guido Günther
+* UI translations:
+    * Emin Tufan Çetin (tr)
+    * Jiri Grönroos (fi)
+    * Jordi Mas i Hernandez (ca)
+    * Kristjan SCHMIDT (eo)
+    * Nathan Follens (nl)
+    * Philipp Kiemle (de)
+    * Sabri Ünal (tr)
+    * twlvnn kraftwerk (bg)
+    * Yaron Shahrabani (he)
+
 phosh 0.49.0
 ------------
 Released August 2025

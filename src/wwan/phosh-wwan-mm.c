@@ -51,6 +51,7 @@ typedef struct _PhoshWWanMM {
 
   MMManager                      *manager;
   GCancellable                   *cancel;
+  GDBusConnection                *connection;
 
   guint                           signal_quality;
   const char                     *access_tec;
@@ -559,8 +560,9 @@ on_mm_object_removed (PhoshWWanMM *self, GDBusObject *object, MMManager *manager
 
 
 static void
-on_mm_manager_ready (GObject *source_object, GAsyncResult *res, PhoshWWanMM  *self)
+on_mm_manager_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshWWanMM *self = PHOSH_WWAN_MM (user_data);
   g_autoptr (GError) err = NULL;
   g_autolist (GDBusObject) modems = NULL;
   MMManager *manager;
@@ -607,6 +609,8 @@ phosh_wwan_mm_dispose (GObject *object)
     g_signal_handlers_disconnect_by_data (self->manager, self);
     g_clear_object (&self->manager);
   }
+
+  g_clear_object (&self->connection);
 
   G_OBJECT_CLASS (phosh_wwan_mm_parent_class)->dispose (object);
 }
@@ -748,8 +752,9 @@ phosh_wwan_mm_interface_init (PhoshWWanInterface *iface)
 
 
 static void
-on_bus_get_ready (GObject *source_object, GAsyncResult *res, PhoshWWanMM *self)
+on_bus_get_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshWWanMM *self = PHOSH_WWAN_MM (user_data);
   g_autoptr (GError) err = NULL;
   GDBusConnection *connection;
 
@@ -759,10 +764,11 @@ on_bus_get_ready (GObject *source_object, GAsyncResult *res, PhoshWWanMM *self)
     return;
   }
 
-  mm_manager_new (connection,
+  self->connection = connection;
+  mm_manager_new (self->connection,
                   G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_DO_NOT_AUTO_START,
                   self->cancel,
-                  (GAsyncReadyCallback)on_mm_manager_ready,
+                  on_mm_manager_ready,
                   self);
 }
 
@@ -774,7 +780,7 @@ phosh_wwan_mm_init (PhoshWWanMM *self)
 
   g_bus_get (G_BUS_TYPE_SYSTEM,
              self->cancel,
-             (GAsyncReadyCallback)on_bus_get_ready,
+             on_bus_get_ready,
              self);
 }
 

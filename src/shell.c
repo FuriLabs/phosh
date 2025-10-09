@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2018 Purism SPC
- *               2023-2025 The Phosh Developers
+ *               2023-2024 The Phosh Developers
+ *               2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -26,6 +27,7 @@
 #include "phosh-config.h"
 #include "ambient.h"
 #include "background.h"
+#include "brightness-manager.h"
 #include "drag-surface.h"
 #include "shell-priv.h"
 #include "app-tracker.h"
@@ -60,6 +62,7 @@
 #include "monitor-manager.h"
 #include "monitor/monitor.h"
 #include "mount-manager.h"
+#include "osd-window.h"
 #include "power-menu-manager.h"
 #include "revealer.h"
 #include "settings.h"
@@ -92,6 +95,7 @@
 #include "top-panel-bg.h"
 #include "torch-manager.h"
 #include "torch-info.h"
+#include "udev-manager.h"
 #include "util.h"
 #include "vpn-info.h"
 #include "wifi-info.h"
@@ -103,6 +107,7 @@
 #include "phosh-settings-enums.h"
 
 #define WWAN_BACKEND_KEY "wwan-backend"
+#define OSD_HIDE_TIMEOUT 1 /* seconds */
 
 /**
  * PhoshShell:
@@ -142,8 +147,13 @@ typedef struct
   gboolean          overview_visible;
   GPtrArray *faders;              /* for final fade out */
 
+  PhoshOsdWindow   *osd;
+  gint              osd_timeoutid;
+  gboolean          osd_continue;
+
   GtkWidget *notification_banner;
 
+  PhoshUdevManager *udev_manager;
   PhoshAppTracker *app_tracker;
   PhoshSessionManager *session_manager;
   PhoshBackgroundManager *background_manager;
@@ -186,6 +196,7 @@ typedef struct
   PhoshCellBroadcastManager *cell_broadcast_manager;
   PhoshConnectivityManager *connectivity_manager;
   PhoshMprisManager *mpris_manager;
+  PhoshBrightnessManager *brightness_manager;
 
   /* sensors */
   PhoshSensorProxyManager *sensor_proxy_manager;
@@ -227,7 +238,7 @@ on_top_panel_activated (PhoshShell    *self,
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_TOP_PANEL (priv->top_panel));
-  phosh_top_panel_toggle_fold (PHOSH_TOP_PANEL(priv->top_panel));
+  phosh_top_panel_toggle_fold (PHOSH_TOP_PANEL (priv->top_panel));
 }
 
 
@@ -451,7 +462,7 @@ panels_dispose (PhoshShell *self)
 static void
 set_locked (PhoshShell *self, gboolean locked)
 {
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private(self);
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   if (priv->locked == locked)
     return;
@@ -540,7 +551,7 @@ static void
 phosh_shell_dispose (GObject *object)
 {
   PhoshShell *self = PHOSH_SHELL (object);
-  PhoshShellPrivate *priv = phosh_shell_get_instance_private(self);
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   g_clear_handle_id (&priv->startup_finished_id, g_source_remove);
 
@@ -550,6 +561,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_pointer (&priv->notification_banner, phosh_cp_widget_destroy);
 
   /* dispose managers in opposite order of declaration */
+  g_clear_object (&priv->brightness_manager);
   g_clear_object (&priv->mpris_manager);
   g_clear_object (&priv->connectivity_manager);
   g_clear_object (&priv->cell_broadcast_manager);
@@ -591,6 +603,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->suspend_manager);
   g_clear_object (&priv->layout_manager);
   g_clear_object (&priv->style_manager);
+  g_clear_object (&priv->udev_manager);
 
   /* sensors */
   g_clear_object (&priv->proximity);
@@ -616,7 +629,9 @@ phosh_shell_finalize (GObject *object)
 
 
 static void
-on_num_toplevels_changed (PhoshShell *self, GParamSpec *pspec, PhoshToplevelManager *toplevel_manager)
+on_num_toplevels_changed (PhoshShell           *self,
+                          GParamSpec           *pspec,
+                          PhoshToplevelManager *toplevel_manager)
 {
   PhoshShellPrivate *priv;
 
@@ -711,6 +726,37 @@ on_fade_out_timeout (PhoshShell *self)
 }
 
 
+/* {{{ OSD */
+
+static gboolean
+on_osd_timeout (PhoshShell *self)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  gboolean ret;
+
+  ret = priv->osd_continue ? G_SOURCE_CONTINUE : G_SOURCE_REMOVE;
+  if (!priv->osd_continue) {
+    g_debug ("Closing osd");
+    priv->osd_timeoutid = 0;
+    if (priv->osd)
+      gtk_widget_destroy (GTK_WIDGET (priv->osd));
+  }
+  priv->osd_continue = FALSE;
+  return ret;
+}
+
+
+static void
+on_osd_destroyed (PhoshShell *self)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  priv->osd = NULL;
+  g_clear_handle_id (&priv->osd_timeoutid, g_source_remove);
+}
+
+/* }}} */
+
 static void
 notify_compositor_up_state (PhoshShell *self, enum phosh_private_shell_state state)
 {
@@ -719,7 +765,8 @@ notify_compositor_up_state (PhoshShell *self, enum phosh_private_shell_state sta
   g_debug ("Notify compositor state: %d", state);
 
   phosh_private = phosh_wayland_get_phosh_private (phosh_wayland_get_default ());
-  if (phosh_private && phosh_private_get_version (phosh_private) >= PHOSH_PRIVATE_SET_SHELL_STATE_SINCE_VERSION)
+  if (phosh_private &&
+      phosh_private_get_version (phosh_private) >= PHOSH_PRIVATE_SET_SHELL_STATE_SINCE_VERSION)
     phosh_private_set_shell_state (phosh_private, state);
 }
 
@@ -1031,6 +1078,7 @@ phosh_shell_constructed (GObject *object)
 {
   PhoshShell *self = PHOSH_SHELL (object);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+  g_autoptr (GError) err = NULL;
   guint id;
   const gchar *home_dir = g_get_home_dir ();
   gchar *file_path = g_build_filename (home_dir, ".config/furios-initial-setup-pending", NULL);
@@ -1043,12 +1091,6 @@ phosh_shell_constructed (GObject *object)
 
   if (!priv->kiosk_mode_apps && g_file_test (file_path, G_FILE_TEST_EXISTS))
     priv->kiosk_mode_apps = "furios-initial-setup";
-
-  priv->settings = g_settings_new ("sm.puri.phosh");
-
-  /* We bind this early since a wl_display_roundtrip () would make us miss
-     existing toplevels */
-  priv->toplevel_manager = phosh_toplevel_manager_new ();
 
   priv->monitor_manager = phosh_monitor_manager_new (NULL);
   g_signal_connect_swapped (priv->monitor_manager,
@@ -1085,9 +1127,6 @@ phosh_shell_constructed (GObject *object)
     g_error ("Need at least one monitor");
   }
 
-  gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (),
-                                    "/mobi/phosh/icons");
-
   priv->calls_manager = phosh_calls_manager_new ();
   priv->launcher_entry_manager = phosh_launcher_entry_manager_new ();
 
@@ -1096,7 +1135,7 @@ phosh_shell_constructed (GObject *object)
                           self, "locked",
                           G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
 
-  priv->idle_manager = phosh_idle_manager_get_default();
+  priv->idle_manager = phosh_idle_manager_get_default ();
 
   priv->faders = g_ptr_array_new_with_free_func ((GDestroyNotify) (gtk_widget_destroy));
 
@@ -1104,11 +1143,15 @@ phosh_shell_constructed (GObject *object)
   priv->polkit_auth_agent = phosh_polkit_auth_agent_new ();
 
   priv->feedback_manager = phosh_feedback_manager_new ();
-  priv->keyboard_events = phosh_keyboard_events_new ();
-  g_signal_connect_swapped (priv->keyboard_events,
-                            "pressed",
-                            G_CALLBACK (on_keyboard_events_pressed),
-                            self);
+  priv->keyboard_events = phosh_keyboard_events_new (&err);
+  if (priv->keyboard_events) {
+    g_signal_connect_swapped (priv->keyboard_events,
+                              "pressed",
+                              G_CALLBACK (on_keyboard_events_pressed),
+                              self);
+  } else {
+    g_warning ("Failed to initialize keyboard events: %s", err->message);
+  }
 
   id = g_idle_add ((GSourceFunc) setup_idle_cb, self);
   g_source_set_name_by_id (id, "[PhoshShell] idle");
@@ -1116,7 +1159,7 @@ phosh_shell_constructed (GObject *object)
 
 /* {{{ Action Map/Group */
 
-static gchar **
+static char **
 phosh_shell_list_actions (GActionGroup *group)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1131,7 +1174,7 @@ phosh_shell_list_actions (GActionGroup *group)
 
 static gboolean
 phosh_shell_query_action (GActionGroup        *group,
-                          const gchar         *action_name,
+                          const char          *action_name,
                           gboolean            *enabled,
                           const GVariantType **parameter_type,
                           const GVariantType **state_type,
@@ -1156,7 +1199,7 @@ phosh_shell_query_action (GActionGroup        *group,
 
 static void
 _phosh_shell_activate_action (GActionGroup *group,
-                              const gchar  *action_name,
+                              const char   *action_name,
                               GVariant     *parameter)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1171,7 +1214,7 @@ _phosh_shell_activate_action (GActionGroup *group,
 
 static void
 phosh_shell_change_action_state (GActionGroup *group,
-                                 const gchar  *action_name,
+                                 const char   *action_name,
                                  GVariant     *state)
 {
   PhoshShell *self = PHOSH_SHELL (group);
@@ -1195,7 +1238,7 @@ phosh_shell_action_group_iface_init (GActionGroupInterface *iface)
 
 
 static GAction *
-phosh_shell_lookup_action (GActionMap *action_map, const gchar *action_name)
+phosh_shell_lookup_action (GActionMap *action_map, const char *action_name)
 {
   PhoshShell *self = PHOSH_SHELL (action_map);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
@@ -1219,7 +1262,7 @@ phosh_shell_add_action (GActionMap *action_map, GAction *action)
 }
 
 static void
-phosh_shell_remove_action (GActionMap *action_map, const gchar *action_name)
+phosh_shell_remove_action (GActionMap *action_map, const char *action_name)
 {
   PhoshShell *self = PHOSH_SHELL (action_map);
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
@@ -1231,7 +1274,8 @@ phosh_shell_remove_action (GActionMap *action_map, const gchar *action_name)
 }
 
 
-static void phosh_shell_action_map_iface_init (GActionMapInterface *iface)
+static void
+phosh_shell_action_map_iface_init (GActionMapInterface *iface)
 {
   iface->lookup_action = phosh_shell_lookup_action;
   iface->add_action = phosh_shell_add_action;
@@ -1320,7 +1364,6 @@ phosh_shell_class_init (PhoshShellClass *klass)
                         PHOSH_TYPE_SHELL_STATE_FLAGS,
                         PHOSH_STATE_NONE,
                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
-
   /**
    * PhoshShell:overview-visible:
    *
@@ -1367,6 +1410,7 @@ phosh_shell_init (PhoshShell *self)
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
   cui_init (TRUE);
+  gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (), "/mobi/phosh/icons");
 
   priv->overview_visible = TRUE;
 
@@ -1380,6 +1424,12 @@ phosh_shell_init (PhoshShell *self)
   priv->style_manager = phosh_style_manager_new ();
   priv->shell_state = PHOSH_STATE_SETTINGS;
   priv->action_map = g_simple_action_group_new ();
+  priv->settings = g_settings_new ("sm.puri.phosh");
+
+  /* We bind this early since a wl_display_roundtrip () would make us miss
+     existing toplevels */
+  priv->toplevel_manager = phosh_toplevel_manager_new ();
+  priv->udev_manager = phosh_udev_manager_get_default ();
 }
 
 /* }}} */
@@ -1868,6 +1918,29 @@ phosh_shell_get_wifi_manager (PhoshShell *self)
 /* Manager getters that create them as needed */
 
 /**
+ * phosh_shell_get_brightness_manager:
+ * @self: The shell singleton
+ *
+ * Get the brightness manager
+ *
+ * Returns: (transfer none): The brightness manager
+ */
+PhoshBrightnessManager *
+phosh_shell_get_brightness_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+
+  if (!priv->brightness_manager)
+    priv->brightness_manager = phosh_brightness_manager_new ();
+
+  g_return_val_if_fail (PHOSH_IS_BRIGHTNESS_MANAGER (priv->brightness_manager), NULL);
+
+  return priv->brightness_manager;
+}
+
+/**
  * phosh_shell_get_bt_manager:
  * @self: The shell singleton
  *
@@ -2145,11 +2218,11 @@ phosh_shell_get_usable_area (PhoshShell *self, int *x, int *y, int *width, int *
   g_return_if_fail (PHOSH_IS_SHELL (self));
 
   monitor = phosh_shell_get_primary_monitor (self);
-  g_return_if_fail(monitor);
+  g_return_if_fail (monitor);
   mode = phosh_monitor_get_current_mode (monitor);
   g_return_if_fail (mode != NULL);
 
-  scale = MAX(1.0, phosh_monitor_get_fractional_scale (monitor));
+  scale = MAX (1.0, phosh_monitor_get_fractional_scale (monitor));
 
   g_debug ("Primary monitor %p scale is %f, mode: %dx%d, transform is %d",
            monitor,
@@ -2158,7 +2231,7 @@ phosh_shell_get_usable_area (PhoshShell *self, int *x, int *y, int *width, int *
            mode->height,
            monitor->transform);
 
-  switch (phosh_monitor_get_transform(monitor)) {
+  switch (phosh_monitor_get_transform (monitor)) {
   case PHOSH_MONITOR_TRANSFORM_NORMAL:
   case PHOSH_MONITOR_TRANSFORM_180:
   case PHOSH_MONITOR_TRANSFORM_FLIPPED:
@@ -2295,7 +2368,7 @@ phosh_shell_enable_power_save (PhoshShell *self, gboolean enable)
  * Returns: %TRUE if we were started from a display manager. %FALSE otherwise.
  */
 gboolean
-phosh_shell_started_by_display_manager(PhoshShell *self)
+phosh_shell_started_by_display_manager (PhoshShell *self)
 {
   g_return_val_if_fail (PHOSH_IS_SHELL (self), FALSE);
 
@@ -2312,7 +2385,7 @@ phosh_shell_started_by_display_manager(PhoshShell *self)
  * Returns: %TRUE if the shell finished startup. %FALSE otherwise.
  */
 gboolean
-phosh_shell_is_startup_finished(PhoshShell *self)
+phosh_shell_is_startup_finished (PhoshShell *self)
 {
   PhoshShellPrivate *priv;
 
@@ -2324,10 +2397,10 @@ phosh_shell_is_startup_finished(PhoshShell *self)
 
 
 void
-phosh_shell_add_global_keyboard_action_entries (PhoshShell *self,
+phosh_shell_add_global_keyboard_action_entries (PhoshShell         *self,
                                                 const GActionEntry *entries,
-                                                gint n_entries,
-                                                gpointer user_data)
+                                                gint                n_entries,
+                                                gpointer            user_data)
 {
   PhoshShellPrivate *priv;
 
@@ -2424,8 +2497,8 @@ phosh_shell_set_state (PhoshShell          *self,
 {
   PhoshShellPrivate *priv;
   PhoshShellStateFlags old_state;
-  g_autofree gchar *str_state = NULL;
-  g_autofree gchar *str_new_flags = NULL;
+  g_autofree char *str_state = NULL;
+  g_autofree char *str_new_flags = NULL;
 
   g_return_if_fail (PHOSH_IS_SHELL (self));
   priv = phosh_shell_get_instance_private (self);
@@ -2614,6 +2687,45 @@ phosh_shell_get_lockscreen_type (PhoshShell *self)
 {
   PhoshShellClass *klass = PHOSH_SHELL_GET_CLASS (self);
   return klass->get_lockscreen_type (self);
+}
+
+
+void
+phosh_shell_show_osd (PhoshShell *self,
+                      const char *connector,
+                      const char *icon,
+                      const char *label,
+                      double      level,
+                      double      max_level)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+
+  g_debug ("DBus show osd: connector: %s icon: %s, label: %s, level %f/%f",
+           connector, icon, label, level, max_level);
+
+  if (priv->osd) {
+    priv->osd_continue = TRUE;
+    g_object_set (priv->osd,
+                  "connector", connector,
+                  "label", label,
+                  "icon-name", icon,
+                  "level", level,
+                  "max-level", max_level,
+                  NULL);
+  } else {
+    priv->osd = PHOSH_OSD_WINDOW (phosh_osd_window_new (connector, label, icon, level, max_level));
+    g_signal_connect_swapped (priv->osd, "destroy", G_CALLBACK (on_osd_destroyed), self);
+    gtk_widget_set_visible (GTK_WIDGET (priv->osd), TRUE);
+  }
+
+  if (!priv->osd_timeoutid) {
+    priv->osd_timeoutid = g_timeout_add_seconds (OSD_HIDE_TIMEOUT,
+                                                 (GSourceFunc) on_osd_timeout,
+                                                 self);
+    g_source_set_name_by_id (priv->osd_timeoutid, "[phosh] osd-timeout");
+  }
 }
 
 /* }}} */

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2018 Purism SPC
+ *               2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -299,21 +300,6 @@ phosh_monitor_manager_handle_get_resources (PhoshDBusDisplayConfig *skeleton,
 
 
 static gboolean
-phosh_monitor_manager_handle_change_backlight (PhoshDBusDisplayConfig *skeleton,
-                                               GDBusMethodInvocation  *invocation,
-                                               guint                   serial,
-                                               guint                   output_index,
-                                               int                     value)
-{
-  g_debug ("Unimplemented DBus call %s", __func__);
-  g_dbus_method_invocation_return_error (invocation, G_DBUS_ERROR,
-                                         G_DBUS_ERROR_NOT_SUPPORTED,
-                                         "Changing backlight not supported");
-  return TRUE;
-}
-
-
-static gboolean
 phosh_monitor_manager_handle_get_crtc_gamma (PhoshDBusDisplayConfig *skeleton,
                                              GDBusMethodInvocation  *invocation,
                                              guint                   serial,
@@ -395,6 +381,49 @@ phosh_monitor_manager_handle_set_crtc_gamma (PhoshDBusDisplayConfig *skeleton,
 #define LOGICAL_MONITORS_FORMAT "a" LOGICAL_MONITOR_FORMAT
 
 
+static void
+build_mode (GVariantBuilder *modes_builder, PhoshHeadMode *mode, gboolean is_current)
+{
+  double scale = 1.0;
+  GVariantBuilder supported_scales_builder, mode_properties_builder;
+  const char *name = "default";
+  int n;
+  g_autofree float *scales = NULL;
+
+  if (mode->name)
+    name = mode->name;
+  else if (!is_current) {
+    g_warning ("Skipping unnamend mode %p", mode);
+    return;
+  }
+
+  g_variant_builder_init (&supported_scales_builder, G_VARIANT_TYPE ("ad"));
+  scales = phosh_util_calculate_supported_mode_scales (mode->width, mode->height, &n, TRUE);
+  for (int l = 0; l < n; l++) {
+    g_variant_builder_add (&supported_scales_builder, "d",
+                           (double)scales[l]);
+  }
+
+  g_variant_builder_init (&mode_properties_builder,
+                          G_VARIANT_TYPE ("a{sv}"));
+  g_variant_builder_add (&mode_properties_builder, "{sv}",
+                         "is-current",
+                         g_variant_new_boolean (is_current));
+  g_variant_builder_add (&mode_properties_builder, "{sv}",
+                         "is-preferred",
+                         g_variant_new_boolean (mode->preferred));
+
+  g_variant_builder_add (modes_builder, MODE_FORMAT,
+                         name,
+                         (gint32)mode->width,
+                         (gint32)mode->height,
+                         (double)mode->refresh / 1000.0,
+                         (double)scale,  /* preferred_scale, */
+                         &supported_scales_builder,
+                         &mode_properties_builder);
+}
+
+
 static gboolean
 phosh_monitor_manager_handle_get_current_state (PhoshDBusDisplayConfig *skeleton,
                                                 GDBusMethodInvocation  *invocation)
@@ -428,49 +457,21 @@ phosh_monitor_manager_handle_get_current_state (PhoshDBusDisplayConfig *skeleton
 
   /* connected physical monitors */
   for (int i = 0; i < self->heads->len; i++) {
-    double scale = 1.0;
     PhoshHead *head = g_ptr_array_index (self->heads, i);
-    GVariantBuilder modes_builder, supported_scales_builder, mode_properties_builder,
-      monitor_properties_builder;
+    GVariantBuilder modes_builder, monitor_properties_builder;
     char *display_name;
     gboolean is_builtin;
-    int n;
 
     g_variant_builder_init (&modes_builder, G_VARIANT_TYPE (MODES_FORMAT));
 
+    /* Ensure we have at least one mode */
+    if (head->modes->len == 0)
+      build_mode (&modes_builder, head->mode, TRUE);
+
     for (int k = 0; k < head->modes->len; k++) {
       PhoshHeadMode *mode = g_ptr_array_index (head->modes, k);
-      g_autofree float *scales = NULL;
-      if (!mode->name) {
-        g_warning ("Skipping unnamend mode %p", mode);
-        continue;
-      }
 
-      g_variant_builder_init (&supported_scales_builder,
-                              G_VARIANT_TYPE ("ad"));
-      scales = phosh_util_calculate_supported_mode_scales (mode->width, mode->height, &n, TRUE);
-      for (int l = 0; l < n; l++) {
-        g_variant_builder_add (&supported_scales_builder, "d",
-                               (double)scales[l]);
-      }
-
-      g_variant_builder_init (&mode_properties_builder,
-                              G_VARIANT_TYPE ("a{sv}"));
-      g_variant_builder_add (&mode_properties_builder, "{sv}",
-                             "is-current",
-                             g_variant_new_boolean (head->mode == mode));
-      g_variant_builder_add (&mode_properties_builder, "{sv}",
-                             "is-preferred",
-                             g_variant_new_boolean (mode->preferred));
-
-      g_variant_builder_add (&modes_builder, MODE_FORMAT,
-                             mode->name,
-                             (gint32)mode->width,
-                             (gint32)mode->height,
-                             (double)mode->refresh / 1000.0,
-                             (double)scale,  /* preferred_scale, */
-                             &supported_scales_builder,
-                             &mode_properties_builder);
+      build_mode (&modes_builder, mode, head->mode == mode);
     }
 
     g_variant_builder_init (&monitor_properties_builder,
@@ -854,7 +855,6 @@ static void
 phosh_monitor_manager_display_config_init (PhoshDBusDisplayConfigIface *iface)
 {
   iface->handle_get_resources = phosh_monitor_manager_handle_get_resources;
-  iface->handle_change_backlight = phosh_monitor_manager_handle_change_backlight;
   iface->handle_get_crtc_gamma = phosh_monitor_manager_handle_get_crtc_gamma;
   iface->handle_set_crtc_gamma = phosh_monitor_manager_handle_set_crtc_gamma;
   iface->handle_get_current_state = phosh_monitor_manager_handle_get_current_state;
@@ -1294,10 +1294,12 @@ on_gsd_color_temperature_changed (PhoshMonitorManager*self,
 
 
 static void
-on_gsd_color_proxy_new_for_bus_finish (GObject             *source_object,
-                                       GAsyncResult        *res,
-                                       PhoshMonitorManager *self)
+on_gsd_color_proxy_new_for_bus_finish (GObject      *source_object,
+                                       GAsyncResult *res,
+                                       gpointer      user_data)
+
 {
+  PhoshMonitorManager *self = PHOSH_MONITOR_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
   PhoshDBusColor *proxy;
 
@@ -1338,7 +1340,7 @@ on_idle (PhoshMonitorManager *self)
                                       GSD_COLOR_BUS_NAME,
                                       GSD_COLOR_OBJECT_PATH,
                                       self->cancel,
-                                      (GAsyncReadyCallback) on_gsd_color_proxy_new_for_bus_finish,
+                                      on_gsd_color_proxy_new_for_bus_finish,
                                       self);
 
   return FALSE;

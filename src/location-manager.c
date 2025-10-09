@@ -70,6 +70,7 @@ typedef struct _PhoshLocationManager {
   GSettings                                          *location_settings;
   gboolean                                            enabled;
   gboolean                                            active;
+  GDBusConnection                                    *connection;
 
   /* Current Request */
   GtkWidget                                          *prompt;
@@ -212,7 +213,7 @@ on_app_auth_prompt_closed (PhoshLocationManager *self, PhoshAppAuthPrompt *promp
 static gboolean
 handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
                       GDBusMethodInvocation                       *invocation,
-                      const gchar                                 *arg_desktop_id,
+                      const char                                  *arg_desktop_id,
                       guint                                        arg_req_accuracy_level)
 {
   PhoshLocationManager *self = PHOSH_LOCATION_MANAGER (object);
@@ -308,9 +309,7 @@ phosh_location_manager_geoclue2_agent_iface_init (PhoshGeoClueDBusOrgFreedesktop
 
 
 static void
-on_bus_acquired (GObject      *source_object,
-                 GAsyncResult *res,
-                 gpointer      user_data)
+on_bus_acquired (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
   g_autoptr (GError) err = NULL;
   PhoshLocationManager *self;
@@ -323,8 +322,9 @@ on_bus_acquired (GObject      *source_object,
   }
 
   self = PHOSH_LOCATION_MANAGER (user_data);
+  self->connection = connection;
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self),
-                                    connection,
+                                    self->connection,
                                     LOCATION_AGENT_DBUS_PATH,
                                     NULL);
   update_accuracy_level (self, self->enabled);
@@ -332,10 +332,11 @@ on_bus_acquired (GObject      *source_object,
 
 
 static void
-on_add_agent_ready (PhoshGeoClueDBusManager *manager,
-                    GAsyncResult            *res,
-                    gpointer                 user_data)
+on_add_agent_ready (GObject      *source_object,
+                    GAsyncResult *res,
+                    gpointer      user_data)
 {
+  PhoshGeoClueDBusManager *manager = PHOSH_GEO_CLUE_DBUS_MANAGER (source_object);
   g_autoptr (GError) err = NULL;
 
   if (phosh_geo_clue_dbus_manager_call_add_agent_finish (manager, res, &err))
@@ -384,8 +385,8 @@ on_manager_proxy_ready (GObject              *source_object,
   phosh_geo_clue_dbus_manager_call_add_agent (self->manager_proxy,
                                               /* Agent whitelisted in geoclue conf */
                                               "sm.puri.Phosh",
-                                              NULL,
-                                              (GAsyncReadyCallback)on_add_agent_ready,
+                                              self->cancel,
+                                              on_add_agent_ready,
                                               NULL);
   g_signal_connect_swapped (self->manager_proxy,
                             "notify::in-use",
@@ -397,8 +398,8 @@ on_manager_proxy_ready (GObject              *source_object,
 
 static void
 on_manager_name_appeared (GDBusConnection      *connection,
-                          const gchar          *name,
-                          const gchar          *name_owner,
+                          const char           *name,
+                          const char           *name_owner,
                           PhoshLocationManager *self)
 {
   g_return_if_fail (PHOSH_IS_LOCATION_MANAGER (self));
@@ -409,14 +410,14 @@ on_manager_name_appeared (GDBusConnection      *connection,
     G_DBUS_PROXY_FLAGS_NONE,
     GEOCLUE_SERVICE,
     GEOCLUE_MANAGER_PATH,
-    NULL,
+    self->cancel,
     (GAsyncReadyCallback)on_manager_proxy_ready,
     self);
 }
 
 static void
 on_manager_name_vanished (GDBusConnection      *connection,
-                          const gchar          *name,
+                          const char           *name,
                           PhoshLocationManager *self)
 {
   g_return_if_fail (PHOSH_IS_LOCATION_MANAGER (self));
@@ -453,6 +454,7 @@ phosh_location_manager_dispose (GObject *object)
 
   g_clear_object (&self->location_settings);
   g_clear_object (&self->manager_proxy);
+  g_clear_object (&self->connection);
 
   G_OBJECT_CLASS (phosh_location_manager_parent_class)->dispose (object);
 }

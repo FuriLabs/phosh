@@ -15,22 +15,56 @@
 #define phosh_async_error_warn(err, ...) \
   phosh_error_warnv (G_LOG_DOMAIN, err, G_IO_ERROR, G_IO_ERROR_CANCELLED, __VA_ARGS__)
 
-#define phosh_dbus_service_error_warn(err, ...) \
-  phosh_error_warnv (G_LOG_DOMAIN, err, G_IO_ERROR, G_IO_ERROR_NOT_FOUND, __VA_ARGS__)
+#define phosh_dbus_service_error_warn(err, ...)                   \
+  phosh_error_warnv2 (G_LOG_DOMAIN, err, G_IO_ERROR,              \
+                      G_IO_ERROR_NOT_FOUND, G_IO_ERROR_CANCELLED, \
+                      __VA_ARGS__)
+
+/**
+ * PHOSH_UTIL_BUILD_KEYBINDING:
+ * @actions: (array)(element-type GActionEntry)(inout): The action array to build
+ * @builder: A `GStrvBuilder` for the action names
+ * @settings: The settings
+ * @key: The settings key
+ * @callback: The callback to invoke when the keybinding is pressed
+ *
+ * Helper to construct keybindings easily
+ *
+ * Append the actions for the keybindings found in the settings and add the keybindings
+ * strings to builder.
+ */
+#define PHOSH_UTIL_BUILD_KEYBINDING(actions, builder, settings, key, callback) \
+  G_STMT_START {                                                        \
+    GStrv _bindings = g_settings_get_strv (settings, key);              \
+    for (int i = 0; _bindings[i]; i++) {                                \
+      GActionEntry _entry = { .name = _bindings[i], .activate = callback }; \
+      g_array_append_val (actions, _entry);                             \
+      g_strv_builder_take (builder, _bindings[i]);                      \
+    }                                                                   \
+    /* Free container but keep individual strings for action_names */   \
+    g_free (_bindings);                                                 \
+  } G_STMT_END
 
 void             phosh_cp_widget_destroy (void *widget);
 GDesktopAppInfo *phosh_get_desktop_app_info_for_app_id (const char *app_id);
 GDesktopAppInfo *phosh_get_desktop_app_info_from_gsettings (void);
-gchar           *phosh_munge_app_id (const gchar *app_id);
+void             phosh_convert_buffer (void *data, enum wl_shm_format format, guint width, guint height, guint stride);
+char            *phosh_munge_app_id (const char *app_id);
 char            *phosh_strip_suffix_from_app_id (const char *app_id);
 gboolean         phosh_find_systemd_session (char **session_id);
-void             phosh_convert_buffer (void *data, enum wl_shm_format format, guint width, guint height, guint stride);
-gboolean         phosh_error_warnv (const char  *log_domain,
-                                    GError      *err,
-                                    GQuark       domain,
-                                    int          code,
-                                    const gchar *fmt,
+gboolean         phosh_error_warnv (const char *log_domain,
+                                    GError     *err,
+                                    GQuark      domain,
+                                    int         code,
+                                    const char *fmt,
                                     ...) G_GNUC_PRINTF(5, 6);
+gboolean         phosh_error_warnv2 (const char  *log_domain,
+                                     GError      *err,
+                                     GQuark       domain,
+                                     int          code1,
+                                     int          code2,
+                                     const gchar *fmt,
+                                     ...) G_GNUC_PRINTF(6, 7);
 int              phosh_create_shm_file (off_t size);
 char            *phosh_util_escape_markup (const char *markup, gboolean allow_markup);
 gboolean         phosh_util_gesture_is_touch (GtkGestureSingle *gesture);

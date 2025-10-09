@@ -12,6 +12,7 @@
 
 #include "feedback-manager.h"
 #include "shell-priv.h"
+#include "util.h"
 
 #include <libfeedback.h>
 
@@ -58,8 +59,12 @@ on_event_triggered (LfbEvent      *event,
   g_autoptr (GError) err = NULL;
 
   if (!lfb_event_trigger_feedback_finish (event, res, &err)) {
-    g_warning_once ("Failed to trigger feedback for '%s': %s",
-                    lfb_event_get_event (event), err->message);
+    if (g_error_matches (err, G_DBUS_ERROR, G_DBUS_ERROR_SERVICE_UNKNOWN)) {
+      g_debug ("Feedbackd service not found: %s", err->message);
+    } else {
+      g_warning ("Failed to trigger feedback for '%s': %s",
+                 lfb_event_get_event (event), err->message);
+    }
   }
 }
 

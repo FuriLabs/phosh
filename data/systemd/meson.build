@@ -29,4 +29,6 @@ configure_file(
   install: true,
 )
 
-install_data('mobi.phosh.Shell.target', install_dir: systemduserdir)
+foreach type : ['Shell', 'OSK']
+  install_data(f'mobi.phosh.@type@.target', install_dir: systemduserdir)
+endforeach

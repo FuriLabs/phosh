@@ -89,6 +89,7 @@
     <file alias="screen-rotation-landscape-symbolic.svg">../data/icons/screen-rotation-landscape-symbolic.svg</file>
     <file alias="screen-rotation-portrait-symbolic.svg">../data/icons/screen-rotation-portrait-symbolic.svg</file>
     <file alias="screenshot-portrait-symbolic.svg">../data/icons/screenshot-portrait-symbolic.svg</file>
+    <file alias="settings-symbolic.svg">../data/icons/settings-symbolic.svg</file>
     <file alias="skip-backwards-10-symbolic.svg">../data/icons/skip-backwards-10-symbolic.svg</file>
     <file alias="skip-forward-30-symbolic.svg">../data/icons/skip-forward-30-symbolic.svg</file>
     <file alias="splash-process-working-symbolic.svg">../data/icons/splash-process-working-symbolic.svg</file>
