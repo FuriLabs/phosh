@@ -14,6 +14,7 @@ dbus_inc_dir = lib_inc_dir / 'dbus'
 #
 dbus_client_protos = [
   # Sorted by xml filename:
+  ['furios-flashlightd-dbus', 'io.furios.Flashlightd.xml', 'io.furios.Flashlightd', false],
   ['iio-sensor-proxy-dbus', 'net.hadess.SensorProxy.xml', 'net.hadess', false],
   ['hostname1-dbus', 'org.freedesktop.hostname1.xml', 'org.freedesktop', false],
   ['portal-dbus', 'org.freedesktop.impl.portal.xml', 'org.freedesktop', false],
