@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+  <interface name="io.furios.Flashlightd">
+    <annotation name="org.gtk.GDBus.C.Name" value="FuriosTorch" />
+
+    <property name="Brightness" type="u" access="read"/>
+    <property name="MaxBrightness" type="u" access="read"/>
+    <property name="Scalable" type="b" access="read"/>
+
+    <method name="SetBrightness">
+      <arg name="brightness" direction="in" type="u" />
+    </method>
+
+  </interface>
+</node>

@@ -15,6 +15,13 @@ dbus_inc_dir = lib_inc_dir / 'dbus'
 dbus_client_protos = [
   # Sorted by xml filename:
   [
+    'furios-flashlightd-dbus',
+    'io.furios.Flashlightd.xml',
+    'io.furios.Flashlightd',
+    false,
+    false,
+  ],
+  [
     'iio-sensor-proxy-dbus',
     'net.hadess.SensorProxy.xml',
     'net.hadess',
