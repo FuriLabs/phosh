@@ -10,6 +10,7 @@
 
 #include <gtk/gtk.h>
 #include <gio/gdesktopappinfo.h>
+#include <wayland-client-protocol.h>
 
 G_BEGIN_DECLS
 
@@ -50,6 +51,11 @@ G_DEFINE_AUTOPTR_CLEANUP_FUNC (cairo_surface_t, cairo_surface_destroy)
   } G_STMT_END
 
 void             phosh_cp_widget_destroy (void *widget);
+void             phosh_convert_buffer (void *data,
+                                       enum wl_shm_format format,
+                                       guint width,
+                                       guint height,
+                                       guint stride);
 GDesktopAppInfo *phosh_get_desktop_app_info_for_app_id (const char *app_id);
 char            *phosh_munge_app_id (const char *app_id);
 char            *phosh_strip_suffix_from_app_id (const char *app_id);
