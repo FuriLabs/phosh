@@ -812,6 +812,7 @@ phosh_activity_set_thumbnail (PhoshActivity *self, PhoshThumbnail *thumbnail)
   PhoshActivityPrivate *priv;
   gpointer data;
   guint w, width, height, stride, margin;
+  enum wl_shm_format format;
   float scale;
   gboolean has_thumbnail;
 
@@ -824,6 +825,9 @@ phosh_activity_set_thumbnail (PhoshActivity *self, PhoshThumbnail *thumbnail)
 
   data = phosh_thumbnail_get_image (thumbnail);
   phosh_thumbnail_get_size (thumbnail, &width, &height, &stride);
+  phosh_thumbnail_get_format (thumbnail, &format);
+
+  phosh_convert_buffer (data, format, width, height, stride);
 
   g_clear_pointer (&priv->surface, cairo_surface_destroy);
   priv->surface = cairo_image_surface_create_for_data (data,
