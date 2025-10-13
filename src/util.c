@@ -51,6 +51,33 @@ phosh_cp_widget_destroy (void *widget)
 }
 
 
+GDesktopAppInfo *
+phosh_get_desktop_app_info_from_gsettings (void)
+{
+  g_autoptr(GDesktopAppInfo) app_info = NULL;
+  g_autoptr(GSettings) settings = NULL;
+  g_autofree char *appid = NULL;
+  const char *schema_id = "io.furios.phosh.shell";
+  const char *key = "appid";
+
+  if (!g_settings_schema_source_lookup (g_settings_schema_source_get_default (), schema_id, FALSE))
+    return NULL;
+
+  settings = g_settings_new (schema_id);
+  if (!settings)
+    return NULL;
+
+  appid = g_settings_get_string (settings, key);
+
+  if (appid && *appid) {
+    app_info = g_desktop_app_info_new (appid);
+    g_settings_set_string (settings, key, "");
+    return app_info ? g_object_ref(app_info) : NULL;
+  }
+
+  return NULL;
+}
+
 /**
  * phosh_get_desktop_app_info_for_app_id:
  * @app_id: the app_id
@@ -68,6 +95,7 @@ phosh_get_desktop_app_info_for_app_id (const char *app_id)
   g_autofree char *desktop_id = NULL;
   g_autofree char *lowercase = NULL;
   GDesktopAppInfo *app_info = NULL;
+  GDesktopAppInfo *gsettings_app_info = NULL;
   char *last_component;
   PhoshAppListModel *model = phosh_app_list_model_get_default ();
 
@@ -112,6 +140,10 @@ phosh_get_desktop_app_info_for_app_id (const char *app_id)
   app_info = phosh_app_list_model_lookup_by_exec (model, lowercase);
   if (app_info)
     return g_object_ref (app_info);
+
+  gsettings_app_info = phosh_get_desktop_app_info_from_gsettings ();
+  if (gsettings_app_info)
+    return g_object_ref (gsettings_app_info);
 
   g_message ("Could not find application for app-id '%s'", app_id);
   return NULL;
