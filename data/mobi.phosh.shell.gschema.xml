@@ -225,4 +225,16 @@
       </description>
     </key>
   </schema>
+
+  <schema id="io.furios.phosh.shell" path="/io/furios/phosh/shell/">
+    <key name="appid" type="s">
+      <default>''</default>
+      <summary>Last used application ID</summary>
+      <description>
+        Stores the application ID of the last app used or referenced
+        by the shell. This can be used to restore session state or
+        remember user preferences related to a specific app.
+      </description>
+    </key>
+  </schema>
 </schemalist>
