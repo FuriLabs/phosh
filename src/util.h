@@ -54,6 +54,7 @@ void             phosh_convert_buffer (void *data,
                                        guint height,
                                        guint stride);
 GDesktopAppInfo *phosh_get_desktop_app_info_for_app_id (const char *app_id);
+GDesktopAppInfo *phosh_get_desktop_app_info_from_gsettings (void);
 char            *phosh_munge_app_id (const char *app_id);
 char            *phosh_strip_suffix_from_app_id (const char *app_id);
 gboolean         phosh_find_systemd_session (char **session_id);
