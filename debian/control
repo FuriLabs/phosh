@@ -62,8 +62,9 @@ Depends:
  fonts-lato,
  gnome-shell-common,
  gsettings-desktop-schemas (>= 47),
- phoc (>= 0.45.0),
+ phoc (>= 0.44.0-1+furios1~),
  phosh-common (>= ${source:Version}),
+ phosh-config-hwcomposer (>= 17),
  ${misc:Depends},
  ${shlibs:Depends},
 Recommends:
