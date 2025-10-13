@@ -83,6 +83,7 @@ typedef struct _PhoshMonitorManager
   uint32_t zwlr_output_serial;
 
   GCancellable            *cancel;
+  GSettings               *settings;
 } PhoshMonitorManager;
 
 G_DEFINE_TYPE_WITH_CODE (PhoshMonitorManager,
@@ -966,6 +967,8 @@ on_monitor_n_gamma_entries_changed (PhoshMonitorManager *self)
 static void
 on_monitor_configured (PhoshMonitorManager *self, PhoshMonitor *monitor)
 {
+  g_autoptr (GVariant) config = g_settings_get_value (self->settings, "config");
+
   g_return_if_fail (PHOSH_IS_MONITOR_MANAGER (self));
   g_return_if_fail (PHOSH_IS_MONITOR (monitor));
 
@@ -996,6 +999,35 @@ on_monitor_configured (PhoshMonitorManager *self, PhoshMonitor *monitor)
   /* Update night light */
   if (self->night_light_temp > 0 && phosh_monitor_has_gamma (monitor))
     phosh_monitor_set_color_temp (monitor, self->night_light_temp);
+
+  /* Do we have a stored scale for this monitor?
+     One thing that sucks is that the monitor's name is still NULL at this point, so we can't
+     use it to look up the config. Instead we have to walk through all potential configs and
+     apply the one that matches any head. :( */
+
+  if (config) {
+    GVariantIter iter;
+    g_autoptr (GVariant) value = NULL;
+    g_autofree gchar *monitor_name = NULL;
+
+    g_variant_iter_init (&iter, config);
+    while (g_variant_iter_next (&iter, "{sv}", &monitor_name, &value)) {
+      gdouble scale;
+      gint x, y;
+
+      if (g_variant_lookup (value, "scale", "d", &scale) &&
+          g_variant_lookup (value, "x", "i", &x) &&
+          g_variant_lookup (value, "y", "i", &y)) {
+        PhoshHead *head = phosh_monitor_manager_find_head (self, monitor_name);
+        if (head) {
+          head->pending.x = x;
+          head->pending.y = y;
+          head->pending.scale = scale;
+        }
+      }
+    }
+    phosh_monitor_manager_apply_monitor_config (self);
+  }
 }
 
 
@@ -1414,6 +1446,7 @@ phosh_monitor_manager_init (PhoshMonitorManager *self)
   self->serial = 1;
 
   self->cancel = g_cancellable_new ();
+  self->settings = g_settings_new ("sm.puri.phosh.monitors");
 }
 
 
@@ -1536,6 +1569,8 @@ phosh_monitor_manager_apply_monitor_config (PhoshMonitorManager *self)
   struct zwlr_output_configuration_v1 *config;
   struct zwlr_output_manager_v1 *output_manager =
     phosh_wayland_get_zwlr_output_manager_v1 (wl);
+  g_autoptr (GVariant) original_config = g_settings_get_value (self->settings, "config");
+  g_autoptr (GVariantDict) config_to_store = g_variant_dict_new (original_config);
 
   g_return_if_fail (PHOSH_IS_MONITOR_MANAGER (self));
 
@@ -1573,7 +1608,12 @@ phosh_monitor_manager_apply_monitor_config (PhoshMonitorManager *self)
     zwlr_output_configuration_head_v1_set_transform (config_head, head->pending.transform);
     zwlr_output_configuration_head_v1_set_scale (config_head,
                                                  wl_fixed_from_double (head->pending.scale));
+    g_variant_dict_insert_value (config_to_store, head->name,
+                                 g_variant_new_parsed ("{'x':<%i>, 'y':<%i>, 'scale':<%d>}",
+                                                       head->pending.x, head->pending.y, head->pending.scale));
   }
+
+  g_settings_set_value (self->settings, "config", g_variant_dict_end (config_to_store));
 
   zwlr_output_configuration_v1_apply (config);
 }
