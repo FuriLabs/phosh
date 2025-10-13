@@ -52,6 +52,9 @@ struct GvcMixerStreamPrivate
         gboolean       is_muted;
         gboolean       can_decibel;
         gboolean       is_event_stream;
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        gboolean       is_phone_stream;
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         gboolean       is_virtual;
         pa_volume_t    base_volume;
         pa_operation  *change_volume_op;
@@ -79,6 +82,9 @@ enum
         PROP_IS_MUTED,
         PROP_CAN_DECIBEL,
         PROP_IS_EVENT_STREAM,
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        PROP_IS_PHONE_STREAM,
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         PROP_IS_VIRTUAL,
         PROP_CARD_INDEX,
         PROP_PORT,
@@ -327,6 +333,28 @@ gvc_mixer_stream_set_is_event_stream (GvcMixerStream *stream,
 
         return TRUE;
 }
+
+#ifdef WITH_DROIDIAN_EXTENSIONS
+gboolean
+gvc_mixer_stream_is_phone_stream (GvcMixerStream *stream)
+{
+        g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), FALSE);
+
+        return stream->priv->is_phone_stream;
+}
+
+gboolean
+gvc_mixer_stream_set_is_phone_stream (GvcMixerStream *stream,
+                                      gboolean is_phone_stream)
+{
+        g_return_val_if_fail (GVC_IS_MIXER_STREAM (stream), FALSE);
+
+        stream->priv->is_phone_stream = is_phone_stream;
+        g_object_notify (G_OBJECT (stream), "is-phone-stream");
+
+        return TRUE;
+}
+#endif /* WITH_DROIDIAN_EXTENSIONS */
 
 gboolean
 gvc_mixer_stream_is_virtual (GvcMixerStream *stream)
@@ -703,6 +731,11 @@ gvc_mixer_stream_set_property (GObject       *object,
         case PROP_IS_EVENT_STREAM:
                 gvc_mixer_stream_set_is_event_stream (self, g_value_get_boolean (value));
                 break;
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        case PROP_IS_PHONE_STREAM:
+                gvc_mixer_stream_set_is_phone_stream (self, g_value_get_boolean (value));
+                break;
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         case PROP_IS_VIRTUAL:
                 gvc_mixer_stream_set_is_virtual (self, g_value_get_boolean (value));
                 break;
@@ -777,6 +810,11 @@ gvc_mixer_stream_get_property (GObject     *object,
         case PROP_IS_EVENT_STREAM:
                 g_value_set_boolean (value, self->priv->is_event_stream);
                 break;
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        case PROP_IS_PHONE_STREAM:
+                g_value_set_boolean (value, self->priv->is_phone_stream);
+                break;
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         case PROP_IS_VIRTUAL:
                 g_value_set_boolean (value, self->priv->is_virtual);
                 break;
@@ -973,6 +1011,13 @@ gvc_mixer_stream_class_init (GvcMixerStreamClass *klass)
                                                                 "Whether stream's role is to play an event",
                                                                 FALSE,
                                                                 G_PARAM_READWRITE|G_PARAM_CONSTRUCT|G_PARAM_STATIC_STRINGS);
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        obj_props[PROP_IS_PHONE_STREAM] = g_param_spec_boolean ("is-phone-stream",
+                                                               "is phone stream",
+                                                               "Whether stream's role is a phone call",
+                                                               FALSE,
+                                                               G_PARAM_READWRITE|G_PARAM_CONSTRUCT);
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         obj_props[PROP_IS_VIRTUAL] = g_param_spec_boolean ("is-virtual",
                                                            "is virtual stream",
                                                            "Whether the stream is virtual",
