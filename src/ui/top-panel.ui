@@ -69,7 +69,7 @@
         </child>
         <child>
           <object class="GtkButton">
-            <property name="visible">1</property>
+            <property name="visible">0</property>
             <property name="action-name">panel.suspend</property>
             <child>
               <object class="GtkBox">
@@ -96,7 +96,7 @@
         </child>
         <child>
           <object class="GtkButton">
-            <property name="visible">1</property>
+            <property name="visible">0</property>
             <property name="action-name">panel.logout</property>
             <child>
               <object class="GtkBox">
@@ -137,8 +137,7 @@
             </style>
             <child>
               <object class="GtkButton" id="btn_lock">
-                <property name="visible" bind-source="PhoshTopPanel" bind-property="on-lockscreen" bind-flags="sync-create|invert-boolean"/>
-                <property name="action-name">panel.lockscreen</property>
+                <property name="visible">0</property>
                 <style>
                   <class name="phosh-topbar-button"/>
                 </style>
