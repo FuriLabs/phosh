@@ -66,7 +66,7 @@ quick_setting_plugins = [
   'night-light-quick-setting',
   'pomodoro-quick-setting',
   'scaling-quick-setting',
-  'simple-custom-quick-setting',
+#  'simple-custom-quick-setting',
   'wifi-hotspot-quick-setting',
 ]
 
