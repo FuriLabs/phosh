@@ -190,6 +190,7 @@ libgvc = subproject(
     'pkglibdir=' + pkglibdir,
     'static=true',
     'introspection=false',
+    'with-droidian-extensions=true',
     'alsa=false',
   ],
 )
