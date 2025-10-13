@@ -11,6 +11,7 @@
 
 G_BEGIN_DECLS
 
-PhoshLockscreenManager *phosh_lockscreen_manager_new (PhoshCallsManager *calls_manager);
+PhoshLockscreenManager *phosh_lockscreen_manager_new (PhoshCallsManager *calls_manager,
+                                                      gboolean          kiosk_mode);
 
 G_END_DECLS
