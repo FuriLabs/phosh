@@ -14,3 +14,7 @@ usr/share/phosh/phoc.ini
 usr/share/wayland-sessions/phosh.desktop
 usr/share/xdg-desktop-portal/phosh-portals.conf
 usr/share/xdg-desktop-portal/portals/phosh-shell.portal
+usr/lib/systemd/user/mobi.phosh.OSK.target
+usr/share/glib-2.0/schemas/mobi.phosh.shell.enums.xml
+usr/share/glib-2.0/schemas/mobi.phosh.shell.gschema.xml
+usr/share/locale
