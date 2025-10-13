@@ -1,5 +1,5 @@
 [wrap-git]
 directory=gmobile
-url=https://gitlab.gnome.org/World/Phosh/gmobile.git
-revision=v0.1.0
+url=https://github.com/FuriLabs/gmobile.git
+revision=furios/forky/0.3.1-1+furios1
 depth=1
