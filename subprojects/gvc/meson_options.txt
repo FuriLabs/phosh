@@ -39,3 +39,9 @@ option('introspection',
   value: false,
   description: 'Build gobject-introspection support'
 )
+
+option('with-droidian-extensions',
+ type: 'boolean',
+ value: false,
+ description: 'Build droidian extensions'
+)

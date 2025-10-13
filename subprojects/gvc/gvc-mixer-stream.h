@@ -101,6 +101,9 @@ GIcon *             gvc_mixer_stream_get_gicon       (GvcMixerStream *stream);
 const char *        gvc_mixer_stream_get_description (GvcMixerStream *stream);
 const char *        gvc_mixer_stream_get_application_id (GvcMixerStream *stream);
 gboolean            gvc_mixer_stream_is_event_stream (GvcMixerStream *stream);
+#ifdef WITH_DROIDIAN_EXTENSIONS
+gboolean            gvc_mixer_stream_is_phone_stream (GvcMixerStream *stream);
+#endif /* WITH_DROIDIAN_EXTENSIONS */
 gboolean            gvc_mixer_stream_is_virtual      (GvcMixerStream *stream);
 guint               gvc_mixer_stream_get_card_index  (GvcMixerStream *stream);
 GvcMixerStreamState gvc_mixer_stream_get_state       (GvcMixerStream *stream);
@@ -126,6 +129,10 @@ gboolean            gvc_mixer_stream_set_sysfs_path  (GvcMixerStream *stream,
                                                       const char     *sysfs_path);
 gboolean            gvc_mixer_stream_set_is_event_stream (GvcMixerStream *stream,
                                                           gboolean is_event_stream);
+#ifdef WITH_DROIDIAN_EXTENSIONS
+gboolean            gvc_mixer_stream_set_is_phone_stream (GvcMixerStream *stream,
+                                                          gboolean is_phone_stream);
+#endif /* WITH_DROIDIAN_EXTENSIONS */
 gboolean            gvc_mixer_stream_set_is_virtual  (GvcMixerStream *stream,
                                                       gboolean is_event_stream);
 gboolean            gvc_mixer_stream_set_application_id (GvcMixerStream *stream,
