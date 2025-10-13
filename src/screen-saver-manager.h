@@ -21,6 +21,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshScreenSaverManager, phosh_screen_saver_manager, PHOSH, SCREEN_SAVER_MANAGER,
                       PhoshDBusScreenSaverSkeleton)
 
-PhoshScreenSaverManager *phosh_screen_saver_manager_new (PhoshLockscreenManager *lockscreen_manager);
+PhoshScreenSaverManager *phosh_screen_saver_manager_new (PhoshLockscreenManager *lockscreen_manager,
+                                                         gboolean                kiosk_mode);
 
 G_END_DECLS

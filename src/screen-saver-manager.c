@@ -58,6 +58,7 @@ enum {
   PROP_LOCK_ENABLED,
   PROP_LOCK_DELAY,
   PROP_ACTIVE,
+  PROP_KIOSK_MODE,
   PROP_LAST_PROP
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -95,6 +96,8 @@ typedef struct _PhoshScreenSaverManager
   PhoshDBusLoginManager *logind_manager_proxy;
 
   GCancellable          *cancel;
+
+  gboolean               kiosk_mode;
 } PhoshScreenSaverManager;
 
 G_DEFINE_TYPE_WITH_CODE (PhoshScreenSaverManager,
@@ -228,7 +231,7 @@ on_power_button_pressed (GSimpleAction *action, GVariant *param, gpointer data)
     return;
 
   g_debug ("Power button released, activating screensaver");
-  screen_saver_set_active (self, TRUE, self->lock_enabled);
+  screen_saver_set_active (self, TRUE, self->lock_enabled && !self->kiosk_mode);
 
   /* Disable long press timer */
   g_clear_handle_id (&self->long_press_id, g_source_remove);
@@ -252,6 +255,9 @@ phosh_screen_saver_manager_set_property (GObject *object,
     break;
   case PROP_LOCK_DELAY:
     self->lock_delay = g_value_get_int (value);
+    break;
+  case PROP_KIOSK_MODE:
+    self->kiosk_mode = g_value_get_boolean (value);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -280,6 +286,9 @@ phosh_screen_saver_manager_get_property (GObject    *object,
     break;
   case PROP_ACTIVE:
     self->active = g_value_get_boolean (value);
+    break;
+  case PROP_KIOSK_MODE:
+    g_value_set_boolean (value, self->kiosk_mode);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -355,8 +364,8 @@ handle_set_active (PhoshDBusScreenSaver  *skeleton,
   g_return_val_if_fail (PHOSH_IS_SCREEN_SAVER_MANAGER (self), FALSE);
   g_return_val_if_fail (PHOSH_IS_LOCKSCREEN_MANAGER (self->lockscreen_manager), FALSE);
 
-  g_debug ("DBus call SetActive: %d, lock-enabled: %d", active, self->lock_enabled);
-  screen_saver_set_active (self, active, self->lock_enabled);
+  g_debug ("DBus call SetActive: %d, lock-enabled: %d, kiosk-mode: %d", active, self->lock_enabled, self->kiosk_mode);
+  screen_saver_set_active (self, active, self->lock_enabled && !self->kiosk_mode);
 
   phosh_dbus_screen_saver_complete_set_active (skeleton, invocation);
 
@@ -981,6 +990,17 @@ phosh_screen_saver_manager_class_init (PhoshScreenSaverManagerClass *klass)
                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS |
                           G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * PhoshScreenSaverManager:kiosk-mode
+   *
+   * Whether Phosh is running in kiosk mode
+   * That means: no locking, no launching other apps.
+   */
+  props[PROP_KIOSK_MODE] =
+    g_param_spec_boolean ("kiosk-mode", "", "",
+                          FALSE,
+                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
   /**
@@ -1015,9 +1035,10 @@ phosh_screen_saver_manager_init (PhoshScreenSaverManager *self)
 
 
 PhoshScreenSaverManager *
-phosh_screen_saver_manager_new (PhoshLockscreenManager *lockscreen_manager)
+phosh_screen_saver_manager_new (PhoshLockscreenManager *lockscreen_manager, gboolean kiosk_mode)
 {
   return g_object_new (PHOSH_TYPE_SCREEN_SAVER_MANAGER,
                        "lockscreen-manager", lockscreen_manager,
+                       "kiosk-mode", kiosk_mode,
                        NULL);
 }

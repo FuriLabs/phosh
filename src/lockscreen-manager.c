@@ -48,6 +48,7 @@ enum {
   PROP_0,
   PROP_LOCKED,
   PROP_CALLS_MANAGER,
+  PROP_KIOSK_MODE,
   PROP_LAST_PROP
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -71,6 +72,8 @@ struct _PhoshLockscreenManager {
   gint64                   active_time;    /* when lock was activated (in us) */
 
   PhoshCallsManager       *calls_manager;  /* Calls DBus Interface */
+
+  gboolean                 kiosk_mode;
 };
 
 G_DEFINE_TYPE (PhoshLockscreenManager, phosh_lockscreen_manager, G_TYPE_OBJECT)
@@ -426,6 +429,9 @@ phosh_lockscreen_manager_set_property (GObject      *object,
   case PROP_CALLS_MANAGER:
     self->calls_manager = g_value_dup_object (value);
     break;
+  case PROP_KIOSK_MODE:
+    self->kiosk_mode = g_value_get_boolean (value);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -447,6 +453,9 @@ phosh_lockscreen_manager_get_property (GObject    *object,
     break;
   case PROP_CALLS_MANAGER:
     g_value_set_object (value, self->calls_manager);
+    break;
+  case PROP_KIOSK_MODE:
+    g_value_set_boolean (value, self->kiosk_mode);
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -526,6 +535,11 @@ phosh_lockscreen_manager_class_init (PhoshLockscreenManagerClass *klass)
                          PHOSH_TYPE_CALLS_MANAGER,
                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
 
+  props[PROP_KIOSK_MODE] =
+    g_param_spec_boolean ("kiosk-mode", "", "",
+                          FALSE,
+                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
   /**
@@ -559,10 +573,12 @@ phosh_lockscreen_manager_init (PhoshLockscreenManager *self)
 
 
 PhoshLockscreenManager *
-phosh_lockscreen_manager_new (PhoshCallsManager *calls_manager)
+phosh_lockscreen_manager_new (PhoshCallsManager *calls_manager,
+                              gboolean           kiosk_mode)
 {
   return g_object_new (PHOSH_TYPE_LOCKSCREEN_MANAGER,
                        "calls-manager", calls_manager,
+                       "kiosk-mode", kiosk_mode,
                        NULL);
 }
 
@@ -577,6 +593,7 @@ void
 phosh_lockscreen_manager_set_locked (PhoshLockscreenManager *self, gboolean lock)
 {
   g_return_if_fail (PHOSH_IS_LOCKSCREEN_MANAGER (self));
+  lock = lock && !self->kiosk_mode;
   if (lock == self->locked)
     return;
 
