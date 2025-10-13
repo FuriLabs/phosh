@@ -14,6 +14,7 @@
 
 #include "cui-call-display.h"
 #include "cui-encryption-indicator-priv.h"
+#include "cui-volte-indicator-priv.h"
 
 #include "cui-call.h"
 
@@ -60,6 +61,7 @@ struct _CuiCallDisplay {
   GtkButton              *hang_up;
   GtkButton              *answer;
   CuiEncryptionIndicator *encryption_indicator;
+  CuiVolteIndicator      *volte_indicator;
 
   GCancellable           *cancel;
   GtkRevealer            *dial_pad_revealer;
@@ -69,6 +71,7 @@ struct _CuiCallDisplay {
   GBinding               *dtmf_bind;
   GBinding               *avatar_icon_bind;
   GBinding               *encryption_bind;
+  GBinding               *volte_bind;
 
   gboolean                needs_cam_reset; /* cam = Call Audio Mode */
   gboolean                update_status_time;
@@ -374,6 +377,7 @@ on_call_unrefed (CuiCallDisplay *self,
   self->dtmf_bind = NULL;
   self->avatar_icon_bind = NULL;
   self->encryption_bind = NULL;
+  self->volte_bind = NULL;
   reset_ui (self);
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CALL]);
 }
@@ -507,6 +511,7 @@ cui_call_display_class_init (CuiCallDisplayClass *klass)
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, dial_pad);
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, dial_pad_revealer);
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, encryption_indicator);
+  gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, volte_indicator);
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, general_controls);
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, gsm_controls);
   gtk_widget_class_bind_template_child (widget_class, CuiCallDisplay, hang_up);
@@ -596,6 +601,7 @@ cui_call_display_set_call (CuiCallDisplay *self, CuiCall *call)
     g_clear_pointer (&self->dtmf_bind, g_binding_unbind);
     g_clear_pointer (&self->avatar_icon_bind, g_binding_unbind);
     g_clear_pointer (&self->encryption_bind, g_binding_unbind);
+    g_clear_pointer (&self->volte_bind, g_binding_unbind);
   }
 
   self->update_status_time = TRUE;
@@ -646,6 +652,12 @@ cui_call_display_set_call (CuiCallDisplay *self, CuiCall *call)
                                                   "encrypted",
                                                   self->encryption_indicator,
                                                   "encrypted",
+                                                  G_BINDING_SYNC_CREATE);
+
+  self->encryption_bind = g_object_bind_property (call,
+                                                  "volte-enabled",
+                                                  self->volte_indicator,
+                                                  "volte-enabled",
                                                   G_BINDING_SYNC_CREATE);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CALL]);

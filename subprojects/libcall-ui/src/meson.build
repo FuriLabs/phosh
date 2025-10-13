@@ -23,7 +23,9 @@ call_ui_private_sources = files(
   'cui-encryption-indicator.c',
   'cui-encryption-indicator-priv.h',
   'cui-keypad-button.c',
-  'cui-keypad-button-private.h'
+  'cui-keypad-button-private.h',
+  'cui-volte-indicator.c',
+  'cui-volte-indicator-priv.h'
 )
 
 call_ui_public_sources = files(

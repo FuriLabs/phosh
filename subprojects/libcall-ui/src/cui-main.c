@@ -7,6 +7,7 @@
 
 #include "call-ui.h"
 #include "cui-encryption-indicator-priv.h"
+#include "cui-volte-indicator-priv.h"
 #include "cui-resources.h"
 
 #include <libcallaudio.h>
@@ -35,6 +36,7 @@ cui_init_types (void)
   g_type_ensure (CUI_TYPE_DIALPAD);
   g_type_ensure (CUI_TYPE_KEYPAD);
   g_type_ensure (CUI_TYPE_ENCRYPTION_INDICATOR);
+  g_type_ensure (CUI_TYPE_VOLTE_INDICATOR);
 }
 
 static void

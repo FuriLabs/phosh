@@ -46,6 +46,7 @@ typedef enum
  * @accept: Accept the incoming call
  * @hang_up: Hang-up an ongoing call or reject an incoming call
  * @send_dtmf: Send DTMF
+ * @get_volte_enabled: Gets whether the call is VoLTE-enabled
  */
 struct _CuiCallInterface {
   GTypeInterface parent_iface;
@@ -61,6 +62,7 @@ struct _CuiCallInterface {
   void           (*accept)                 (CuiCall *self);
   void           (*hang_up)                (CuiCall *self);
   void           (*send_dtmf)              (CuiCall *self, const gchar *dtmf);
+  gboolean       (*get_volte_enabled)      (CuiCall *self);
 };
 
 GLoadableIcon *cui_call_get_avatar_icon (CuiCall *self);
@@ -77,3 +79,4 @@ void         cui_call_send_dtmf (CuiCall *self, const gchar *dtmf);
 
 const char  *cui_call_state_to_string  (CuiCallState state);
 char        *cui_call_format_duration  (double duration);
+gboolean      cui_call_get_volte_enabled (CuiCall *self);

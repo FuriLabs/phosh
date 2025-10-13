@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="call-ui">
+  <requires lib="gtk" version="4.0"/>
+  <template class="CuiVolteIndicator" parent="GtkStack">
+    <child>
+      <object class="GtkStack" id="stack">
+        <child>
+          <object class="GtkBox" id="is_not_volte_enabled">
+            <property name="spacing">6</property>
+            <property name="halign">center</property>
+            <property name="hexpand">True</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="True"></property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="is_volte_enabled">
+            <property name="spacing">6</property>
+            <property name="halign">center</property>
+            <property name="hexpand">True</property>
+            <child>
+              <object class="GtkImage">
+                <property name="icon-name">network-cellular-4g-symbolic</property>
+                <property name="icon-size">1</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel">
+                <property name="label" translatable="True">This call is VoLTE-enabled</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

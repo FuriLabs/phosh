@@ -96,6 +96,19 @@ cui_call_default_init (CuiCallInterface *iface)
                           G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY));
 
   /**
+   * CuiCall:volte-enabled:
+   *
+   * Whether the call is VoLTE-enabled
+   */
+  g_object_interface_install_property (
+    iface,
+    g_param_spec_boolean ("volte-enabled",
+                          "",
+                          "",
+                          FALSE,
+                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY));
+
+  /**
    * CuiCall:can-dtmf
    *
    * Whether the call can have DTMF
@@ -231,6 +244,20 @@ cui_call_get_can_dtmf (CuiCall *self)
   g_return_val_if_fail (iface->get_can_dtmf, FALSE);
 
   return iface->get_can_dtmf (self);
+}
+
+
+gboolean
+cui_call_get_volte_enabled (CuiCall *self)
+{
+  CuiCallInterface *iface;
+
+  g_return_val_if_fail (CUI_IS_CALL (self), FALSE);
+
+  iface = CUI_CALL_GET_IFACE (self);
+  g_return_val_if_fail (iface->get_volte_enabled, FALSE);
+
+  return iface->get_volte_enabled (self);
 }
 
 /**
