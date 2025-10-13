@@ -198,4 +198,20 @@
       </description>
     </key>
   </schema>
+
+  <schema id="sm.puri.phosh.monitors"path="/sm/puri/phosh/monitors/">
+    <key name="config" type="a{sv}">
+      <default><![CDATA[@a{sv} {'HWCOMPOSER-1': <{'x': <@i 0>, 'y': <@i 0>, 'scale': <@d 2.765625>}>}]]></default>
+      <summary>Monitor configuration</summary>
+      <description>
+        Configuration for each monitor. The key is the monitor name and the value is a dictionary
+        with the following keys:
+        - 'scale': the scale factor for the monitor
+        - 'x': the x position of the monitor
+        - 'y': the y position of the monitor
+
+        NB: rotation is deliberately not stored so that we always start in the default orientation.
+      </description>
+    </key>
+  </schema>
 </schemalist>
