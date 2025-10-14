@@ -84,7 +84,7 @@ adjust_brightness (PhoshBrightnessManager *self, gboolean up)
   if (phosh_shell_get_state (shell) & PHOSH_STATE_SETTINGS)
     return;
 
-  percentage = 100.0 * phosh_backlight_get_relative (self->backlight);
+  percentage = 100.0 * (brightness - min) / (max - min);
   phosh_shell_show_osd (phosh_shell_get_default (),
                         NULL,
                         "display-brightness-symbolic",

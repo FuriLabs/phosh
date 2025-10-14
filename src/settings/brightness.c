@@ -28,6 +28,7 @@ on_brightness_changed (PhoshBacklight *backlight_,
                        gpointer        user_data)
 {
   GtkScale *scale = GTK_SCALE (user_data);
+  int brightness, min = 0, max = 0;
   double value;
 
   g_assert (backlight == backlight_);
@@ -35,7 +36,10 @@ on_brightness_changed (PhoshBacklight *backlight_,
   if (setting_brightness)
     return;
 
-  value = 100.0 * phosh_backlight_get_relative (backlight);
+  brightness = phosh_backlight_get_brightness (backlight);
+  phosh_backlight_get_range (backlight, &min, &max);
+
+  value = 100.0 * (brightness - min) / (max - min);
 
   g_signal_handler_block (G_OBJECT (scale), scale_handler_id);
   gtk_range_set_value (GTK_RANGE (scale), value);
@@ -92,6 +96,8 @@ brightness_init (GtkScale *scale, gulong handler_id)
 void
 brightness_set (int value)
 {
+  int brightness, min = 0, max = 0;
+
   if (!backlight)
     return;
 
@@ -100,7 +106,10 @@ brightness_set (int value)
 
   setting_brightness = TRUE;
 
-  phosh_backlight_set_relative (backlight, value * 0.01);
+  phosh_backlight_get_range (backlight, &min, &max);
+
+  brightness = min + ((max - min) * (value * 0.01));
+  phosh_backlight_set_brightness (backlight, brightness);
   setting_brightness = FALSE;
 }
 
