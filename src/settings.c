@@ -56,7 +56,6 @@ typedef struct _PhoshSettings {
   guint      debounce_handle;
 
   GtkWidget *scrolled_window;
-  GtkWidget *box_brightness;
   GtkWidget *box_sliders;
   GtkWidget *box_settings;
   GtkWidget *quick_settings;
@@ -337,12 +336,6 @@ setup_brightness_scale (PhoshSettings *self)
   brightness_manager = phosh_shell_get_brightness_manager (shell);
   adj = phosh_brightness_manager_get_adjustment (brightness_manager);
   gtk_range_set_adjustment (GTK_RANGE (self->scale_brightness), adj);
-
-  g_object_bind_property (brightness_manager,
-                          "has-brightness-control",
-                          self->box_brightness,
-                          "visible",
-                          G_BINDING_SYNC_CREATE);
 }
 
 
@@ -479,7 +472,6 @@ phosh_settings_class_init (PhoshSettingsClass *klass)
 
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, audio_settings);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_bottom_half);
-  gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_brightness);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_sliders);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, box_settings);
   gtk_widget_class_bind_template_child (widget_class, PhoshSettings, list_notifications);
