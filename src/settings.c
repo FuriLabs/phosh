@@ -206,6 +206,16 @@ update_drag_handle_offset (PhoshSettings *self)
 
 
 static void
+brightness_value_changed_cb (GtkScale *scale_brightness, gpointer unused)
+{
+  int brightness;
+
+  brightness = (int)gtk_range_get_value (GTK_RANGE (scale_brightness));
+  brightness_set (brightness);
+}
+
+
+static void
 on_is_headphone_changed (PhoshSettings      *self,
                          GParamSpec         *pspec,
                          PhoshAudioSettings *audio_settings)
@@ -327,15 +337,18 @@ on_notification_frames_items_changed (PhoshSettings *self,
 
 
 static void
-setup_brightness_scale (PhoshSettings *self)
+setup_brightness_range (PhoshSettings *self)
 {
-  PhoshShell *shell = phosh_shell_get_default ();
-  PhoshBrightnessManager *brightness_manager;
-  GtkAdjustment *adj;
+  gulong value_changed_handler_id;
 
-  brightness_manager = phosh_shell_get_brightness_manager (shell);
-  adj = phosh_brightness_manager_get_adjustment (brightness_manager);
-  gtk_range_set_adjustment (GTK_RANGE (self->scale_brightness), adj);
+  gtk_range_set_range (GTK_RANGE (self->scale_brightness), 0, 100);
+  gtk_range_set_round_digits (GTK_RANGE (self->scale_brightness), 0);
+  gtk_range_set_increments (GTK_RANGE (self->scale_brightness), 1, 10);
+  value_changed_handler_id = g_signal_connect (self->scale_brightness,
+                                               "value-changed",
+                                               G_CALLBACK (brightness_value_changed_cb),
+                                               NULL);
+  brightness_init (GTK_SCALE (self->scale_brightness), value_changed_handler_id);
 }
 
 
@@ -371,7 +384,7 @@ phosh_settings_constructed (GObject *object)
 
   G_OBJECT_CLASS (phosh_settings_parent_class)->constructed (object);
 
-  setup_brightness_scale (self);
+  setup_brightness_range (self);
   setup_torch (self);
 
   manager = phosh_notify_manager_get_default ();
@@ -400,6 +413,8 @@ static void
 phosh_settings_dispose (GObject *object)
 {
   PhoshSettings *self = PHOSH_SETTINGS (object);
+
+  brightness_dispose ();
 
   g_clear_object (&self->torch_manager);
 

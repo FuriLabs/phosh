@@ -10,5 +10,6 @@ phosh_settings_widgets_sources = files(
   'audio-device.c',
   'audio-devices.c',
   'audio-settings.c',
+  'brightness.c',
   'gvc-channel-bar.c',
 )
