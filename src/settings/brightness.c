@@ -67,6 +67,8 @@ find_backlight (void)
 void
 brightness_init (GtkScale *scale, gulong handler_id)
 {
+  g_autoptr (GError) err = NULL;
+  g_autoptr (GDBusConnection) session_con = NULL;
   int brightness;
 
   scale_handler_id = handler_id;
