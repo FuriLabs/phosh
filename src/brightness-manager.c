@@ -20,8 +20,6 @@
 #define KEYBINDING_KEY_BRIGHTNESS_UP_MONITOR "screen-brightness-up-monitor"
 #define KEYBINDING_KEY_BRIGHTNESS_DOWN_MONITOR "screen-brightness-down-monitor"
 
-#define POWER_SCHEMA "org.gnome.settings-daemon.plugins.power"
-
 /**
  * PhoshBrightnessManager:
  *
@@ -31,7 +29,7 @@
 #define BRIGHTNESS_STEP_AMOUNT(max) ((max) < 20 ? 1 : (max) / 20)
 
 struct _PhoshBrightnessManager {
-  PhoshDBusBrightnessSkeleton parent;
+  GObject               parent;
 
   GStrv           action_names;
   GSettings      *settings;
@@ -39,118 +37,8 @@ struct _PhoshBrightnessManager {
   GtkAdjustment  *adjustment;
   gulong          value_changed_id;
   gboolean        setting_brightness;
-
-  GSettings      *settings_power;
-  gboolean        dimmed;
-  int             dbus_name_id;
-  double          saved_brightness;
 };
-
-static void phosh_brightness_manager_brightness_init (PhoshDBusBrightnessIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (PhoshBrightnessManager,
-                         phosh_brightness_manager,
-                         PHOSH_DBUS_TYPE_BRIGHTNESS_SKELETON,
-                         G_IMPLEMENT_INTERFACE (PHOSH_DBUS_TYPE_BRIGHTNESS,
-                                                phosh_brightness_manager_brightness_init))
-
-
-static void
-on_name_acquired (GDBusConnection *connection, const char *name, gpointer user_data)
-{
-  g_debug ("Acquired name %s", name);
-}
-
-
-static void
-on_name_lost (GDBusConnection *connection, const char *name, gpointer user_data)
-{
-  g_debug ("Lost or failed to acquire name %s", name);
-}
-
-
-static void
-on_bus_acquired (GDBusConnection *connection, const char *name, gpointer user_data)
-{
-  g_autoptr (GError) err = NULL;
-  PhoshBrightnessManager *self = PHOSH_BRIGHTNESS_MANAGER (user_data);
-
-  /* We need to use GNOME Shell's object path here to make g-s-d happy */
-  if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self),
-                                         connection,
-                                         "/org/gnome/Shell/Brightness",
-                                         &err)) {
-    g_warning ("Failed export brightness interface: %s", err->message);
-  }
-}
-
-
-static gboolean
-phosh_brightness_manager_handle_set_auto_brightness_target (PhoshDBusBrightness   *object,
-                                                            GDBusMethodInvocation *invocation,
-                                                            gdouble                arg_target)
-{
-  g_debug ("Target brightness: %f", arg_target);
-
-  /* TODO: Leave unimplemented until
-   * https://gitlab.gnome.org/GNOME/gnome-settings-daemon/-/merge_requests/442
-   * is fixed as we otherwise might end up with a very dark screen */
-
-  phosh_dbus_brightness_complete_set_auto_brightness_target (object, invocation);
-  return TRUE;
-}
-
-
-static gboolean
-phosh_brightness_manager_handle_set_dimming (PhoshDBusBrightness   *object,
-                                             GDBusMethodInvocation *invocation,
-                                             gboolean               arg_enable)
-{
-  PhoshBrightnessManager *self = PHOSH_BRIGHTNESS_MANAGER (object);
-  double target;
-
-  g_debug ("Dimming: %s", arg_enable ? "enabled" : "disabled");
-
-  if (!self->backlight) {
-    g_dbus_method_invocation_return_error (invocation,
-                                           G_DBUS_ERROR,
-                                           G_DBUS_ERROR_FILE_NOT_FOUND,
-                                           "No backlight");
-    return TRUE;
-  }
-
-  if (arg_enable) {
-    target = g_settings_get_int (self->settings_power, "idle-brightness") * 0.01;
-    self->saved_brightness = phosh_backlight_get_relative (self->backlight);
-  } else {
-    target = self->saved_brightness;
-    self->saved_brightness = -1.0;
-  }
-
-  if (target >= 0.0)
-    phosh_backlight_set_relative (self->backlight, target);
-
-  phosh_dbus_brightness_complete_set_dimming (object, invocation);
-  return TRUE;
-}
-
-
-static gboolean
-phosh_brightness_manager_handle_get_has_brightness_control (PhoshDBusBrightness *object)
-{
-  PhoshBrightnessManager *self = PHOSH_BRIGHTNESS_MANAGER (object);
-
-  return !!self->backlight;
-}
-
-
-static void
-phosh_brightness_manager_brightness_init (PhoshDBusBrightnessIface *iface)
-{
-  iface->handle_set_auto_brightness_target = phosh_brightness_manager_handle_set_auto_brightness_target;
-  iface->handle_set_dimming = phosh_brightness_manager_handle_set_dimming;
-  iface->get_has_brightness_control = phosh_brightness_manager_handle_get_has_brightness_control;
-}
+G_DEFINE_TYPE (PhoshBrightnessManager, phosh_brightness_manager, G_TYPE_OBJECT)
 
 
 static void
@@ -199,8 +87,6 @@ set_backlight (PhoshBrightnessManager *self, PhoshBacklight *backlight)
     g_signal_handlers_disconnect_by_data (self->backlight, self);
 
   g_set_object (&self->backlight, backlight);
-  self->saved_brightness = -1.0;
-
   if (self->backlight) {
     g_debug ("Found %s for brightness control", phosh_backlight_get_name (self->backlight));
 
@@ -230,9 +116,6 @@ on_primary_monitor_changed (PhoshBrightnessManager *self, GParamSpec *psepc, Pho
   }
 
   set_backlight (self, backlight);
-
-  phosh_dbus_brightness_set_has_brightness_control (PHOSH_DBUS_BRIGHTNESS (self),
-                                                    !!self->backlight);
 }
 
 
@@ -342,15 +225,9 @@ phosh_brightness_manager_dispose (GObject *object)
 {
   PhoshBrightnessManager *self = PHOSH_BRIGHTNESS_MANAGER (object);
 
-  g_clear_handle_id (&self->dbus_name_id, g_bus_unown_name);
-
-  if (g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (self)))
-    g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (self));
-
   set_backlight (self, NULL);
   g_clear_pointer (&self->action_names, g_strfreev);
   g_clear_object (&self->settings);
-  g_clear_object (&self->settings_power);
   g_clear_signal_handler (&self->value_changed_id, self->adjustment);
   g_clear_object (&self->adjustment);
 
@@ -374,8 +251,6 @@ phosh_brightness_manager_init (PhoshBrightnessManager *self)
   GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
   g_autoptr (GSettingsSchema) schema = NULL;
 
-  self->saved_brightness = -1.0;
-  self->settings_power = g_settings_new (POWER_SCHEMA);
   self->adjustment = g_object_ref_sink (gtk_adjustment_new (0, 0, 100, 10, 10, 0));
   self->value_changed_id = g_signal_connect_swapped (self->adjustment,
                                                      "value-changed",
@@ -404,16 +279,6 @@ phosh_brightness_manager_init (PhoshBrightnessManager *self)
                            self,
                            G_CONNECT_SWAPPED);
   on_primary_monitor_changed (self, NULL, shell);
-
-  self->dbus_name_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                       "org.gnome.Shell.Brightness",
-                                       G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
-                                       G_BUS_NAME_OWNER_FLAGS_REPLACE,
-                                       on_bus_acquired,
-                                       on_name_acquired,
-                                       on_name_lost,
-                                       self,
-                                       NULL);
 }
 
 
