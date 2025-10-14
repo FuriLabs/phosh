@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <gtk/gtk.h>
+#include <glib-object.h>
 
 G_BEGIN_DECLS
 
@@ -15,6 +15,5 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshBrightnessManager, phosh_brightness_manager, PHOSH, BRIGHTNESS_MANAGER, GObject)
 
 PhoshBrightnessManager *phosh_brightness_manager_new (void);
-GtkAdjustment *         phosh_brightness_manager_get_adjustment (PhoshBrightnessManager *self);
 
 G_END_DECLS
