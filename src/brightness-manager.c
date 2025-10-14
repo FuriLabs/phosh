@@ -382,6 +382,22 @@ phosh_brightness_manager_init (PhoshBrightnessManager *self)
                                                      G_CALLBACK (on_value_changed),
                                                      self);
 
+  /* TODO: Drop once we can rely on GNOME 49 schema */
+  schema = g_settings_schema_source_lookup (source, KEYBINDINGS_SCHEMA_ID, TRUE);
+  if (!schema)
+    return;
+
+  if (!g_settings_schema_has_key (schema, KEYBINDING_KEY_BRIGHTNESS_UP))
+    return;
+
+  self->settings = g_settings_new (KEYBINDINGS_SCHEMA_ID);
+  g_signal_connect_object (self->settings,
+                           "changed",
+                           G_CALLBACK (on_keybindings_changed),
+                           self,
+                           G_CONNECT_SWAPPED);
+  add_keybindings (self);
+
   g_signal_connect_object (shell,
                            "notify::primary-monitor",
                            G_CALLBACK (on_primary_monitor_changed),
@@ -398,22 +414,6 @@ phosh_brightness_manager_init (PhoshBrightnessManager *self)
                                        on_name_lost,
                                        self,
                                        NULL);
-
-  /* TODO: Drop once we can rely on GNOME 49 schema for the keybindings */
-  schema = g_settings_schema_source_lookup (source, KEYBINDINGS_SCHEMA_ID, TRUE);
-  if (!schema)
-    return;
-
-  if (!g_settings_schema_has_key (schema, KEYBINDING_KEY_BRIGHTNESS_UP))
-    return;
-
-  self->settings = g_settings_new (KEYBINDINGS_SCHEMA_ID);
-  g_signal_connect_object (self->settings,
-                           "changed",
-                           G_CALLBACK (on_keybindings_changed),
-                           self,
-                           G_CONNECT_SWAPPED);
-  add_keybindings (self);
 }
 
 
