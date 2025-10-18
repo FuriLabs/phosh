@@ -68,6 +68,7 @@ struct _PhoshAppGridPrivate {
   char *search_string;
   gboolean filter_adaptive;
   GSettings *settings;
+  GSettings *shell_settings;
   GStrv force_adaptive;
   GSimpleActionGroup *actions;
   PhoshAppFilterModeFlags filter_mode;
@@ -328,6 +329,63 @@ filter_adaptive (PhoshAppGrid *self, GDesktopAppInfo *info)
 
 
 static gboolean
+is_filtered_app (PhoshAppGrid *self, const char *app_id)
+{
+  PhoshAppGridPrivate *priv = phosh_app_grid_get_instance_private (self);
+  g_auto (GStrv) filtered_ids = NULL;
+  g_autofree char *app_id_nosuf = NULL;
+  char **p;
+  char *dot;
+  gboolean filtered = FALSE;
+
+  if (!app_id || !priv->shell_settings)
+    return FALSE;
+
+  filtered_ids = g_settings_get_strv (priv->shell_settings, "filtered-app-ids");
+
+  if (!filtered_ids)
+    return FALSE;
+
+  if (g_str_has_suffix (app_id, ".desktop")) {
+    app_id_nosuf = g_strdup (app_id);
+    dot = g_strrstr (app_id_nosuf, ".desktop");
+    if (dot)
+      *dot = '\0';
+  }
+
+  for (p = filtered_ids; p && *p; p++) {
+    const char *key = *p;
+
+    if (g_strcmp0 (app_id, key) == 0) {
+      filtered = TRUE;
+      break;
+    }
+
+    if (g_str_has_suffix (key, ".desktop")) {
+      g_autofree char *key_nosuf = g_strdup (key);
+      dot = g_strrstr (key_nosuf, ".desktop");
+      if (dot)
+        *dot = '\0';
+      if (g_strcmp0 (app_id, key_nosuf) == 0) {
+        filtered = TRUE;
+        break;
+      }
+    } else {
+      if (app_id_nosuf && g_strcmp0 (app_id_nosuf, key) == 0) {
+        filtered = TRUE;
+        break;
+      }
+    }
+  }
+
+  if (filtered)
+    g_debug ("Filtering app id '%s' due to filtered-app-ids", app_id);
+
+  return filtered;
+}
+
+
+static gboolean
 search_apps (gpointer item, gpointer data)
 {
   PhoshAppGrid *self = data;
@@ -341,6 +399,10 @@ search_apps (gpointer item, gpointer data)
   search = priv->search_string;
 
   if (G_IS_DESKTOP_APP_INFO (info)) {
+    const char *id = g_app_info_get_id (G_APP_INFO (info));
+    if (id && is_filtered_app (self, id))
+      return FALSE;
+
     if (!filter_adaptive (self, G_DESKTOP_APP_INFO (info)))
       return FALSE;
   }
@@ -429,6 +491,20 @@ create_launcher (gpointer item,
 
 
 static void
+on_filtered_app_ids_changed (GSettings *settings,
+                             gchar     *key,
+                             gpointer   user_data)
+{
+  PhoshAppGrid *self = PHOSH_APP_GRID (user_data);
+  PhoshAppGridPrivate *priv = phosh_app_grid_get_instance_private (self);
+
+  g_debug ("filtered-app-ids changed — refreshing app grid");
+
+  gtk_filter_list_model_refilter (priv->model);
+}
+
+
+static void
 phosh_app_grid_init (PhoshAppGrid *self)
 {
   PhoshAppGridPrivate *priv = phosh_app_grid_get_instance_private (self);
@@ -477,6 +553,12 @@ phosh_app_grid_init (PhoshAppGrid *self)
   action = (GAction*) g_property_action_new ("filter-adaptive", self, "filter-adaptive");
   g_action_map_add_action (G_ACTION_MAP (priv->actions), action);
 
+  priv->shell_settings = g_settings_new ("io.furios.phosh.shell");
+  g_signal_connect (priv->shell_settings,
+                    "changed::filtered-app-ids",
+                    G_CALLBACK (on_filtered_app_ids_changed),
+                    self);
+
   toggle_favorites_revealer (self);
 }
 
@@ -491,6 +573,7 @@ phosh_app_grid_dispose (GObject *object)
   g_clear_object (&priv->actions);
   g_clear_object (&priv->model);
   g_clear_object (&priv->settings);
+  g_clear_object (&priv->shell_settings);
   g_clear_handle_id (&priv->debounce, g_source_remove);
 
   G_OBJECT_CLASS (phosh_app_grid_parent_class)->dispose (object);
