@@ -236,5 +236,14 @@
         remember user preferences related to a specific app.
       </description>
     </key>
+
+    <key name="filtered-app-ids" type="as">
+      <default>[]</default>
+      <summary>Hidden applications</summary>
+      <description>
+        List of application IDs to filter out and hide from the app list.
+        Apps in this list will not appear in the launcher or app drawer.
+      </description>
+    </key>
   </schema>
 </schemalist>
