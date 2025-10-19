@@ -37,10 +37,6 @@ cui_encryption_indicator_set_encrypted (CuiEncryptionIndicator *self,
   g_return_if_fail (CUI_IS_ENCRYPTION_INDICATOR (self));
 
   encrypted = !!encrypted;
-
-  gtk_stack_set_visible_child (
-    GTK_STACK (self),
-    GTK_WIDGET (encrypted ? self->is_encrypted : self->is_not_encrypted));
 }
 
 

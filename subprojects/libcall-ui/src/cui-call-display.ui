@@ -335,6 +335,7 @@
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkButton" id="hang_up">
+                <property name="name">hang_up</property>
                 <property name="width-request">112</property>
                 <property name="height-request">72</property>
                 <property name="visible">True</property>
@@ -352,12 +353,12 @@
                 </child>
                 <style>
                   <class name="image-button"/>
-                  <class name="destructive-action"/>
                 </style>
               </object>
             </child>
             <child>
               <object class="GtkButton" id="answer">
+                <property name="name">answer</property>
                 <property name="width-request">112</property>
                 <property name="height-request">72</property>
                 <property name="visible">True</property>
@@ -375,7 +376,6 @@
                 </child>
                 <style>
                   <class name="image-button"/>
-                  <class name="suggested-action"/>
                 </style>
               </object>
             </child>

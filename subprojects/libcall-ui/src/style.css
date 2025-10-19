@@ -32,3 +32,50 @@ cui-dialpad      .phone-number-entry {
 #cui_call_buttons {
   font-size: 10pt;
 }
+
+/* Furi Labs */
+
+#answer {
+  background-image: none;
+  background-color: #2e7d32;
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.15);
+}
+
+#answer:hover {
+  background-color: #2a7030;
+}
+
+#answer:active {
+  background-color: #255e2a;
+}
+
+#answer:disabled {
+  background-color: #1f4d24;
+  color: rgba(255,255,255,0.5);
+}
+
+#hang_up {
+  background-image: none;
+  background-color: #d32f2f;
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.15);
+}
+
+#hang_up:hover {
+  background-color: #c62828;
+}
+
+#hang_up:active {
+  background-color: #b71c1c;
+}
+
+#hang_up:disabled {
+  background-color: #8e1515;
+  color: rgba(255,255,255,0.5);
+}
+
+#answer.image-button,
+#hang_up.image-button {
+  border-radius: 9999px;
+}

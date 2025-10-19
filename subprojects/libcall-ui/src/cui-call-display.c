@@ -540,6 +540,31 @@ cui_call_display_class_init (CuiCallDisplayClass *klass)
 
 
 static void
+cui_force_css_on_buttons (GtkWidget *hang_up, GtkWidget *answer)
+{
+  /*
+   * Attaches a provider directly to the widgets at USER priority.
+   * This is extra insurance if screen-level provider is late or overridden.
+   */
+  GtkCssProvider *prov = gtk_css_provider_new ();
+  gtk_css_provider_load_from_resource (prov, "/org/gnome/CallUI/style.css");
+
+  if (hang_up) {
+    GtkStyleContext *ctx = gtk_widget_get_style_context (hang_up);
+    gtk_style_context_add_provider (ctx,
+                                    GTK_STYLE_PROVIDER (prov),
+                                    GTK_STYLE_PROVIDER_PRIORITY_USER);
+  }
+  if (answer) {
+    GtkStyleContext *ctx = gtk_widget_get_style_context (answer);
+    gtk_style_context_add_provider (ctx,
+                                    GTK_STYLE_PROVIDER (prov),
+                                    GTK_STYLE_PROVIDER_PRIORITY_USER);
+  }
+  g_object_unref (prov);
+}
+
+static void
 cui_call_display_init (CuiCallDisplay *self)
 {
   gtk_widget_init_template (GTK_WIDGET (self));
@@ -551,6 +576,9 @@ G_GNUC_END_IGNORE_DEPRECATIONS
     gtk_widget_set_sensitive (GTK_WIDGET (self->speaker), FALSE);
     gtk_widget_set_sensitive (GTK_WIDGET (self->mute), FALSE);
   }
+
+  cui_force_css_on_buttons (GTK_WIDGET (self->hang_up),
+                            GTK_WIDGET (self->answer));
 }
 
 /**

@@ -7,7 +7,7 @@
       <object class="GtkBox" id="is_not_encrypted">
         <property name="spacing">6</property>
         <property name="halign">center</property>
-        <property name="visible">True</property>
+        <property name="visible">False</property>
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
@@ -28,7 +28,7 @@
       <object class="GtkBox" id="is_encrypted">
         <property name="spacing">6</property>
         <property name="halign">center</property>
-        <property name="visible">True</property>
+        <property name="visible">False</property>
         <child>
           <object class="GtkImage">
             <property name="visible">True</property>
