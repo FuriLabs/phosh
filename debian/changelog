@@ -1,3 +1,11 @@
+phosh (0.50.1-1) experimental; urgency=medium
+
+  * New upstream bugfix release
+    * Fix upcoming-event's plugin empty state
+    * Fix "Open settings" button position on devices with rounded corners
+
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 22 Oct 2025 17:36:13 +0200
+
 phosh (0.50.0-1) experimental; urgency=medium
 
   * New upstream release
