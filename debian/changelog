@@ -1,3 +1,9 @@
+phosh (0.50.1-2) unstable; urgency=medium
+
+  * Upload to unstable (Closes: #1119791)
+
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 31 Oct 2025 13:57:51 +0100
+
 phosh (0.50.1-1) experimental; urgency=medium
 
   * New upstream bugfix release
