@@ -82,6 +82,7 @@ Provides:
  polkit-1-auth-agent,
 Breaks:
  phosh-osk-stevia (<< 0.50.0~),
+ phosh-osk-stub,
  gnome-settings-daemon (<< 49),
 Description: Pure Wayland shell for mobile devices
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
