@@ -74,14 +74,14 @@ Recommends:
  iio-sensor-proxy,
  kbd,
  phosh-mobile-tweaks,
- phosh-osk-stevia | squeekboard,
+ phosh-osk-stevia,
  phosh-plugins,
  slurp,
 Provides:
  notification-daemon,
  polkit-1-auth-agent,
 Breaks:
- phosh-osk-stevia (<< 0.50.0~),
+ phosh-osk-stevia (<< 0.51~),
  phosh-osk-stub,
  gnome-settings-daemon (<< 49),
 Description: Pure Wayland shell for mobile devices
