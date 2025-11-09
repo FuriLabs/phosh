@@ -1,3 +1,9 @@
+phosh (0.51~rc1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 09 Nov 2025 18:05:41 +0100
+
 phosh (0.50.1-3) unstable; urgency=medium
 
   * Force phosh-osk-stub off the system.
