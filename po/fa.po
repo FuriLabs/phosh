@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-10-12 15:40+0000\n"
-"PO-Revision-Date: 2025-10-13 11:27+0330\n"
+"POT-Creation-Date: 2025-11-06 08:42+0000\n"
+"PO-Revision-Date: 2025-11-06 16:01+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian\n"
 "Language: fa\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Poedit 3.8\n"
 "X-DL-Lang: fa\n"
 "X-DL-Module: phosh\n"
 "X-DL-Branch: main\n"
@@ -80,6 +80,14 @@ msgstr "جعبهٔ اجراگر"
 #: plugins/launcher-box/launcher-box.desktop.in.in:5
 msgid "Add launchers to the lock screen. <b>This plugin is experimental.</b>"
 msgstr "افزودن اجراگرها به صفحهٔ قفل. <b>این افزایه آزمایشی است.</b>"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:4
+msgid "Location Quick Setting"
+msgstr "تنظیمات سریع مکان"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:6
+msgid "Toggle location services on/off"
+msgstr "تغییر وضعیت خدمات مکانی"
 
 #: plugins/media-players/media-players.desktop.in.in:3
 #: plugins/media-players/media-players.ui:19
@@ -267,20 +275,20 @@ msgctxt "feedback:enabled"
 msgid "On"
 msgstr "روشن"
 
-#: src/location-manager.c:269
+#: src/location-manager.c:266
 #, c-format
 msgid "Allow '%s' to access your location information?"
 msgstr "اجازه به %s برای دسترسی به اطّلاعات مکانیتان؟"
 
-#: src/location-manager.c:274
+#: src/location-manager.c:271
 msgid "Geolocation"
 msgstr "مکان جغرافیایی"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "Yes"
 msgstr "بله"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "No"
 msgstr "نه"
 
@@ -321,12 +329,12 @@ msgid "Screenshot from %s%s.png"
 msgstr "نماگرفت از ‪%s%s.png"
 
 #. Translators: Used when the title of a song is unknown
-#: src/media-player.c:646 src/ui/media-player.ui:208
+#: src/media-player.c:690 src/ui/media-player.ui:208
 msgid "Unknown Title"
 msgstr "عنوان ناشناخته"
 
 #. Translators: Used when the artist of a song is unknown
-#: src/media-player.c:654 src/ui/media-player.ui:196
+#: src/media-player.c:698 src/ui/media-player.ui:196
 msgid "Unknown Artist"
 msgstr "هنرمند ناشناخته"
 
@@ -371,7 +379,7 @@ msgstr "گشودن"
 #. We don't just set the app_info but name and icon separately to
 #. * not overwrite values set by the caller
 #: src/notifications/notification.c:422 src/notifications/notification.c:695
-#: src/notifications/notify-manager.c:1012
+#: src/notifications/notify-manager.c:1009
 msgid "Notification"
 msgstr "آگاهی"
 
@@ -581,6 +589,14 @@ msgstr "افزاره‌های ورودی"
 msgid "Sound Settings"
 msgstr "تنظیمات صدا"
 
+#: src/ui/brightness-settings.ui:87
+msgid "Automatic Brightness"
+msgstr "روشنایی خودکار"
+
+#: src/ui/brightness-settings.ui:120
+msgid "Brightness Settings"
+msgstr "تنظیمات روشنایی"
+
 #: src/ui/bt-status-page.ui:39
 msgid "Enable Bluetooth"
 msgstr "به کار انداختن بلوتوث"
@@ -691,15 +707,15 @@ msgstr "اضطراری"
 msgid "Run Command"
 msgstr "اجرای فرمان"
 
-#: src/ui/settings.ui:138
+#: src/ui/settings.ui:121
 msgid "No notifications"
 msgstr "بدون آگاهی"
 
-#: src/ui/settings.ui:167
+#: src/ui/settings.ui:150
 msgid "Notifications"
 msgstr "آگاهی‌ها"
 
-#: src/ui/settings.ui:176
+#: src/ui/settings.ui:159
 msgid "Clear all"
 msgstr "پاک‌سازی همه"
 
@@ -780,29 +796,37 @@ msgid "Cellular"
 msgstr "سلولی"
 
 #. Translators: Phosh prevents the session from going idle because the caffeine quick setting is toggled
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:53
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:68
 msgid "Phosh on caffeine"
 msgstr "فوش روی کافئین"
 
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
-msgctxt "caffeine-enabled"
-msgid "On"
-msgstr "روشن"
-
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:226
 msgctxt "caffeine-disabled"
 msgid "Off"
 msgstr "خاموش"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:231
+msgctxt "caffeine-enabled"
+msgid "On"
+msgstr "روشن"
+
+#: plugins/caffeine-quick-setting/qs.ui:15
+msgid "Caffeine timers"
+msgstr "شمارش معکوس کافئین"
+
+#: plugins/caffeine-quick-setting/qs.ui:37
+msgid "No caffeine intervals"
+msgstr "بدون دورهٔ کافئین"
+
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
 msgstr "سبک پیش‌گزیده"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:37
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:35
 msgid "Dark mode"
 msgstr "حالت تیره"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:38
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
 msgid "Light mode"
 msgstr "حالت روشن"
 
@@ -932,52 +956,60 @@ msgstr "هیچ اجراگری پیکربندی نشده"
 msgid "Launchers"
 msgstr "اجراگرها"
 
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location On"
+msgstr "مکان روشن"
+
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location Off"
+msgstr "مکان خاموش"
+
 #: plugins/media-players/media-players.ui:20
 msgid "No running media players"
 msgstr "هیچ پخش‌کنندهٔ آهنگی در حال اجرا نیست"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data On"
 msgstr "دادهٔ همراه روشن"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data Off"
 msgstr "دادهٔ همراه خاموش"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light On"
 msgstr "نور شب روشن"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light Off"
 msgstr "نور شب خاموش"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:75
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:72
 msgid "Pomodoro start"
 msgstr "آغاز پومودورو"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:76
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:73
 #, c-format
 msgid "Focus on your task for %d minutes"
 msgstr "تمرکز روی وظیفه‌تان برای %Id دقیقه"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:81
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:78
 msgid "Take a break"
 msgstr "استراحت کنید"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:83
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:80
 #, c-format
 msgid "You have %d minutes until next Pomodoro"
 msgstr "تا پومودوروی بعد %Id دقیقه دارید"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:98
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:95
 msgid "Pomodoro Timer"
 msgstr "زمان‌سنج پومودورو"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:121
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:118
 #, c-format
 msgid "Pomodoro Off"
 msgstr "پومودورو خاموش"
@@ -1125,15 +1157,15 @@ msgstr "مقیاس‌های نمایشگر"
 
 #. Translators: This is scale factor of a monitor in percent
 #: plugins/scaling-quick-setting/scale-row.c:48
-#: plugins/scaling-quick-setting/scaling-quick-setting.c:93
+#: plugins/scaling-quick-setting/scaling-quick-setting.c:91
 #, c-format
 msgid "%d%%"
 msgstr "%Id٪"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:79
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:75
 msgid "Hotspot On"
 msgstr "نقطهٔ داغ روشن"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:81
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:77
 msgid "Hotspot Off"
 msgstr "نقطهٔ داغ خاموش"

@@ -136,10 +136,12 @@ static void
 on_device_added (PhoshAudioDevices *self, guint id)
 {
   GvcMixerUIDevice *device = NULL;
+  GvcMixerStream *stream = NULL;
   g_autofree char *description = NULL;
   const char *icon_name;
   const char *origin;
   g_autoptr (PhoshAudioDevice) audio_device = NULL;
+  guint stream_id;
 
   g_debug ("Adding audio device %d", id);
   if (self->is_input)
@@ -150,6 +152,17 @@ on_device_added (PhoshAudioDevices *self, guint id)
   if (device == NULL) {
     g_debug ("No device for id %u", id);
     return;
+  }
+
+  stream_id = gvc_mixer_ui_device_get_stream_id (device);
+  stream = gvc_mixer_control_lookup_stream_id (self->mixer_control, stream_id);
+  if (stream) {
+    const char *name;
+
+    name = gvc_mixer_stream_get_name (stream);
+    /* Don't add role loopbacks as switching to them is not useful */
+    if (g_str_has_prefix (name, "input.loopback.sink.role."))
+      return;
   }
 
   origin = gvc_mixer_ui_device_get_origin (device);

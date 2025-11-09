@@ -95,7 +95,9 @@ cui_init (gboolean init_callaudio)
   cui_init_css ();
 
   if (init_callaudio) {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     call_audio_init (NULL);
+G_GNUC_END_IGNORE_DEPRECATIONS
     call_audio_initialized = TRUE;
   }
 
@@ -112,7 +114,9 @@ void
 cui_uninit (void)
 {
   if (call_audio_initialized) {
+G_GNUC_BEGIN_IGNORE_DEPRECATIONS
     call_audio_deinit ();
+G_GNUC_END_IGNORE_DEPRECATIONS
     call_audio_initialized = FALSE;
   }
 }

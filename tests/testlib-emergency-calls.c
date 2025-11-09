@@ -31,7 +31,7 @@ on_bus_acquired (GDBusConnection *connection,
 #define CONTACTS_FORMAT "a" CONTACT_FORMAT
 
 static gboolean
-on_handle_get_emergency_contacts (PhoshEmergencyCalls         *interface,
+on_handle_get_emergency_contacts (PhoshDBusEmergencyCalls     *interface,
                                   GDBusMethodInvocation       *invocation,
                                   PhoshTestEmergencyCallsMock *self)
 {
@@ -55,7 +55,7 @@ on_handle_get_emergency_contacts (PhoshEmergencyCalls         *interface,
   g_variant_builder_add (&contacts_builder, "a{sv}", NULL);
   g_variant_builder_close (&contacts_builder);
 
-  g_variant_builder_open(&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
+  g_variant_builder_open (&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
   /* https://www.police.govt.nz/use-105 */
   /* 105 is the number for Police non-emergencies. */
 
@@ -69,7 +69,7 @@ on_handle_get_emergency_contacts (PhoshEmergencyCalls         *interface,
   g_variant_builder_add (&contacts_builder, "a{sv}", NULL);
   g_variant_builder_close (&contacts_builder);
 
-  g_variant_builder_open(&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
+  g_variant_builder_open (&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
   /* https://en.wikipedia.org/wiki/Fictitious_telephone_number */
 
   /* id: The identifier to dial (usually the phone number) */
@@ -82,7 +82,7 @@ on_handle_get_emergency_contacts (PhoshEmergencyCalls         *interface,
   g_variant_builder_add (&contacts_builder, "a{sv}", NULL);
   g_variant_builder_close(&contacts_builder);
 
-  g_variant_builder_open(&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
+  g_variant_builder_open (&contacts_builder, G_VARIANT_TYPE (CONTACT_FORMAT));
   /* https://en.wikipedia.org/wiki/Fictitious_telephone_number */
 
   /* id: The identifier to dial (usually the phone number) */
@@ -97,7 +97,7 @@ on_handle_get_emergency_contacts (PhoshEmergencyCalls         *interface,
 
   contacts = g_variant_builder_end (&contacts_builder);
 
-  phosh_emergency_calls_complete_get_emergency_contacts (interface, invocation, contacts);
+  phosh_dbus_emergency_calls_complete_get_emergency_contacts (interface, invocation, contacts);
 
   return TRUE;
 }
@@ -109,7 +109,7 @@ phosh_test_emergency_calls_mock_new (void)
   PhoshTestEmergencyCallsMock *self;
 
   self = g_new0 (PhoshTestEmergencyCallsMock, 1);
-  self->skel = phosh_emergency_calls_skeleton_new ();
+  self->skel = phosh_dbus_emergency_calls_skeleton_new ();
 
   g_signal_connect (self->skel,
                     "handle-get-emergency-contacts",

@@ -1235,9 +1235,7 @@ phosh_monitor_manager_get_property (GObject    *object,
 
 
 static void
-on_gsd_color_temperature_changed (PhoshMonitorManager*self,
-                                  GParamSpec         *pspec,
-                                  PhoshDBusColor     *proxy)
+on_gsd_color_temperature_changed (PhoshMonitorManager*self)
 {
   guint32 temp;
 
@@ -1284,7 +1282,7 @@ on_gsd_color_proxy_new_for_bus_finish (GObject      *source_object,
                            G_CALLBACK (on_gsd_color_temperature_changed),
                            self,
                            G_CONNECT_SWAPPED);
-  on_gsd_color_temperature_changed (self, NULL, self->gsd_color_proxy);
+  on_gsd_color_temperature_changed (self);
 
   g_debug ("GSD Color initialized");
 }

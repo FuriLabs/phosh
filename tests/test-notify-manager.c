@@ -24,26 +24,26 @@ static void
 test_phosh_notify_manager_caps (PhoshTestFullShellFixture *fixture, gconstpointer unused)
 {
   g_autoptr (GError) err = NULL;
-  g_autoptr (PhoshNotifyDBusNotifications) proxy = NULL;
+  g_autoptr (PhoshDBusNotifications) proxy = NULL;
   g_auto (GStrv) caps = NULL;
   gboolean success;
 
   /* Wait until comp/shell are up */
   g_assert_nonnull (g_async_queue_timeout_pop (fixture->queue, POP_TIMEOUT));
 
-  proxy = phosh_notify_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                                                  G_DBUS_PROXY_FLAGS_NONE,
-                                                                  BUS_NAME,
-                                                                  OBJECT_PATH,
-                                                                  NULL,
-                                                                  &err);
+  proxy = phosh_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+                                                           G_DBUS_PROXY_FLAGS_NONE,
+                                                           BUS_NAME,
+                                                           OBJECT_PATH,
+                                                           NULL,
+                                                           &err);
   g_assert_no_error (err);
-  g_assert_true (PHOSH_NOTIFY_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
+  g_assert_true (PHOSH_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
 
-  success = phosh_notify_dbus_notifications_call_get_capabilities_sync (proxy,
-                                                                        &caps,
-                                                                        NULL,
-                                                                        &err);
+  success = phosh_dbus_notifications_call_get_capabilities_sync (proxy,
+                                                                 &caps,
+                                                                 NULL,
+                                                                 &err);
   g_assert_no_error (err);
   g_assert_true (success);
 
@@ -60,7 +60,7 @@ static void
 test_phosh_notify_manager_server_info (PhoshTestFullShellFixture *fixture, gconstpointer unused)
 {
   g_autoptr (GError) err = NULL;
-  g_autoptr (PhoshNotifyDBusNotifications) proxy = NULL;
+  g_autoptr (PhoshDBusNotifications) proxy = NULL;
   g_autofree char *name = NULL;
   g_autofree char *vendor = NULL;
   g_autofree char *version = NULL;
@@ -70,22 +70,22 @@ test_phosh_notify_manager_server_info (PhoshTestFullShellFixture *fixture, gcons
   /* Wait until comp/shell are up */
   g_assert_nonnull (g_async_queue_timeout_pop (fixture->queue, POP_TIMEOUT));
 
-  proxy = phosh_notify_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                                                  G_DBUS_PROXY_FLAGS_NONE,
-                                                                  BUS_NAME,
-                                                                  OBJECT_PATH,
-                                                                  NULL,
-                                                                  &err);
+  proxy = phosh_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+                                                           G_DBUS_PROXY_FLAGS_NONE,
+                                                           BUS_NAME,
+                                                           OBJECT_PATH,
+                                                           NULL,
+                                                           &err);
   g_assert_no_error (err);
-  g_assert_true (PHOSH_NOTIFY_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
+  g_assert_true (PHOSH_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
 
-  success = phosh_notify_dbus_notifications_call_get_server_information_sync (proxy,
-                                                                              &name,
-                                                                              &vendor,
-                                                                              &version,
-                                                                              &spec_ver,
-                                                                              NULL,
-                                                                              &err);
+  success = phosh_dbus_notifications_call_get_server_information_sync (proxy,
+                                                                       &name,
+                                                                       &vendor,
+                                                                       &version,
+                                                                       &spec_ver,
+                                                                       NULL,
+                                                                       &err);
   g_assert_no_error (err);
   g_assert_true (success);
 
@@ -107,7 +107,7 @@ static void
 test_phosh_notify_manager_server_notify (PhoshTestFullShellFixture *fixture, gconstpointer unused)
 {
   g_autoptr (GError) err = NULL;
-  g_autoptr (PhoshNotifyDBusNotifications) proxy = NULL;
+  g_autoptr (PhoshDBusNotifications) proxy = NULL;
   PhoshNotifyManager *nm = NULL;
   gboolean success, notified = FALSE;
   guint id;
@@ -117,31 +117,31 @@ test_phosh_notify_manager_server_notify (PhoshTestFullShellFixture *fixture, gco
   /* Wait until comp/shell are up */
   g_assert_nonnull (g_async_queue_timeout_pop (fixture->queue, POP_TIMEOUT));
 
-  proxy = phosh_notify_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
-                                                                  G_DBUS_PROXY_FLAGS_NONE,
-                                                                  BUS_NAME,
-                                                                  OBJECT_PATH,
-                                                                  NULL,
-                                                                  &err);
+  proxy = phosh_dbus_notifications_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+                                                           G_DBUS_PROXY_FLAGS_NONE,
+                                                           BUS_NAME,
+                                                           OBJECT_PATH,
+                                                           NULL,
+                                                           &err);
   g_assert_no_error (err);
-  g_assert_true (PHOSH_NOTIFY_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
+  g_assert_true (PHOSH_DBUS_IS_NOTIFICATIONS_PROXY (proxy));
 
   /* phosh runs in another thread without locking, so careful */
   nm = phosh_notify_manager_get_default ();
   g_signal_connect_swapped (nm, "new-notification", G_CALLBACK (on_new_notification), &notified);
 
-  success = phosh_notify_dbus_notifications_call_notify_sync (proxy,
-                                                              "com.example.notify",
-                                                              -1,
-                                                              "",
-                                                              "",
-                                                              "",
-                                                              actions,
-                                                              hints,
-                                                              3,
-                                                              &id,
-                                                              NULL,
-                                                              &err);
+  success = phosh_dbus_notifications_call_notify_sync (proxy,
+                                                       "com.example.notify",
+                                                       -1,
+                                                       "",
+                                                       "",
+                                                       "",
+                                                       actions,
+                                                       hints,
+                                                       3,
+                                                       &id,
+                                                       NULL,
+                                                       &err);
   g_assert_no_error (err);
   g_assert_true (success);
   g_assert_cmpint (id, ==, 1);

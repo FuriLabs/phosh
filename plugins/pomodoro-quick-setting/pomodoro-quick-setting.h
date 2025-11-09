@@ -4,11 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include <gtk/gtk.h>
+#pragma once
 
 #include "quick-setting.h"
-
-#pragma once
 
 G_BEGIN_DECLS
 
@@ -18,7 +16,7 @@ typedef enum _PhoshPomodoroState {
   PHOSH_POMODORO_STATE_BREAK = 2,
 } PhoshPomodoroState;
 
-#define PHOSH_TYPE_POMODORO_QUICK_SETTING (phosh_pomodoro_quick_setting_get_type ())
+#define PHOSH_TYPE_POMODORO_QUICK_SETTING phosh_pomodoro_quick_setting_get_type ()
 
 G_DECLARE_FINAL_TYPE (PhoshPomodoroQuickSetting,
                       phosh_pomodoro_quick_setting,

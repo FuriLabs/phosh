@@ -9,9 +9,7 @@
 
 #include "scaling-quick-setting.h"
 #include "plugin-shell.h"
-#include "quick-setting.h"
 #include "scale-row.h"
-#include "status-icon.h"
 #include "util.h"
 
 #include <glib/gi18n.h>

@@ -36,7 +36,7 @@ G_DECLARE_DERIVABLE_TYPE (PhoshMediaPlayer, phosh_media_player, PHOSH, MEDIA_PLA
 
 GtkWidget              *phosh_media_player_new                   (void);
 void                    phosh_media_player_set_player            (PhoshMediaPlayer *self,
-                                                                  PhoshMprisDBusMediaPlayer2Player *player);
+                                                                  PhoshDBusMediaPlayer2Player *player);
 gboolean                phosh_media_player_get_is_playable       (PhoshMediaPlayer *self);
 PhoshMediaPlayerStatus  phosh_media_player_get_status            (PhoshMediaPlayer *self);
 void                    phosh_media_player_toggle_play_pause     (PhoshMediaPlayer *self);

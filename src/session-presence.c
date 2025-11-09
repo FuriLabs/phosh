@@ -26,14 +26,13 @@
  * object path, names and bus names in several places.
  */
 
-
-typedef struct _PhoshSessionPresence
-{
-  PhoshSessionPresenceDBusPresenceProxy parent;
+typedef struct _PhoshSessionPresence {
+  PhoshDBusSessionManagerPresenceProxy parent;
 } PhoshSessionPresence;
 
 
-G_DEFINE_TYPE (PhoshSessionPresence, phosh_session_presence, PHOSH_SESSION_PRESENCE_DBUS_TYPE_PRESENCE_PROXY)
+G_DEFINE_TYPE (PhoshSessionPresence, phosh_session_presence,
+               PHOSH_DBUS_TYPE_SESSION_MANAGER_PRESENCE_PROXY)
 
 
 static void

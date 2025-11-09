@@ -43,8 +43,8 @@ struct _PhoshOskManager
 
   /* Currently the only impl. We can use an interface once we support
    * different OSK types */
-  PhoshOsk0SmPuriOSK0 *proxy;
-  GSettings           *a11y_settings;
+  PhoshDBusOSK0 *proxy;
+  GSettings     *a11y_settings;
 
   gboolean visible;
   gboolean has_name_owner;
@@ -76,17 +76,17 @@ phosh_osk_manager_get_property (GObject *object,
 
 
 static void
-on_osk0_set_visible_done (PhoshOsk0SmPuriOSK0 *proxy,
-                          GAsyncResult        *res,
-                          PhoshOskManager     *self)
+on_osk0_set_visible_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshDBusOSK0 *proxy = PHOSH_DBUS_OSK0 (source_object);
+  PhoshOskManager *self = PHOSH_OSK_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
   gboolean visible;
 
-  if (!phosh_osk0_sm_puri_osk0_call_set_visible_finish (proxy, res, &err))
+  if (!phosh_dbus_osk0_call_set_visible_finish (proxy, res, &err))
     g_warning ("Unable to toggle OSK: %s", err->message);
 
-  visible = phosh_osk0_sm_puri_osk0_get_visible (proxy);
+  visible = phosh_dbus_osk0_get_visible (proxy);
   if (visible != self->visible) {
     self->visible = visible;
     g_object_notify_by_pspec (G_OBJECT (self), props[PROP_VISIBLE]);
@@ -102,11 +102,11 @@ set_visible_real (PhoshOskManager *self, gboolean visible)
   g_return_if_fail (G_IS_DBUS_PROXY (self->proxy));
 
   g_debug ("Setting osk to %svisible", visible ? "" : "not ");
-  phosh_osk0_sm_puri_osk0_call_set_visible (
+  phosh_dbus_osk0_call_set_visible (
     self->proxy,
     visible,
     NULL,
-    (GAsyncReadyCallback) on_osk0_set_visible_done,
+    on_osk0_set_visible_done,
     g_object_ref (self));
 }
 
@@ -154,14 +154,14 @@ on_availability_changed (PhoshOskManager *self, GParamSpec *pspec, gpointer unus
 
 
 static void
-on_visible_changed (PhoshOskManager *self, GParamSpec *pspec, PhoshOsk0SmPuriOSK0 *proxy)
+on_visible_changed (PhoshOskManager *self, GParamSpec *pspec, PhoshDBusOSK0 *proxy)
 {
   gboolean visible;
 
   g_return_if_fail (PHOSH_IS_OSK_MANAGER (self));
   g_return_if_fail (G_IS_DBUS_PROXY (proxy));
 
-  visible = phosh_osk0_sm_puri_osk0_get_visible (proxy);
+  visible = phosh_dbus_osk0_get_visible (proxy);
   /* Just need to sync the property, osk shows/hides itself */
   if (visible != self->visible) {
     self->visible = visible;
@@ -190,7 +190,7 @@ phosh_osk_manager_constructed (GObject *object)
 
   G_OBJECT_CLASS (phosh_osk_manager_parent_class)->constructed (object);
 
-  self->proxy = phosh_osk0_sm_puri_osk0_proxy_new_for_bus_sync(
+  self->proxy = phosh_dbus_osk0_proxy_new_for_bus_sync (
     G_BUS_TYPE_SESSION,
     G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START_AT_CONSTRUCTION,
     VIRTBOARD_DBUS_NAME,
@@ -221,7 +221,7 @@ phosh_osk_manager_constructed (GObject *object)
                             self);
   on_visible_changed (self, NULL, self->proxy);
 
-  shell = phosh_shell_get_default();
+  shell = phosh_shell_get_default ();
   g_signal_connect_swapped (shell,
                             "notify::locked",
                             G_CALLBACK (on_shell_locked_changed),

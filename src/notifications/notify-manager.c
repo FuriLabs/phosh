@@ -56,7 +56,7 @@ static guint signals[N_SIGNALS] = { 0 };
 
 typedef struct _PhoshNotifyManager
 {
-  PhoshNotifyDBusNotificationsSkeleton parent;
+  PhoshDBusNotificationsSkeleton parent;
 
   int dbus_name_id;
   guint next_id;
@@ -76,18 +76,18 @@ typedef struct _PhoshNotifyManager
   PhoshNotifyFeedback *feedback;
 } PhoshNotifyManager;
 
-static void phosh_notify_manager_notify_iface_init (PhoshNotifyDBusNotificationsIface *iface);
+static void phosh_notify_manager_notify_iface_init (PhoshDBusNotificationsIface *iface);
 G_DEFINE_TYPE_WITH_CODE (PhoshNotifyManager,
                          phosh_notify_manager,
-                         PHOSH_NOTIFY_DBUS_TYPE_NOTIFICATIONS_SKELETON,
-                         G_IMPLEMENT_INTERFACE (
-                           PHOSH_NOTIFY_DBUS_TYPE_NOTIFICATIONS,
-                           phosh_notify_manager_notify_iface_init));
+                         PHOSH_DBUS_TYPE_NOTIFICATIONS_SKELETON,
+                         G_IMPLEMENT_INTERFACE (PHOSH_DBUS_TYPE_NOTIFICATIONS,
+                                                phosh_notify_manager_notify_iface_init));
+
 
 static gboolean
-handle_close_notification (PhoshNotifyDBusNotifications *skeleton,
-                           GDBusMethodInvocation        *invocation,
-                           guint                         arg_id)
+handle_close_notification (PhoshDBusNotifications *skeleton,
+                           GDBusMethodInvocation  *invocation,
+                           guint                   arg_id)
 {
   PhoshNotification *notification = NULL;
   PhoshNotifyManager *self = PHOSH_NOTIFY_MANAGER (skeleton);
@@ -104,41 +104,40 @@ handle_close_notification (PhoshNotifyDBusNotifications *skeleton,
   if (notification && PHOSH_IS_NOTIFICATION (notification)) {
     phosh_notification_close (notification, PHOSH_NOTIFICATION_REASON_CLOSED);
   } else {
-    phosh_notify_dbus_notifications_emit_notification_closed (
-      PHOSH_NOTIFY_DBUS_NOTIFICATIONS (self), arg_id,
-      PHOSH_NOTIFICATION_REASON_CLOSED);
+    phosh_dbus_notifications_emit_notification_closed (PHOSH_DBUS_NOTIFICATIONS (self),
+                                                       arg_id,
+                                                       PHOSH_NOTIFICATION_REASON_CLOSED);
   }
 
-  phosh_notify_dbus_notifications_complete_close_notification (
-    skeleton, invocation);
+  phosh_dbus_notifications_complete_close_notification (skeleton, invocation);
 
   return TRUE;
 }
 
 
 static gboolean
-handle_get_capabilities (PhoshNotifyDBusNotifications *skeleton,
-                         GDBusMethodInvocation        *invocation)
+handle_get_capabilities (PhoshDBusNotifications *skeleton, GDBusMethodInvocation *invocation)
 {
   const char *const capabilities[] = {
     "body", "body-markup", "actions", "icon-static", "sound", NULL,
   };
 
   g_debug ("DBus call GetCapabilities");
-  phosh_notify_dbus_notifications_complete_get_capabilities (
-    skeleton, invocation, capabilities);
+  phosh_dbus_notifications_complete_get_capabilities (skeleton, invocation, capabilities);
   return TRUE;
 }
 
 
 static gboolean
-handle_get_server_information (PhoshNotifyDBusNotifications *skeleton,
-                               GDBusMethodInvocation        *invocation)
+handle_get_server_information (PhoshDBusNotifications *skeleton, GDBusMethodInvocation *invocation)
 {
   g_debug ("DBus call GetServerInformation");
-  phosh_notify_dbus_notifications_complete_get_server_information (
-    skeleton, invocation, "Phosh Notify Daemon", "Phosh", PHOSH_VERSION,
-    NOTIFICATIONS_SPEC_VERSION);
+  phosh_dbus_notifications_complete_get_server_information (skeleton,
+                                                            invocation,
+                                                            "Phosh Notify Daemon",
+                                                            "Phosh",
+                                                            PHOSH_VERSION,
+                                                            NOTIFICATIONS_SPEC_VERSION);
   return TRUE;
 }
 
@@ -261,8 +260,7 @@ on_notification_closed (PhoshNotifyManager      *self,
 
   g_debug ("Emitting NotificationClosed: %d, %d", id, reason);
 
-  phosh_notify_dbus_notifications_emit_notification_closed (
-    PHOSH_NOTIFY_DBUS_NOTIFICATIONS (self), id, reason);
+  phosh_dbus_notifications_emit_notification_closed (PHOSH_DBUS_NOTIFICATIONS (self), id, reason);
 }
 
 
@@ -403,16 +401,16 @@ phosh_notify_manager_add_application (PhoshNotifyManager *self, GAppInfo *info)
 
 
 static gboolean
-handle_notify (PhoshNotifyDBusNotifications *skeleton,
-               GDBusMethodInvocation        *invocation,
-               const char                   *app_name,
-               guint                         replaces_id,
-               const char                   *app_icon,
-               const char                   *summary,
-               const char                   *body,
-               const char *const            *actions,
-               GVariant                     *hints,
-               int                           expire_timeout)
+handle_notify (PhoshDBusNotifications *skeleton,
+               GDBusMethodInvocation  *invocation,
+               const char             *app_name,
+               guint                   replaces_id,
+               const char             *app_icon,
+               const char             *summary,
+               const char             *body,
+               const char *const      *actions,
+               GVariant               *hints,
+               int                     expire_timeout)
 {
   PhoshNotifyManager *self = PHOSH_NOTIFY_MANAGER (skeleton);
   PhoshNotification *notification = NULL;
@@ -544,7 +542,7 @@ handle_notify (PhoshNotifyDBusNotifications *skeleton,
                   "sound-file", sound_file,
                   NULL);
   } else {
-    g_autoptr(PhoshDBusNotification) dbus_notification = NULL;
+    g_autoptr (PhoshDBusNotification) dbus_notification = NULL;
 
     if (info)
       phosh_notify_manager_add_application (self, info);
@@ -572,15 +570,14 @@ handle_notify (PhoshNotifyDBusNotifications *skeleton,
                                            PHOSH_NOTIFICATION (dbus_notification));
   }
 
-  phosh_notify_dbus_notifications_complete_notify (
-    skeleton, invocation, id);
+  phosh_dbus_notifications_complete_notify (skeleton, invocation, id);
 
   return TRUE;
 }
 
 
 static void
-phosh_notify_manager_notify_iface_init (PhoshNotifyDBusNotificationsIface *iface)
+phosh_notify_manager_notify_iface_init (PhoshDBusNotificationsIface *iface)
 {
   iface->handle_close_notification = handle_close_notification;
   iface->handle_get_capabilities = handle_get_capabilities;

@@ -20,6 +20,7 @@ target="${1:-main}"
 
 files=$(
     git diff-tree \
+    --diff-filter=d \
     --no-commit-id \
     --name-only \
     -r \

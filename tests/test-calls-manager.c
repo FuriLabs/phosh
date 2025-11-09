@@ -140,8 +140,8 @@ t2_on_calls_manager_present (PhoshCallsManager *manager,
 {
   PhoshCallsManager *cm = phosh_shell_get_calls_manager (phosh_shell_get_default ());
   gboolean present;
-  g_autoptr (PhoshCallsDBusObjectSkeleton) object = NULL;
-  g_autoptr (PhoshCallsDBusCallsCall) iface = NULL;
+  g_autoptr (PhoshDBusObjectSkeleton) object = NULL;
+  g_autoptr (PhoshDBusCallsCall) iface = NULL;
   CallsMock *calls_mock = user_data;
 
   g_assert_true (PHOSH_IS_CALLS_MANAGER (manager));
@@ -150,9 +150,9 @@ t2_on_calls_manager_present (PhoshCallsManager *manager,
   g_test_message ("Object manager present: %d", present);
   g_assert_true (present);
 
-  object = phosh_calls_dbus_object_skeleton_new (OBJECT_PATH "/Call/1");
-  iface = phosh_calls_dbus_calls_call_skeleton_new ();
-  phosh_calls_dbus_calls_call_set_state (iface, PHOSH_CALL_STATE_ACTIVE);
+  object = phosh_dbus_object_skeleton_new (OBJECT_PATH "/Call/1");
+  iface = phosh_dbus_calls_call_skeleton_new ();
+  phosh_dbus_calls_call_set_state (iface, PHOSH_CALL_STATE_ACTIVE);
   g_dbus_object_skeleton_add_interface (G_DBUS_OBJECT_SKELETON (object),
                                         G_DBUS_INTERFACE_SKELETON (iface));
   g_dbus_object_manager_server_export (calls_mock->object_manager, G_DBUS_OBJECT_SKELETON (object));

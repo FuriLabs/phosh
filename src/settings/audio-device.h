@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Guido Günther <agx@sigxcpu.org>
+ * Copyright (C) 2023 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -23,6 +23,3 @@ void                     phosh_audio_device_set_active      (PhoshAudioDevice *s
                                                              gboolean          active);
 
 G_END_DECLS
-
-
-

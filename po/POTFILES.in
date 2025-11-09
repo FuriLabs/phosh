@@ -7,6 +7,7 @@ plugins/calendar/calendar.desktop.in.in
 plugins/dark-mode-quick-setting/dark-mode-quick-setting.desktop.in.in
 plugins/emergency-info/emergency-info.desktop.in.in
 plugins/launcher-box/launcher-box.desktop.in.in
+plugins/location-quick-setting/location-quick-setting.desktop.in.in
 plugins/media-players/media-players.desktop.in.in
 plugins/mobile-data-quick-setting/mobile-data-quick-setting.desktop.in.in
 plugins/night-light-quick-setting/night-light-quick-setting.desktop.in.in
@@ -79,6 +80,7 @@ src/ui/app-auth-prompt.ui
 src/ui/app-grid-button.ui
 src/ui/app-grid.ui
 src/ui/audio-settings.ui
+src/ui/brightness-settings.ui
 src/ui/bt-status-page.ui
 src/ui/cell-broadcast-prompt.ui
 src/ui/emergency-menu.ui
@@ -110,6 +112,7 @@ src/wifi-manager.c
 src/wifi-status-page.c
 src/wwan-info.c
 plugins/caffeine-quick-setting/caffeine-quick-setting.c
+plugins/caffeine-quick-setting/qs.ui
 plugins/dark-mode-quick-setting/dark-mode-quick-setting.c
 plugins/emergency-info/emergency-info.c
 plugins/emergency-info/emergency-info.ui
@@ -118,6 +121,7 @@ plugins/emergency-info/prefs/emergency-info-prefs.ui
 plugins/emergency-info/prefs/emergency-info-prefs-row.c
 plugins/emergency-info/prefs/emergency-info-prefs-row.ui
 plugins/launcher-box/launcher-box.ui
+plugins/location-quick-setting/location-quick-setting.c
 plugins/media-players/media-players.ui
 plugins/mobile-data-quick-setting/mobile-data-quick-setting.c
 plugins/night-light-quick-setting/night-light-quick-setting.c

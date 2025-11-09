@@ -31,24 +31,7 @@
                         <property name="margin-top">6</property>
                         <property name="margin-bottom">6</property>
                         <child>
-                          <object class="GtkBox" id="box_brightness">
-                            <property name="visible">1</property>
-                            <child>
-                              <object class="GtkImage">
-                                <property name="visible">1</property>
-                                <property name="margin-end">6</property>
-                                <property name="icon-name">display-brightness-symbolic</property>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="GtkScale" id="scale_brightness">
-                                <property name="visible">1</property>
-                                <property name="hexpand">1</property>
-                                <property name="round-digits">1</property>
-                                <property name="draw-value">0</property>
-                              </object>
-                            </child>
-                          </object>
+                          <object class="PhoshBrightnessSettings" id="brightness_settings"/>
                         </child>
                         <child>
                           <object class="PhoshAudioSettings" id="audio_settings">

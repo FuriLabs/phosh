@@ -6,6 +6,7 @@ Name=Pomodoro Quick Setting
 Types=quick-setting;
 Comment=Simple Pomodoro Timer
 Plugin=@plugins_dir@/libphosh-plugin-@name@.so
+Icon=pomodoro-quick-setting
 
 [Prefs]
 Id=@name@-prefs

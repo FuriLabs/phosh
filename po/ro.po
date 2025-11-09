@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-10-12 14:32+0000\n"
-"PO-Revision-Date: 2025-10-12 17:07+0200\n"
+"POT-Creation-Date: 2025-11-06 07:24+0000\n"
+"PO-Revision-Date: 2025-11-06 09:40+0100\n"
 "Last-Translator: Antonio Marin <gnmer.6qxyg@slmail.me>\n"
 "Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -79,6 +79,14 @@ msgstr "Cutie lansator"
 msgid "Add launchers to the lock screen. <b>This plugin is experimental.</b>"
 msgstr ""
 "Adaugă lansatoare pe ecranul blocat. <b>Acest modul este experimental.</b>"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:4
+msgid "Location Quick Setting"
+msgstr "Opțiuni pentru Localizare"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:6
+msgid "Toggle location services on/off"
+msgstr "Localizare Activată/Dezactivată"
 
 #: plugins/media-players/media-players.desktop.in.in:3
 #: plugins/media-players/media-players.ui:19
@@ -270,20 +278,20 @@ msgctxt "feedback:enabled"
 msgid "On"
 msgstr "Pornit"
 
-#: src/location-manager.c:269
+#: src/location-manager.c:266
 #, c-format
 msgid "Allow '%s' to access your location information?"
 msgstr "„%s” poate accesa poziția ta geografică?"
 
-#: src/location-manager.c:274
+#: src/location-manager.c:271
 msgid "Geolocation"
 msgstr "Poziția geografică"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "Yes"
 msgstr "Da"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "No"
 msgstr "Nu"
 
@@ -324,12 +332,12 @@ msgid "Screenshot from %s%s.png"
 msgstr "Instantaneu de ecran %s%s.png"
 
 #. Translators: Used when the title of a song is unknown
-#: src/media-player.c:646 src/ui/media-player.ui:208
+#: src/media-player.c:690 src/ui/media-player.ui:208
 msgid "Unknown Title"
 msgstr "Titlu necunoscut"
 
 #. Translators: Used when the artist of a song is unknown
-#: src/media-player.c:654 src/ui/media-player.ui:196
+#: src/media-player.c:698 src/ui/media-player.ui:196
 msgid "Unknown Artist"
 msgstr "Artist necunoscut"
 
@@ -374,7 +382,7 @@ msgstr "Deschide"
 #. We don't just set the app_info but name and icon separately to
 #. * not overwrite values set by the caller
 #: src/notifications/notification.c:422 src/notifications/notification.c:695
-#: src/notifications/notify-manager.c:1012
+#: src/notifications/notify-manager.c:1009
 msgid "Notification"
 msgstr "Notificare"
 
@@ -557,11 +565,11 @@ msgstr "Anulează"
 
 #: src/ui/app-grid-button.ui:31
 msgid "Remove from _Favorites"
-msgstr "Elimină din _Favorite"
+msgstr "Elimină din Pre_ferate"
 
 #: src/ui/app-grid-button.ui:36
 msgid "Add to _Favorites"
-msgstr "Adaugă în _Favorite"
+msgstr "Adaugă în Pre_ferate"
 
 #: src/ui/app-grid-button.ui:41
 msgid "View _Details"
@@ -589,7 +597,15 @@ msgstr "Dispozitive de intrare"
 
 #: src/ui/audio-settings.ui:136
 msgid "Sound Settings"
-msgstr "Opțiuni sunet"
+msgstr "Opțiuni Sunet"
+
+#: src/ui/brightness-settings.ui:87
+msgid "Automatic Brightness"
+msgstr "Luminozitate automată"
+
+#: src/ui/brightness-settings.ui:120
+msgid "Brightness Settings"
+msgstr "Opțiuni Luminozitate"
 
 #: src/ui/bt-status-page.ui:39
 msgid "Enable Bluetooth"
@@ -701,15 +717,15 @@ msgstr "Urgență"
 msgid "Run Command"
 msgstr "Execută comanda"
 
-#: src/ui/settings.ui:138
+#: src/ui/settings.ui:121
 msgid "No notifications"
 msgstr "Nicio notificare"
 
-#: src/ui/settings.ui:167
+#: src/ui/settings.ui:150
 msgid "Notifications"
 msgstr "Notificări"
 
-#: src/ui/settings.ui:176
+#: src/ui/settings.ui:159
 msgid "Clear all"
 msgstr "Șterge tot"
 
@@ -749,7 +765,7 @@ msgstr "VPN"
 #. long format
 #: src/wall-clock.c:248
 msgid "%A, %B %-e"
-msgstr "%A, %B %-e"
+msgstr "%A, %-e %B"
 
 #: src/widget-box.c:54
 msgid "Plugin not found"
@@ -790,29 +806,37 @@ msgid "Cellular"
 msgstr "Celular"
 
 #. Translators: Phosh prevents the session from going idle because the caffeine quick setting is toggled
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:53
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:68
 msgid "Phosh on caffeine"
 msgstr "Phosh cu Cafeină"
 
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
-msgctxt "caffeine-enabled"
-msgid "On"
-msgstr "Pornit"
-
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:226
 msgctxt "caffeine-disabled"
 msgid "Off"
 msgstr "Oprit"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:231
+msgctxt "caffeine-enabled"
+msgid "On"
+msgstr "Pornit"
+
+#: plugins/caffeine-quick-setting/qs.ui:15
+msgid "Caffeine timers"
+msgstr "Timpi Cafeină"
+
+#: plugins/caffeine-quick-setting/qs.ui:37
+msgid "No caffeine intervals"
+msgstr "Niciun interval Cafeină"
+
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
 msgstr "Aspect prestabilit"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:37
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:35
 msgid "Dark mode"
 msgstr "Aspect întunecos"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:38
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
 msgid "Light mode"
 msgstr "Aspect luminos"
 
@@ -928,7 +952,7 @@ msgstr "Numele _contactului"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:246
 msgid "Relationship"
-msgstr "Relație"
+msgstr "Relația"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:252
 msgid "_Contact Number"
@@ -936,58 +960,66 @@ msgstr "Numărul _contactului"
 
 #: plugins/launcher-box/launcher-box.ui:18
 msgid "No launchers configured"
-msgstr "Nu există lansatoare configurate"
+msgstr "Nu există lansatoare"
 
 #: plugins/launcher-box/launcher-box.ui:33
 msgid "Launchers"
 msgstr "Lansatoare"
 
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location On"
+msgstr "Localizare Activată"
+
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location Off"
+msgstr "Localizare Dezactivată"
+
 #: plugins/media-players/media-players.ui:20
 msgid "No running media players"
 msgstr "Nicio aplicație activă de redare media"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data On"
 msgstr "Date mobile Activate"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data Off"
 msgstr "Date mobile Dezactivate"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light On"
 msgstr "Lumina de noapte Pornită"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light Off"
 msgstr "Lumina de noapte Oprită"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:75
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:72
 msgid "Pomodoro start"
 msgstr "Pornește Pomodoro"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:76
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:73
 #, c-format
 msgid "Focus on your task for %d minutes"
 msgstr "Concentrează-te la treaba ta timp de %d minute"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:81
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:78
 msgid "Take a break"
 msgstr "Fă o pauză"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:83
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:80
 #, c-format
 msgid "You have %d minutes until next Pomodoro"
 msgstr "%d minute până la următoarea activitate"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:98
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:95
 msgid "Pomodoro Timer"
 msgstr "Cronometru Pomodoro"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:121
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:118
 #, c-format
 msgid "Pomodoro Off"
 msgstr "Oprește Pomodoro"
@@ -1135,15 +1167,15 @@ msgstr "Scala monitorului"
 
 #. Translators: This is scale factor of a monitor in percent
 #: plugins/scaling-quick-setting/scale-row.c:48
-#: plugins/scaling-quick-setting/scaling-quick-setting.c:93
+#: plugins/scaling-quick-setting/scaling-quick-setting.c:91
 #, c-format
 msgid "%d%%"
 msgstr "%d%%"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:79
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:75
 msgid "Hotspot On"
 msgstr "Punct de acces Activ"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:81
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:77
 msgid "Hotspot Off"
 msgstr "Punct de acces Oprit"

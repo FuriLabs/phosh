@@ -19,5 +19,6 @@ G_DECLARE_FINAL_TYPE (PhoshBrightnessManager, phosh_brightness_manager, PHOSH, B
 
 PhoshBrightnessManager *phosh_brightness_manager_new (void);
 GtkAdjustment *         phosh_brightness_manager_get_adjustment (PhoshBrightnessManager *self);
+gboolean                phosh_brightness_manager_get_auto_brightness_enabled (PhoshBrightnessManager *self);
 
 G_END_DECLS

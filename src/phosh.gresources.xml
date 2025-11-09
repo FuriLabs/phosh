@@ -9,6 +9,7 @@
     <file preprocess="xml-stripblanks">ui/app-grid.ui</file>
     <file preprocess="xml-stripblanks">ui/audio-device-row.ui</file>
     <file preprocess="xml-stripblanks">ui/audio-settings.ui</file>
+    <file preprocess="xml-stripblanks">ui/brightness-settings.ui</file>
     <file preprocess="xml-stripblanks">ui/bt-device-row.ui</file>
     <file preprocess="xml-stripblanks">ui/bt-status-page.ui</file>
     <file preprocess="xml-stripblanks">ui/call-notification.ui</file>
@@ -63,6 +64,7 @@
     <file alias="audio-handsfree-symbolic.svg">../data/icons/audio-handsfree-symbolic.svg</file>
     <file alias="auth-sim-locked-symbolic.svg">../data/icons/auth-sim-locked-symbolic.svg</file>
     <file alias="auth-sim-missing-symbolic.svg">../data/icons/auth-sim-missing-symbolic.svg</file>
+    <file alias="auto-brightness-symbolic.svg">../data/icons/auto-brightness-symbolic.svg</file>
     <file alias="camera-hardware-disabled-symbolic.svg">../data/icons/camera-hardware-disabled-symbolic.svg</file>
     <file alias="chat-symbolic.svg">../data/icons/chat-symbolic.svg</file>
     <file alias="chat-none-symbolic.svg">../data/icons/chat-none-symbolic.svg</file>

@@ -44,17 +44,17 @@ static GParamSpec *props[PROP_NUM_PROPS];
 
 
 typedef struct _PhoshCall {
-  GObject                  parent;
+  GObject             parent;
 
-  PhoshCallsDBusCallsCall *proxy; /* DBus proxy to a single call on gnome-calls' DBus service */
-  GCancellable            *cancel;
+  PhoshDBusCallsCall *proxy; /* DBus proxy to a single call on gnome-calls' DBus service */
+  GCancellable       *cancel;
 
-  GLoadableIcon           *avatar_icon;
-  gboolean                 can_dtmf;
+  GLoadableIcon      *avatar_icon;
+  gboolean            can_dtmf;
 
-  GTimer                  *timer;
-  gdouble                  active_time;
-  guint                    timer_id;
+  GTimer             *timer;
+  gdouble             active_time;
+  guint               timer_id;
 } PhoshCall;
 
 
@@ -81,7 +81,7 @@ phosh_call_get_id (CuiCall *call)
   g_return_val_if_fail (PHOSH_IS_CALL (call), NULL);
   self = PHOSH_CALL (call);
 
-  return phosh_calls_dbus_calls_call_get_id (self->proxy);
+  return phosh_dbus_calls_call_get_id (self->proxy);
 }
 
 
@@ -93,7 +93,7 @@ phosh_call_get_display_name (CuiCall *call)
   g_return_val_if_fail (PHOSH_IS_CALL (call), NULL);
   self = PHOSH_CALL (call);
 
-  return phosh_calls_dbus_calls_call_get_display_name (self->proxy);
+  return phosh_dbus_calls_call_get_display_name (self->proxy);
 }
 
 
@@ -105,7 +105,7 @@ phosh_call_get_state (CuiCall *call)
   g_return_val_if_fail (PHOSH_IS_CALL (call), CUI_CALL_STATE_UNKNOWN);
   self = PHOSH_CALL (call);
 
-  return phosh_calls_dbus_calls_call_get_state (self->proxy);
+  return phosh_dbus_calls_call_get_state (self->proxy);
 }
 
 
@@ -117,7 +117,7 @@ phosh_call_get_encrypted (CuiCall *call)
   g_return_val_if_fail (PHOSH_IS_CALL (call), CUI_CALL_STATE_UNKNOWN);
   self = PHOSH_CALL (call);
 
-  return phosh_calls_dbus_calls_call_get_encrypted (self->proxy);
+  return phosh_dbus_calls_call_get_encrypted (self->proxy);
 }
 
 
@@ -129,7 +129,7 @@ phosh_call_get_can_dtmf (CuiCall *call)
   g_return_val_if_fail (PHOSH_IS_CALL (call), CUI_CALL_STATE_UNKNOWN);
   self = PHOSH_CALL (call);
 
-  return phosh_calls_dbus_calls_call_get_can_dtmf (self->proxy);
+  return phosh_dbus_calls_call_get_can_dtmf (self->proxy);
 }
 
 
@@ -196,7 +196,7 @@ on_state_changed (PhoshCall *self)
 
 
 static void
-phosh_call_set_dbus_proxy (PhoshCall *self, PhoshCallsDBusCallsCall *proxy)
+phosh_call_set_dbus_proxy (PhoshCall *self, PhoshDBusCallsCall *proxy)
 {
   self->proxy = g_object_ref (proxy);
 
@@ -282,12 +282,11 @@ phosh_call_constructed (GObject *object)
 
   G_OBJECT_CLASS (phosh_call_parent_class)->constructed (object);
 
-  path = phosh_calls_dbus_calls_call_get_image_path (self->proxy);
+  path = phosh_dbus_calls_call_get_image_path (self->proxy);
   if (!gm_str_is_null_or_empty (path)) {
     file = g_file_new_for_path (path);
-    if (file) {
+    if (file)
       self->avatar_icon = G_LOADABLE_ICON (g_file_icon_new (file));
-    }
   }
 
   /* Sync active property */
@@ -330,7 +329,7 @@ phosh_call_class_init (PhoshCallClass *klass)
   props[PROP_DBUS_PROXY] = g_param_spec_object ("dbus-proxy",
                                                 "",
                                                 "",
-                                                PHOSH_CALLS_DBUS_TYPE_CALLS_CALL,
+                                                PHOSH_DBUS_TYPE_CALLS_CALL,
                                                 G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
                                                 G_PARAM_CONSTRUCT_ONLY);
   g_object_class_install_properties (object_class, PROP_NUM_OBJ_PROPS, props);
@@ -373,15 +372,14 @@ phosh_call_class_init (PhoshCallClass *klass)
 
 
 static void
-on_call_accept_finish (PhoshCallsDBusCallsCall *proxy,
-                       GAsyncResult            *res,
-                       gpointer                 unused)
+on_call_accept_finish (GObject *source_object, GAsyncResult *res, gpointer unused)
 {
+  PhoshDBusCallsCall *proxy = PHOSH_DBUS_CALLS_CALL (source_object);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_CALLS_DBUS_IS_CALLS_CALL_PROXY (proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_CALLS_CALL_PROXY (proxy));
 
-  if (!phosh_calls_dbus_calls_call_call_accept_finish (proxy, res, &err))
+  if (!phosh_dbus_calls_call_call_accept_finish (proxy, res, &err))
     phosh_async_error_warn (err, "Failed to accept call %p", proxy);
 }
 
@@ -394,22 +392,21 @@ phosh_call_accept (CuiCall *call)
   g_return_if_fail (PHOSH_IS_CALL (call));
   self = PHOSH_CALL (call);
 
-  phosh_calls_dbus_calls_call_call_accept (self->proxy,
-                                           self->cancel,
-                                           (GAsyncReadyCallback) on_call_accept_finish,
-                                           NULL);
+  phosh_dbus_calls_call_call_accept (self->proxy,
+                                     self->cancel,
+                                     on_call_accept_finish,
+                                     NULL);
 }
 
 static void
-on_call_hangup_finish (PhoshCallsDBusCallsCall *proxy,
-                       GAsyncResult            *res,
-                       gpointer                 unused)
+on_call_hangup_finish (GObject *source_object, GAsyncResult *res, gpointer unused)
 {
+  PhoshDBusCallsCall *proxy = PHOSH_DBUS_CALLS_CALL (source_object);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_CALLS_DBUS_IS_CALLS_CALL_PROXY (proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_CALLS_CALL_PROXY (proxy));
 
-  if (!phosh_calls_dbus_calls_call_call_hangup_finish (proxy, res, &err))
+  if (!phosh_dbus_calls_call_call_hangup_finish (proxy, res, &err))
     phosh_async_error_warn (err, "Failed to hangup call %p", proxy);
 }
 
@@ -422,25 +419,24 @@ phosh_call_hang_up (CuiCall *call)
   g_return_if_fail (PHOSH_IS_CALL (call));
   self = PHOSH_CALL (call);
 
-  phosh_calls_dbus_calls_call_call_hangup (self->proxy,
-                                           self->cancel,
-                                           (GAsyncReadyCallback) on_call_hangup_finish,
-                                           NULL);
+  phosh_dbus_calls_call_call_hangup (self->proxy,
+                                     self->cancel,
+                                     on_call_hangup_finish,
+                                     NULL);
 }
 
 
 static void
-on_call_send_dtmf_finish (PhoshCallsDBusCallsCall *proxy,
-                          GAsyncResult            *res,
-                          gpointer                 dtmf_key)
+on_call_send_dtmf_finish (GObject *source_object, GAsyncResult *res, gpointer dtmf_key)
 {
+  PhoshDBusCallsCall *proxy = PHOSH_DBUS_CALLS_CALL (source_object);
   g_autoptr (GError) err = NULL;
   char key = (char) GPOINTER_TO_INT (dtmf_key);
 
-  g_return_if_fail (PHOSH_CALLS_DBUS_IS_CALLS_CALL_PROXY (proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_CALLS_CALL_PROXY (proxy));
 
-  if (!phosh_calls_dbus_calls_call_call_send_dtmf_finish (proxy, res, &err))
-    phosh_async_error_warn(err, "Failed to send DTMF `%c' %p", key, proxy);
+  if (!phosh_dbus_calls_call_call_send_dtmf_finish (proxy, res, &err))
+    phosh_async_error_warn (err, "Failed to send DTMF `%c' %p", key, proxy);
 }
 
 
@@ -453,11 +449,11 @@ phosh_call_send_dtmf (CuiCall *call, const char *dtmf)
 
   self = PHOSH_CALL (call);
 
-  phosh_calls_dbus_calls_call_call_send_dtmf (self->proxy,
-                                              dtmf,
-                                              self->cancel,
-                                              (GAsyncReadyCallback) on_call_send_dtmf_finish,
-                                              GINT_TO_POINTER (dtmf));
+  phosh_dbus_calls_call_call_send_dtmf (self->proxy,
+                                        dtmf,
+                                        self->cancel,
+                                        on_call_send_dtmf_finish,
+                                        GINT_TO_POINTER (dtmf));
 }
 
 
@@ -489,7 +485,7 @@ phosh_call_init (PhoshCall *self)
 
 
 PhoshCall *
-phosh_call_new (PhoshCallsDBusCallsCall *proxy)
+phosh_call_new (PhoshDBusCallsCall *proxy)
 {
   return g_object_new (PHOSH_TYPE_CALL,
                        "dbus-proxy", proxy,

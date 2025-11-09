@@ -73,9 +73,9 @@ on_dbus_login_session_brightness_set (GObject      *source_object,
 
 
 static int
-phosh_backlight_sysfs_set_brightness_finish (PhoshBacklight  *backlight,
-                                             GAsyncResult    *result,
-                                             GError         **error)
+phosh_backlight_sysfs_set_level_finish (PhoshBacklight  *backlight,
+                                        GAsyncResult    *result,
+                                        GError         **error)
 {
   PhoshBacklightSysfs *self = PHOSH_BACKLIGHT_SYSFS (backlight);
 
@@ -86,11 +86,11 @@ phosh_backlight_sysfs_set_brightness_finish (PhoshBacklight  *backlight,
 
 
 static void
-phosh_backlight_sysfs_set_brightness (PhoshBacklight      *backlight,
-                                      int                  brightness,
-                                      GCancellable        *cancellable,
-                                      GAsyncReadyCallback  callback,
-                                      gpointer             user_data)
+phosh_backlight_sysfs_set_level (PhoshBacklight      *backlight,
+                                 int                  brightness,
+                                 GCancellable        *cancellable,
+                                 GAsyncReadyCallback  callback,
+                                 gpointer             user_data)
 {
   PhoshBacklightSysfs *self = PHOSH_BACKLIGHT_SYSFS (backlight);
   g_autoptr (GTask) task = NULL;
@@ -99,7 +99,7 @@ phosh_backlight_sysfs_set_brightness (PhoshBacklight      *backlight,
 
   task = g_task_new (self, cancellable, callback, user_data);
   g_task_set_task_data (task, GINT_TO_POINTER (brightness), NULL);
-  g_task_set_source_tag (task, phosh_backlight_sysfs_set_brightness);
+  g_task_set_source_tag (task, phosh_backlight_sysfs_set_level);
 
   if (!self->session_proxy)
     return;
@@ -120,7 +120,7 @@ phosh_backlight_sysfs_update (PhoshBacklightSysfs *self)
 {
   g_autoptr (GError) err = NULL;
   g_autofree char *contents = NULL;
-  int brightness;
+  int level;
 
   if (!g_file_get_contents (self->brightness_path, &contents, NULL, &err)) {
     g_warning ("Backlight %s: Could not get brightness from sysfs: %s",
@@ -129,8 +129,8 @@ phosh_backlight_sysfs_update (PhoshBacklightSysfs *self)
     return;
   }
 
-  brightness = g_ascii_strtoll (contents, NULL, 0);
-  phosh_backlight_backend_update_brightness (PHOSH_BACKLIGHT (self), brightness);
+  level = g_ascii_strtoll (contents, NULL, 0);
+  phosh_backlight_backend_update_level (PHOSH_BACKLIGHT (self), level);
 }
 
 
@@ -150,10 +150,15 @@ on_backlight_changed (PhoshBacklightSysfs *self,
 
 
 static gboolean
-phosh_backlight_sysfs_get_udev_info (GUdevDevice *device, int *minout, int *maxout, GError **err)
+phosh_backlight_sysfs_get_udev_info (GUdevDevice         *device,
+                                     int                 *minout,
+                                     int                 *maxout,
+                                     PhoshBacklightScale *scaleout,
+                                     GError             **err)
 {
   int min, max;
-  const char *device_type;
+  const char *device_type, *scale_str;
+  PhoshBacklightScale scale = PHOSH_BACKLIGHT_SCALE_UNKNOWN;
 
   max = g_udev_device_get_sysfs_attr_as_int (device, "max_brightness");
   min = MAX (1, max / 100);
@@ -171,10 +176,25 @@ phosh_backlight_sysfs_get_udev_info (GUdevDevice *device, int *minout, int *maxo
     return FALSE;
   }
 
+  scale_str = g_udev_device_get_sysfs_attr (device, "scale");
+  if (scale_str) {
+    if (g_str_equal (scale_str, "unknown")) {
+      scale = PHOSH_BACKLIGHT_SCALE_UNKNOWN;
+    } else if (g_str_equal (scale_str, "linear")) {
+      scale = PHOSH_BACKLIGHT_SCALE_LINEAR;
+    } else if (g_str_equal (scale_str, "non-linear")) {
+      scale = PHOSH_BACKLIGHT_SCALE_NON_LINEAR;
+    } else {
+      g_warning ("Unknown brightness scale '%s'", scale_str);
+    }
+  }
+
   if (minout)
     *minout = min;
   if (maxout)
     *maxout = max;
+  if (scaleout)
+    *scaleout = scale;
 
   return TRUE;
 }
@@ -185,6 +205,7 @@ initable_init (GInitable *initable, GCancellable *cancel, GError **error)
 {
   PhoshBacklightSysfs *self = PHOSH_BACKLIGHT_SYSFS (initable);
   PhoshUdevManager *udev_manager = phosh_udev_manager_get_default ();
+  PhoshBacklightScale scale;
   int min = 0, max = 0;
 
   if (!self->connector_name) {
@@ -200,10 +221,10 @@ initable_init (GInitable *initable, GCancellable *cancel, GError **error)
     return FALSE;
   }
 
-  if (!phosh_backlight_sysfs_get_udev_info (self->device, &min, &max, error))
+  if (!phosh_backlight_sysfs_get_udev_info (self->device, &min, &max, &scale, error))
     return FALSE;
 
-  phosh_backlight_set_range (PHOSH_BACKLIGHT (self), min, max);
+  phosh_backlight_set_range (PHOSH_BACKLIGHT (self), min, max, scale);
 
   self->device_name = g_strdup (g_udev_device_get_name (self->device));
   self->device_path = realpath (g_udev_device_get_sysfs_path (self->device), NULL);
@@ -278,8 +299,8 @@ phosh_backlight_sysfs_class_init (PhoshBacklightSysfsClass *klass)
   object_class->set_property = phosh_backlight_sysfs_set_property;
   object_class->dispose = phosh_backlight_sysfs_dispose;
 
-  backlight_class->set_brightness = phosh_backlight_sysfs_set_brightness;
-  backlight_class->set_brightness_finish = phosh_backlight_sysfs_set_brightness_finish;
+  backlight_class->set_level = phosh_backlight_sysfs_set_level;
+  backlight_class->set_level_finish = phosh_backlight_sysfs_set_level_finish;
 
   props[PROP_CONNECTOR_NAME] =
     g_param_spec_string ("connector-name", "", "",

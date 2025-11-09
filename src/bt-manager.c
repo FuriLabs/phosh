@@ -46,19 +46,19 @@ enum {
 static GParamSpec *props[PROP_LAST_PROP];
 
 struct _PhoshBtManager {
-  PhoshManager           manager;
+  PhoshManager        manager;
 
-  gboolean               enabled;
-  gboolean               present;
-  const char            *icon_name;
-  guint                  n_connected;
-  guint                  n_devices;
-  char                  *info;
+  gboolean            enabled;
+  gboolean            present;
+  const char         *icon_name;
+  guint               n_connected;
+  guint               n_devices;
+  char               *info;
 
-  BluetoothClient       *bt_client;
-  GtkFilterListModel    *connectable_devices;
+  BluetoothClient    *bt_client;
+  GtkFilterListModel *connectable_devices;
 
-  PhoshRfkillDBusRfkill *proxy;
+  PhoshDBusRfkill    *proxy;
 };
 G_DEFINE_TYPE (PhoshBtManager, phosh_bt_manager, PHOSH_TYPE_MANAGER);
 
@@ -128,17 +128,15 @@ phosh_bt_manager_get_property (GObject    *object,
 
 
 static void
-on_bt_airplane_mode_changed (PhoshBtManager        *self,
-                             GParamSpec            *pspec,
-                             PhoshRfkillDBusRfkill *proxy)
+on_bt_airplane_mode_changed (PhoshBtManager *self, GParamSpec *pspec, PhoshDBusRfkill *proxy)
 {
   gboolean enabled;
   const char *icon_name;
 
   g_return_if_fail (PHOSH_IS_BT_MANAGER (self));
-  g_return_if_fail (PHOSH_RFKILL_DBUS_IS_RFKILL (proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_RFKILL (proxy));
 
-  enabled = !phosh_rfkill_dbus_rfkill_get_bluetooth_airplane_mode (proxy) && self->present;
+  enabled = !phosh_dbus_rfkill_get_bluetooth_airplane_mode (proxy) && self->present;
 
   if (enabled == self->enabled)
     return;
@@ -161,13 +159,11 @@ on_bt_airplane_mode_changed (PhoshBtManager        *self,
 
 
 static void
-on_bt_has_airplane_mode_changed (PhoshBtManager        *self,
-                                 GParamSpec            *pspec,
-                                 PhoshRfkillDBusRfkill *proxy)
+on_bt_has_airplane_mode_changed (PhoshBtManager *self, GParamSpec *pspec, PhoshDBusRfkill *proxy)
 {
   gboolean present;
 
-  present = phosh_rfkill_dbus_rfkill_get_bluetooth_has_airplane_mode (proxy);
+  present = phosh_dbus_rfkill_get_bluetooth_has_airplane_mode (proxy);
 
   if (present == self->present)
     return;
@@ -184,15 +180,14 @@ on_bt_has_airplane_mode_changed (PhoshBtManager        *self,
 
 
 static void
-on_proxy_new_for_bus_finish (GObject        *source_object,
-                             GAsyncResult   *res,
-                             PhoshBtManager *self)
+on_proxy_new_for_bus_finish (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshBtManager *self = PHOSH_BT_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
 
   g_return_if_fail (PHOSH_IS_BT_MANAGER (self));
 
-  self->proxy = phosh_rfkill_dbus_rfkill_proxy_new_for_bus_finish (res, &err);
+  self->proxy = phosh_dbus_rfkill_proxy_new_for_bus_finish (res, &err);
 
   if (!self->proxy) {
     phosh_dbus_service_error_warn (err, "Failed to get gsd rfkill proxy");
@@ -221,13 +216,13 @@ phosh_bt_manager_idle_init (PhoshManager *manager)
 {
   PhoshBtManager *self = PHOSH_BT_MANAGER (manager);
 
-  phosh_rfkill_dbus_rfkill_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                              G_DBUS_PROXY_FLAGS_NONE,
-                                              BUS_NAME,
-                                              OBJECT_PATH,
-                                              NULL,
-                                              (GAsyncReadyCallback) on_proxy_new_for_bus_finish,
-                                              g_object_ref (self));
+  phosh_dbus_rfkill_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                                       G_DBUS_PROXY_FLAGS_NONE,
+                                       BUS_NAME,
+                                       OBJECT_PATH,
+                                       NULL,
+                                       on_proxy_new_for_bus_finish,
+                                       g_object_ref (self));
 }
 
 
@@ -492,7 +487,7 @@ phosh_bt_manager_set_enabled (PhoshBtManager *self, gboolean enabled)
   g_return_if_fail (self->proxy);
 
   self->enabled = enabled;
-  phosh_rfkill_dbus_rfkill_set_bluetooth_airplane_mode (self->proxy, !enabled);
+  phosh_dbus_rfkill_set_bluetooth_airplane_mode (self->proxy, !enabled);
 }
 
 

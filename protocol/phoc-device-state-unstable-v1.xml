@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <protocol name="phoc_device_state_unstable_v1">
   <copyright>
-    Copyright © 2023 Guido Günther
+    Copyright (C) 2023 Phosh.mobi e.V.
 
     Permission to use, copy, modify, distribute, and sell this
     software and its documentation for any purpose is hereby granted

@@ -40,8 +40,7 @@ phosh_dbus_notification_do_action (PhoshNotification *notification, guint id, co
 {
   PhoshNotifyManager *nm = phosh_notify_manager_get_default ();
 
-  phosh_notify_dbus_notifications_emit_action_invoked (
-    PHOSH_NOTIFY_DBUS_NOTIFICATIONS (nm), id, action);
+  phosh_dbus_notifications_emit_action_invoked (PHOSH_DBUS_NOTIFICATIONS (nm), id, action);
 }
 
 

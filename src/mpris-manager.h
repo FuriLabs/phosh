@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Phosh Developers
+ * Copyright (C) 2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -17,7 +17,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshMprisManager, phosh_mpris_manager, PHOSH, MPRIS_MANAGER, GObject)
 
 PhoshMprisManager *      phosh_mpris_manager_new                 (void);
-PhoshMprisDBusMediaPlayer2Player *
+PhoshDBusMediaPlayer2Player *
                          phosh_mpris_manager_get_player          (PhoshMprisManager  *self);
 gboolean                 phosh_mpris_manager_get_can_raise       (PhoshMprisManager  *self);
 void                     phosh_mpris_manager_raise_async         (PhoshMprisManager  *self,

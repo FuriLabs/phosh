@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2018-2022 Purism SPC
- *               2023-2024 Guido Günther
+ *               2023-2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -266,8 +266,6 @@ on_background_destroy (PhoshBackgroundManager *self, GtkWidget *widget)
 
   g_hash_table_iter_init (&iter, self->backgrounds);
   while (g_hash_table_iter_next (&iter, &key, &value)) {
-
-
     if (background == PHOSH_BACKGROUND (value)) {
       PhoshMonitor *monitor = PHOSH_MONITOR (key);
 
@@ -276,7 +274,7 @@ on_background_destroy (PhoshBackgroundManager *self, GtkWidget *widget)
     }
   }
 
-  g_critical ("Failed to remove background %p from list of know backgrounds", background);
+  g_debug ("Background %p to remove not found", background);
 }
 
 
@@ -308,12 +306,10 @@ on_monitor_removed (PhoshBackgroundManager *self,
   g_return_if_fail (PHOSH_IS_BACKGROUND_MANAGER (self));
   g_return_if_fail (PHOSH_IS_MONITOR (monitor));
 
-  g_debug ("Monitor %p removed", monitor);
-
   if (!g_hash_table_lookup (self->backgrounds,  monitor))
     return;
 
-  g_critical ("Monitor %p shouldn't have a background anymore", monitor);
+  g_debug ("Monitor %p removed, removing background", monitor);
   g_hash_table_remove (self->backgrounds, monitor);
 }
 

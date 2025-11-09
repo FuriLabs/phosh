@@ -49,16 +49,16 @@ static guint signals[N_SIGNALS] = { 0 };
 
 
 struct _PhoshCallsManager {
-  PhoshManager                       parent;
+  PhoshManager                  parent;
 
-  gboolean                           present;
-  gboolean                           incoming;
-  char                              *active_call;
+  gboolean                      present;
+  gboolean                      incoming;
+  char                         *active_call;
 
-  PhoshCallsDBusObjectManagerClient *om_client;
-  GCancellable                      *cancel;
-  GHashTable                        *calls;
-  GListStore                        *calls_store;
+  PhoshDBusObjectManagerClient *om_client;
+  GCancellable                 *cancel;
+  GHashTable                   *calls;
+  GListStore                   *calls_store;
 };
 
 static void phosh_calls_manager_list_model_iface_init (GListModelInterface *iface);
@@ -81,22 +81,20 @@ is_active (PhoshCallState state)
 
 
 static void
-on_call_state_changed (PhoshCallsManager       *self,
-                       GParamSpec              *pspec,
-                       PhoshCallsDBusCallsCall *proxy)
+on_call_state_changed (PhoshCallsManager *self, GParamSpec *pspec, PhoshDBusCallsCall *proxy)
 {
   const char *path;
   PhoshCallState state;
   PhoshCall *call;
 
   g_return_if_fail (PHOSH_IS_CALLS_MANAGER (self));
-  g_return_if_fail (PHOSH_CALLS_DBUS_IS_CALLS_CALL (proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_CALLS_CALL (proxy));
 
   call = g_object_get_data (G_OBJECT (proxy), "call");
   g_return_if_fail (call);
 
   path = g_dbus_proxy_get_object_path (G_DBUS_PROXY (proxy));
-  state = phosh_calls_dbus_calls_call_get_state (proxy);
+  state = phosh_dbus_calls_call_get_state (proxy);
 
   g_debug ("Call %s, state %d", path, state);
   if (g_strcmp0 (path, self->active_call) == 0) {
@@ -127,18 +125,16 @@ on_call_state_changed (PhoshCallsManager       *self,
 
 
 static void
-on_call_proxy_new_for_bus_finish (GObject      *source_object,
-                                  GAsyncResult *res,
-                                  gpointer     *data)
+on_call_proxy_new_for_bus_finish (GObject *source_object, GAsyncResult *res, gpointer data)
 {
   const char *path;
   gboolean inbound;
   PhoshCallsManager *self;
-  g_autoptr (PhoshCallsDBusCallsCall) proxy = NULL;
+  g_autoptr (PhoshDBusCallsCall) proxy = NULL;
   g_autoptr (PhoshCall) call = NULL;
   g_autoptr (GError) err = NULL;
 
-  proxy = phosh_calls_dbus_calls_call_proxy_new_for_bus_finish (res, &err);
+  proxy = phosh_dbus_calls_call_proxy_new_for_bus_finish (res, &err);
   if (!proxy) {
     phosh_async_error_warn (err, "Failed to get call proxy");
     return;
@@ -163,7 +159,7 @@ on_call_proxy_new_for_bus_finish (GObject      *source_object,
                             self);
   on_call_state_changed (self, NULL, proxy);
 
-  inbound = phosh_calls_dbus_calls_call_get_inbound (proxy);
+  inbound = phosh_dbus_calls_call_get_inbound (proxy);
   g_debug ("Added call %s, inbound: %d", path, inbound);
 
   g_signal_emit (self, signals[CALL_ADDED], 0, path);
@@ -171,8 +167,7 @@ on_call_proxy_new_for_bus_finish (GObject      *source_object,
 
 
 static void
-on_call_obj_added (PhoshCallsManager *self,
-                   GDBusObject       *object)
+on_call_obj_added (PhoshCallsManager *self, GDBusObject *object)
 {
   const char *path;
 
@@ -183,13 +178,13 @@ on_call_obj_added (PhoshCallsManager *self,
   if (!g_str_has_prefix (path, OBJECT_PATHS_CALLS_PREFIX))
     return;
 
-  phosh_calls_dbus_calls_call_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                                 G_DBUS_PROXY_FLAGS_NONE,
-                                                 BUS_NAME,
-                                                 path,
-                                                 self->cancel,
-                                                 (GAsyncReadyCallback) on_call_proxy_new_for_bus_finish,
-                                                 self);
+  phosh_dbus_calls_call_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                                           G_DBUS_PROXY_FLAGS_NONE,
+                                           BUS_NAME,
+                                           path,
+                                           self->cancel,
+                                           on_call_proxy_new_for_bus_finish,
+                                           self);
 }
 
 
@@ -303,14 +298,14 @@ on_om_new_for_bus_finish (GObject      *source_object,
   GDBusObjectManager *om;
   GDBusObjectManagerClient *om_client;
 
-  om = phosh_calls_dbus_object_manager_client_new_for_bus_finish (res, &err);
+  om = phosh_dbus_object_manager_client_new_for_bus_finish (res, &err);
   if (om == NULL) {
     g_message ("Failed to get calls object manager client: %s", err->message);
     return;
   }
 
   self = PHOSH_CALLS_MANAGER (data);
-  self->om_client = PHOSH_CALLS_DBUS_OBJECT_MANAGER_CLIENT (om);
+  self->om_client = PHOSH_DBUS_OBJECT_MANAGER_CLIENT (om);
   om_client = G_DBUS_OBJECT_MANAGER_CLIENT (om);
 
   g_signal_connect_object (self->om_client,
@@ -387,13 +382,13 @@ phosh_calls_manager_idle_init (PhoshManager *manager)
 {
   PhoshCallsManager *self = PHOSH_CALLS_MANAGER (manager);
 
-  phosh_calls_dbus_object_manager_client_new_for_bus (G_BUS_TYPE_SESSION,
-                                                      G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_DO_NOT_AUTO_START,
-                                                      BUS_NAME,
-                                                      OBJECT_PATH,
-                                                      self->cancel,
-                                                      on_om_new_for_bus_finish,
-                                                      self);
+  phosh_dbus_object_manager_client_new_for_bus (G_BUS_TYPE_SESSION,
+                                                G_DBUS_OBJECT_MANAGER_CLIENT_FLAGS_DO_NOT_AUTO_START,
+                                                BUS_NAME,
+                                                OBJECT_PATH,
+                                                self->cancel,
+                                                on_om_new_for_bus_finish,
+                                                self);
 }
 
 

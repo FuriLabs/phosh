@@ -6,11 +6,7 @@
  * Author: Teemu Ikonen <tpikonen@mailbox.org>
  */
 
-#include "monitor-manager.h"
 #include "dark-mode-quick-setting.h"
-#include "plugin-shell.h"
-#include "quick-setting.h"
-#include "status-icon.h"
 
 #include <glib/gi18n.h>
 #include <gsettings-desktop-schemas/gdesktop-enums.h>
@@ -20,6 +16,7 @@
  *
  * Set the color-scheme enum.
  */
+
 struct _PhoshDarkModeQuickSetting {
   PhoshQuickSetting parent;
 
@@ -29,8 +26,9 @@ struct _PhoshDarkModeQuickSetting {
 
 G_DEFINE_TYPE (PhoshDarkModeQuickSetting, phosh_dark_mode_quick_setting, PHOSH_TYPE_QUICK_SETTING);
 
+
 static const char*
-enum_to_info (gint color_scheme)
+enum_to_info (int color_scheme)
 {
   const char *labels[] = {
     _("Default style"),
@@ -40,8 +38,9 @@ enum_to_info (gint color_scheme)
   return labels[CLAMP (color_scheme, 0, 2)];
 }
 
+
 static const char*
-enum_to_icon_name (gint color_scheme)
+enum_to_icon_name (int color_scheme)
 {
   const char *icons[] = {
     "dark-mode-disabled-symbolic",
@@ -51,19 +50,21 @@ enum_to_icon_name (gint color_scheme)
   return icons[CLAMP (color_scheme, 0, 2)];
 }
 
+
 static void
 set_props_from_enum (PhoshDarkModeQuickSetting *self,
-                     gint                       color_scheme)
+                     int                        color_scheme)
 {
   g_object_set (self->info, "icon-name", enum_to_icon_name (color_scheme), NULL);
   g_object_set (self->info, "info", enum_to_info (color_scheme), NULL);
   g_object_set (self, "active", color_scheme == 1, NULL);
 }
 
+
 static void
 on_clicked (PhoshDarkModeQuickSetting *self)
 {
-  gint color_scheme = g_settings_get_enum (self->settings, "color-scheme");
+  int color_scheme = g_settings_get_enum (self->settings, "color-scheme");
 
   /* Only allow setting 'default' or 'prefer-dark' by clicking */
   g_settings_set_enum (self->settings, "color-scheme",
@@ -72,15 +73,17 @@ on_clicked (PhoshDarkModeQuickSetting *self)
                        G_DESKTOP_COLOR_SCHEME_PREFER_DARK);
 }
 
+
 static void
 on_color_scheme_changed (PhoshDarkModeQuickSetting *self,
                          char                      *_key,
                          GSettings                 *_settings)
 {
-  gint color_scheme = g_settings_get_enum (self->settings, "color-scheme");
+  int color_scheme = g_settings_get_enum (self->settings, "color-scheme");
 
   set_props_from_enum (self, color_scheme);
 }
+
 
 static void
 phosh_lockscreen_finalize (GObject *object)

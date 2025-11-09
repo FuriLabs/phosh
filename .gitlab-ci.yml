@@ -1,7 +1,7 @@
 ---
 include:
   - project: 'guidog/meta-phosh'
-    ref: '7e4c54478a07dfa3df0867a3c7be067cd254165d'
+    ref: '992eb10ac05e479d9cff3dc0ee119a029e298e0c'
     file: '/ci/phosh-common-jobs.yml'
   - project: 'Infrastructure/freedesktop-ci-templates'
     ref: 'd03cddbcff35f26861429fc816c00323f48e99af'
@@ -43,7 +43,7 @@ variables:
   # For ci-fairy
   FDO_UPSTREAM_REPO: World/Phosh/phosh
   # screenshot and asan builds on DEBIAN_IMAGE so keep them in sync
-  IMAGE_VERSION: v0.0.2025-09-27
+  IMAGE_VERSION: v0.0.2025-11-06
   DEBIAN_IMAGE: $CI_REGISTRY/world/phosh/phosh/debian:$IMAGE_VERSION
   SCREENSHOT_IMAGE: $CI_REGISTRY/world/phosh/phosh/screenshot:$IMAGE_VERSION
   ASAN_IMAGE: $CI_REGISTRY/world/phosh/phosh/asan:$IMAGE_VERSION
@@ -57,10 +57,7 @@ variables:
                     vala
   RUST_BINDINGS_BRANCH: main
   LIBPHOSH: libphosh-0.45
-
-.trixie_vars: &trixie_vars
-  variables:
-    BUILD_OPTS: -Dcallui-i18n=true -Dphoc_tests=enabled -Dsearchd=true ${COMMON_BUILD_OPTS}
+  BUILD_OPTS: -Dcallui-i18n=true -Dphoc_tests=enabled -Dsearchd=true ${COMMON_BUILD_OPTS}
 
 .test_before_script: &test_before_script
   before_script:
@@ -94,10 +91,10 @@ variables:
   script:
     - export LC_ALL=C.UTF-8
     - meson configure ${BUILD_OPTS} _build
-    - ${XVFB_RUN} meson test --print-errorlogs -C _build --suite tools
-    - ${XVFB_RUN} meson test --print-errorlogs -C _build --suite unit
-    - ${XVFB_RUN} meson test --print-errorlogs -C _build --suite lint
-    - ${XVFB_RUN} meson test --print-errorlogs -C _build --suite integration
+    - ${XVFB_RUN} meson test --logbase=tools --print-errorlogs -C _build --suite tools
+    - ${XVFB_RUN} meson test --logbase=unit --print-errorlogs -C _build --suite unit
+    - ${XVFB_RUN} meson test --logbase=lint --print-errorlogs -C _build --suite lint
+    - ${XVFB_RUN} meson test --logbase=integration --print-errorlogs -C _build --suite integration
   after_script:
     - gcovr --json --gcov-ignore-errors=no_working_dir_found --output=coverage-${CI_JOB_NAME}.json
 
@@ -117,17 +114,16 @@ commit-log-check:
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $CI_DEFAULT_BRANCH'
 
-build:native-debian-trixie:
+build:native-debian-forky:
   stage: build
   image: ${DEBIAN_IMAGE}
   <<: *build_before_script
-  <<: *trixie_vars
   <<: *build_step
   artifacts:
     paths:
       - _build
 
-build:lib-debian-trixie:
+build:lib-debian-forky:
   stage: build
   image: ${DEBIAN_IMAGE}
   variables:
@@ -142,12 +138,11 @@ build:lib-debian-trixie:
     paths:
       - _build
 
-unit-test:native-debian-trixie:
+unit-test:native-debian-forky:
   stage: test+docs
   image: ${DEBIAN_IMAGE}
   needs:
-    - build:native-debian-trixie
-  <<: *trixie_vars
+    - build:native-debian-forky
   <<: *test_before_script
   <<: *test_step
   artifacts:
@@ -155,29 +150,31 @@ unit-test:native-debian-trixie:
     paths:
       - _build
       - coverage-*.json
+      - _build/meson-logs/*.junit.xml
+    reports:
+      junit: _build/meson-logs/*.junit.xml
 
-asan-test:native-debian-trixie:
+asan-test:native-debian-forky:
   stage: test+docs
   image: ${ASAN_IMAGE}
   tags: [asan]
   needs: []
-  <<: *trixie_vars
   <<: *test_before_script
   script:
     - meson setup -Dphoc_tests=enabled -Dtools=false -Db_sanitize=address -Dbuildtype=debug -Dsearchd=true _build-asan
     - ${XVFB_RUN} meson test --print-errorlogs -C _build-asan --suite unit --timeout-multiplier 5
   allow_failure: true
 
-screenshot:native-debian-trixie:
+screenshot:native-debian-forky:
   stage: test+docs
   image: ${SCREENSHOT_IMAGE}
   needs:
-    - build:native-debian-trixie
+    - build:native-debian-forky
+  variables:
+    LC_ALL: C.UTF-8
+    G_MESSAGES_DEBUG: all
   <<: *test_before_script
-  <<: *trixie_vars
   script:
-    - export LC_ALL=C.UTF-8
-    - export G_MESSAGES_DEBUG=all
     # Make sure tests can find the plugins and po files
     - "meson install -C _build"
     - ${XVFB_RUN} meson test -C _build --print-errorlogs --suite screenshots
@@ -191,18 +188,24 @@ screenshot:native-debian-trixie:
     paths:
       - screenshots/
       - _build/meson-logs/testlog.txt
+      - _build/meson-logs/testlog.junit.xml
+    reports:
+      junit: _build/meson-logs/testlog.junit.xml
 
-integration:native-debian-trixie:
+integration:native-debian-forky:
   stage: test+docs
   image: ${DEBIAN_IMAGE}
   needs:
-    - build:native-debian-trixie
+    - build:native-debian-forky
   <<: *test_before_script
-  <<: *trixie_vars
+  variables:
+    SID_PKGS: phoc
+    # exports
+    LC_ALL: C.UTF-8
+    NO_AT_BRIDGE: 1
+    WLR_RENDERER: pixman
+    WLR_BACKENDS: headless
   script:
-    - export LC_ALL=C.UTF-8
-    - export G_MESSAGES_DEBUG=all
-    - export NO_AT_BRIDGE=1
     - export TOPSRCDIR="${PWD}"
     - export TOPBUILDDIR="${PWD}/_build"
     # Make sure tests can find the plugins and po files
@@ -264,7 +267,6 @@ check-ui:
 check-license-headers:
   stage: test+docs
   image: ${DEBIAN_IMAGE}
-  <<: *trixie_vars
   needs: []
   script:
     # Checks .c and .h files begin with a license header as
@@ -297,11 +299,12 @@ unit-test:native-alpinelinux-edge:
   allow_failure: true
   needs:
     - build:native-alpinelinux-edge
+  variables:
+    LC_ALL: C.UTF-8
   before_script:
     - echo "https://alpine.global.ssl.fastly.net/alpine/edge/testing" >> /etc/apk/repositories
     - apk add xvfb-run $ALPINE_EDGE_DEPS
   script:
-    - export LC_ALL=C.UTF-8
     - ${XVFB_RUN} meson test -C _build --suite unit
   artifacts:
     when: always
@@ -309,11 +312,10 @@ unit-test:native-alpinelinux-edge:
       - _build
   when: manual
 
-build:native-debian-trixie-clang:
+build:native-debian-forky-clang:
   stage: build
   image: ${DEBIAN_IMAGE}
   <<: *build_before_script
-  <<: *trixie_vars
   script:
     - CC=clang CC_LD=lld meson setup ${BUILD_OPTS} _build
     - meson compile -C _build
@@ -369,14 +371,14 @@ coverage:
         path: coverage-report/coverage.xml
   coverage: '/^lines: (\d+\.\d+\%)/'
   needs:
-    - unit-test:native-debian-trixie
-    - screenshot:native-debian-trixie
-    - integration:native-debian-trixie
+    - unit-test:native-debian-forky
+    - screenshot:native-debian-forky
+    - integration:native-debian-forky
 
 abi-compliance-checker:
   image: ${DEBIAN_IMAGE}
   stage: analyze
-  needs: [build:lib-debian-trixie]
+  needs: [build:lib-debian-forky]
   <<: *build_before_script
   script:
     - meson setup --reconfigure -Dabi-check=true _build .
@@ -394,10 +396,10 @@ abi-compliance-checker:
           - src/libphosh.syms.in
     - when: manual
 
-package:deb-debian-trixie:arm64:
+package:deb-debian-forky:arm64:
   stage: package
   variables:
-    PHOSH_DOCKER_IMAGE: debian:trixie
+    PHOSH_DOCKER_IMAGE: debian:forky
     DEB_BUILD_PROFILES: "nodoc nocheck"
     DEB_BUILD_OPTIONS: nocheck
   extends: .phosh-build-debian-package

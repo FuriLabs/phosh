@@ -797,7 +797,9 @@ setup_idle_cb (PhoshShell *self)
   priv->connectivity_manager = phosh_connectivity_manager_new ();
 
   priv->sensor_proxy_manager = phosh_sensor_proxy_manager_new (&err);
-  if (!priv->sensor_proxy_manager)
+  if (priv->sensor_proxy_manager)
+    priv->ambient = phosh_ambient_new (priv->sensor_proxy_manager);
+  else
     g_message ("Failed to connect to sensor-proxy: %s", err->message);
 
   priv->layout_manager = phosh_layout_manager_new ();
@@ -845,7 +847,6 @@ setup_idle_cb (PhoshShell *self)
                                                     priv->sensor_proxy_manager);
     g_signal_connect_swapped (priv->proximity, "notify::fader",
                               G_CALLBACK (on_proximity_fader_changed), self);
-    priv->ambient = phosh_ambient_new (priv->sensor_proxy_manager);
   }
 
   priv->mount_manager = phosh_mount_manager_new ();
@@ -1526,6 +1527,26 @@ phosh_shell_get_primary_monitor (PhoshShell *self)
 }
 
 /* Manager getters */
+
+/**
+ * phosh_shell_get_ambient:
+ * @self: The shell singleton
+ *
+ * Get the ambient light manager
+ *
+ * Returns: (nullable)(transfer none): The ambient light manager.
+ */
+PhoshAmbient *
+phosh_shell_get_ambient (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+  g_return_val_if_fail (PHOSH_IS_AMBIENT (priv->ambient) || priv->ambient == NULL, NULL);
+
+  return priv->ambient;
+}
 
 /**
  * phosh_shell_get_app_tracker:

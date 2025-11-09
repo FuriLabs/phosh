@@ -1,16 +1,257 @@
-phosh (0.50.1) experimental; urgency=medium
+phosh (0.51~rc1) experimental; urgency=medium
 
   [ Rudra Pratap Singh ]
   * upcoming-events: Show appropriate status page in case of no events.
     Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1255
     Fixes: 6614bbd39 ("upcoming-events: Add new setting for skipping non-event days")
+  * upcoming-events: Reindent UI file
+  * caffeine: Add libcall-ui as dependency
+  * caffeine: Refactor icon names into defines.
+    No functional change.
+  * caffeine: Allow to select caffeine duration.
+    With this, we add support for custom intervals
+    in caffeine. It will decide how long caffeine
+    will stay on for. Intervals can be added/selected
+    individually via gsettings keys.
 
   [ Guido Günther ]
   * layout-manager: Don't forget to init corner shift.
     This ensures we have the correct default in case of no rounded corners.
   * top-panel: Shift gear icon according to corner shift
-  * top-panel: Drop `name` property.  Fixes a warning on startup.
+  * top-panel: Drop `name` property.
+    Fixes the
+       (phosh:1106322): Gtk-WARNING **: 17:26:18.095: GtkBox does not have a child property called name
+    warning on startup.
     Fixes: b567c6ed3 ("top-panel: Add gear button")
+  * doc: Use apt instead of apt-get. Let's be modern here.
+  * screenshot: Update screenshot. Let's be at least as recent as Wikipedia.
+  * ci: Update shared scripts to 7aa7dc1
+  * treewide: Update my copyright assignment. Let's use the fiduciary agreement.
+  * ambient: Avoid cast. This gives us more type safety
+  * ambient: Rename settings to schema.
+    The later is more wide spread
+  * udev: Handle fake-builtin debug flag. If set assume that the found
+    displays are built-in. This allows to test backlight handling in
+    nested sessions.
+  * auto-brightness: Add interface for turning ambient into display brightness
+  * auto-brightness: Add bucket implementation.
+    This implementation uses buckets to determine the
+    brightness level.
+  * shell: Create ambient manager earlier.
+    We'll need it for the brightness manager which gets created
+    with the panels. We also add a getter.
+  * ambient: Track whether display brightness should be adjusted.
+    If so emit the ambient brightness values so other parts of the shell can
+    consume them.
+  * ambient: Track automatic high-contrast.
+    Avoids dconf lookups and is a bit easier to read
+  * brightness-manager: Track ambient brightness changes.
+    When enabled we adjust the backlight brightness according
+    to the auto-brightness trackers output.
+  * data: Add auto-brightness-symbolic icon.
+    I wanted to draw my own but then accidentally found one by
+    Jakub Steiner in org.gnome.design.IconLibrary.
+  * brightness-manager: Expose auto-brightness-enabled.
+    This allows users of the brightness manager to use it
+    without having to care about e.g. the ambient manager.
+  * settings: Use different icon when autobrightness is in use
+  * emergency-calls: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * emergency-calls-manager: Use correct types for async callbacks.
+    This gives us more type safety
+  * build: Allow to codegen object manager too
+  * calls: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * calls-manager: Use correct types for async callbacks.
+    This exposed a real bug where the data argument used the
+    wrong type (but was unused).
+  * calls: Use correct types for async callbacks.
+    Gives us more type safety
+  * location-manager: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * location-manager: Use correct types for async callbacks.
+    Gives us more type safety
+  * session-manager: Use default DBus prefix for `ClientPrivate`
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * session-manager: Use correct types for async callbacks.
+    Gives us more type safety.
+  * session-presence: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * osk-manager: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * osk-manager: Use correct types for async callbacks.
+    This gives us more type safety.
+  * rfkill-manager: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * rfkill-manager: Use correct types for async callbacks.
+    This gives us more type safety.
+  * mpris: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+  * mpris-manager: Use correct types for async callbacks.
+    This gives us more type safety.
+  * mpris-player: Use correct types for async callbacks.
+    This gives us more type safety.
+  * background-manager: Avoid criticals when monitor goes away first.
+    We emit a critical when the monitor goes away before the layer-surface.
+    However that doesn't really matter to us so make it a debug message.
+  * audio-devices: Ignore role loopbacks.
+    Users shouldn't switch to the media role loopback devices
+  * location-manager: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+    In this case everything get a lot shorter as the `interface_prefix`
+    didn't match and we thus had the full `org_freedesktop` in all the
+    names.
+  * notify-manager: Use default DBus prefix.
+    This allows us to move to `dbus_client_protos` so our generated header
+    gets added to `generated_dbus_headers` instead of
+    `generated_dbus_sources`.
+    In this case everything get a lot shorter as the `interface_prefix`
+    didn't match and we thus had the full `org_freedesktop` in all the
+    names.
+  * build: Separate dbus headers and sources.
+    The idle monitor needs an object manager. Moving it into
+    dbus_server_protos would create one with a `PhoshDBus`
+    prefix clashing with the one from `org.gnome.Calls.Call`
+    so keep it separate for now but split headers and
+    sources already. (Closes: #1276)
+  * ambient: Improve readability.
+    Get the proxy ones instead of producing overly long cast lines
+  * ambient: Guard against `NULL` unit
+    g_ascii_strcasecmp() doesn't handle that gracefully and it happens
+    e.g. on laptops after resume.
+  * ambient: Handle settings changes in a one place.
+    Otherwise it is harder to determine if we should claim the sensor
+    base on auto-hc and auto-brightness settings.
+  * ambient: Reclaim sensor on unblank.
+    The current code didn't necessarily do this.
+  * ambient: Simplify claim / unclaim callbacks.
+    Avoid the casts, bumping readability and making claim and unclaim more
+    alike
+  * ambient: Release sensor more thorougly.
+    Otherwise we don't reclaim. In order to avoid overlapping calls
+    of claim and release clearing the flag we make it a counter instead
+    of a plain boolean.
+  * ambient: Separate HighContrast handling from ambient.
+    This makes is easier to invoke it from multiple places. We e.g.
+    forgot to stop sampling when the sensor went away.
+  * auto-brightness-bucket: Only notify when index changes.
+    No need to emit the signal if it didn't and thus brightness
+    wouldn't change.
+  * backlight: Allow to get brightness levels.
+    Will be used in the next commit
+  * brightness-manager: Use brightness transition.
+    This makes brightness changes less noticeable
+  * ci: Drop gstyle check.
+    It fails on contrib code that we don't want to modify.
+  * media-player: Move media loading to separate function
+  * media-player: Don't reload cover art if the URL didn't change.
+    Players like kasts trigger a whole lot of meta data updates grinding
+    devices like the Librem 5 to halt when loading the icon.
+  * brightness-manager: End transition immediately when disabled.
+    When the user toggles automatic brightness off we want to end the
+    transition right away.
+    Fixes: f50546254 ("brightness-manager: Track ambient brightness changes")
+  * brightness-manager: Trigger auto brightness transition when enabled.
+    Always trigger an auto-brightness transition when enabled. In dark
+    environments the ambient sensor might not put out a new value but
+    we still want to transition right away when the user enables it.
+    Fixes: f50546254 ("brightness-manager: Track ambient brightness changes")
+  * brightness-manager: Use relative brightness for keybindings too.
+    Instead of calculating based on the brightness range use relative
+    brightness and the number of levels the hardware supports.
+  * brightness-manager: Use adjustment range [0.0, 1.0]
+    This is what we use for the backlights and there's nothing
+    gained when we convert to percentage.
+  * brightness-manager: Allow to get auto-brightness-enabled
+  * backlight: Track scale.
+    This allows to track whether the backlight exposes a linear
+    or exponential scale.
+  * backlight: Use anonymous struct.
+    Better groups the variables
+  * backlight: Separate backlight level from exposed brightness.
+    When we want the brightness curve to be non-linear be need two
+    values: those exposed to the user facing side and those values
+    actually set in the hardware (called `level`s).
+    We do the split here but use a linear mapping only. This will
+    change in the next commits.
+  * backlight: Use logarithmic scale.
+    If the backlight type is unknown or linear we use a logarithmic
+    scale to match the human eye's brightness perception, see
+    https://en.wikipedia.org/wiki/Weber%E2%80%93Fechner_law
+    This lets the brightness slider in settings appear linear over the
+    whole scale instead of doing almost nothing in the upper half.
+  * brightness-manager: Make slider an offset when auto-brightness is on.
+    With autobrightness enabled we want the brightness slider to be an
+    offset to the auto brightness target rather than the actual brightness.
+  * brightness-manager: Update autobrightness on monitor changes
+  * brightness-settings: Remove origin when auto-brightness is enabled.
+    As this is an offset now we don't want to draw the origin part
+    Helps: https://gitlab.gnome.org/guidog/meta-phosh/-/issues/19
+  * brightness-settings: Use icon.
+    This makes it consistent with the audio settings
+  * brightness-manager: Provide a suitable icon based on current state.
+    Similar to other managers provide an icon-name based on the current
+    state (auto-brightness enabled or not). We need that for the OSD and can
+    then reuse it in other parts of the shell.
+  * brightness-settings: Use brightness-manager's icon-name property
+  * ci: Update to forky
+  * libcall-ui: Update to latest 0.1.x branch.
+    Avoids clang build failures
+  * plugins: Avoid warning when copying symlinks.
+    Otherwise we might end up copying the symlink with newer meson. We
+    need to bump the minimum meson version for that.
+    Fixes: fda76c376 ("mobile-data: Install icon to user's filesystem")
+  * doap: Drop Zander.  Not active since several years. Thanks Zander for
+    your work!
+  * doap: Add Arun
+  * wifi-manager: Fix log domain
+  * ci: Use headless backend for integration tests.
+    No need to have the tests guess
+  * tests/integration: Specify Wayland socket.
+    That is more reliable than parsing it from the output
+  * tests/integration: Don't always close stdout.
+    This allows us to parse phosh's output
+  * tests/integration: Ease output checking.
+    Allow tests to access phosh's output more easily.
+    They can specify if the check should fail when the searched for string
+    is already present.
+  * tests/integration: Allow to tweak phosh's environment.
+    This allows to e.g. set logging levels without polluting `os.environ`.
+  * tests/integration: Simplify running pytests locally.
+    Setting the env vars can be cumbersome so make it as simple as
+  * tests/integration: Make is simple to save test logs
+  * tests: Lint Phosh helper too
+  * ci: Use pixman renderer for integration tests. Avoids criticals.
+  * tests/integration: Disable XWayland.
+    We don't need it in CI
+  * tests/integration: Add initial system service test.
+    We interact with quiet a bit of system services but don't exercise this
+    in the tests so far. Make sure we at least look for a modem.
+  * tests/integration: Allow phoc to exit cleanly.
+    We handle `SIGTERM` gracefully nowadays so allow for that too.
+  * ci: Set default build opts.  No need to set them on jobs individually
+  * ci: Minimize script sections.  We move the variable setting to
+    `variables:`
+  * ci: Use phoc 0.51~rc1
+  * ci: Collect junit reports from tests run by meson as well
 
   [ Martin ]
   * Update Slovenian translation
@@ -39,7 +280,55 @@ phosh (0.50.1) experimental; urgency=medium
   [ Ekaterine Papava ]
   * Update Georgian translation
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 19 Oct 2025 11:10:03 +0200
+  [ Arun Mani J ]
+  * simple-custom-quick-setting: Simplify files.
+    Remove unnecessary headers and uses 2 lines separation between
+    functions.
+  * caffeine-quick-setting: Simplify files
+  * dark-mode-quick-setting: Simplify files
+  * mobile-data-quick-setting: Simplify files
+  * night-light-quick-setting: Simplify files
+  * pomodoro-quick-setting: Simplify files
+  * scaling-quick-setting: Simplify files
+  * wifi-hotspot-quick-setting: Simplify files
+  * ci: Ignore deleted files in `check-ui`
+    Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1274
+  * tree: Add `PhoshBrightnessSettings`
+  * settings: Use `PhoshBrightnessSettings`
+    Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1272
+  * settings: Clean up unused headers
+
+  [ Gotam Gorabh ]
+  * plugins: Add location quick setting.
+    Closes: https://gitlab.gnome.org/World/Phosh/phosh/-/issues/783
+  * build: Define 'phosh_plugin_icon_dir'
+  * caffeine: Install icon to user's filesystem
+  * dark-mode: Install icon to user's filesystem
+  * night-light: Install icon to user's filesystem
+  * pomodoro: Install icon to user's filesystem
+  * scaling: Install icon to user's filesystem
+  * wifi-hotspot: Install icon to user's filesystem
+  * mobile-data: Install icon to user's filesystem
+  * location: Install icon to user's filesystem
+  * debian: Install plugin's icon
+  * ci: Use common gchar check
+
+  [ Emin Tufan Çetin ]
+  * Update Turkish translation
+
+  [ Efstathios Iosifidis ]
+  * Update Greek translation
+
+  [ Sabri Ünal ]
+  * Update Turkish translation
+
+  [ Anders Jonsson ]
+  * Update Swedish translation
+
+  [ Yaron Shahrabani ]
+  * Update Hebrew translation
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 09 Nov 2025 17:25:42 +0100
 
 phosh (0.50.0) experimental; urgency=medium
 

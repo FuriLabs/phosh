@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "ambient.h"
 #include "app-tracker.h"
 #include "background-manager.h"
 #include "brightness-manager.h"
@@ -79,6 +80,7 @@ void                 phosh_shell_unlock          (PhoshShell *self);
 void                 phosh_shell_set_primary_monitor (PhoshShell *self, PhoshMonitor *monitor);
 
 /* Created by the shell on startup */
+PhoshAmbient           *phosh_shell_get_ambient            (PhoshShell *self);
 PhoshAppTracker        *phosh_shell_get_app_tracker        (PhoshShell *self);
 PhoshBackgroundManager *phosh_shell_get_background_manager (PhoshShell *self);
 PhoshBrightnessManager *phosh_shell_get_brightness_manager (PhoshShell *self);

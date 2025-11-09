@@ -9,6 +9,7 @@ endif
 subdir('services')
 subdir('system')
 subdir('user')
+subdir('integration')
 
 screenshot_langs = ['ar_AE.UTF-8', 'de_DE.UTF-8', 'ja_JP.UTF-8', 'uk_UA.UTF-8']
 
@@ -112,6 +113,7 @@ tests_unit = [
   'app-grid-button',
   'app-grid-folder-button',
   'app-list-model',
+  'auto-brightness-bucket',
   'connectivity-info',
   'css',
   'fading-label',
@@ -353,7 +355,13 @@ flake8 = find_program('flake8', required: false)
 black = find_program('black', required: false)
 ruff = find_program('ruff', required: false)
 
-pyfiles = files('integration/test_output.py', 'mock-mm-nm.py')
+pyfiles = files(
+  'integration/__init__.py',
+  'integration/test_dbus.py',
+  'integration/test_output.py',
+  'mock-mm-nm.py',
+)
+
 foreach pyfile : pyfiles
   if flake8.found()
     test(
@@ -392,4 +400,3 @@ foreach pyfile : pyfiles
   endif
 
 endforeach
-
