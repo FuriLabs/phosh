@@ -6,13 +6,12 @@
  * Author: Arun Mani J <arunmani@peartree.to>
  */
 
-#include "simple-custom-quick-setting.h"
 #include "phosh-plugin.h"
+#include "simple-custom-quick-setting.h"
 
-#include <gio/gio.h>
-#include <gtk/gtk.h>
 
 char **g_io_phosh_plugin_simple_custom_quick_setting_query (void);
+
 
 void
 g_io_module_load (GIOModule *module)
@@ -25,10 +24,12 @@ g_io_module_load (GIOModule *module)
                                   10);
 }
 
+
 void
 g_io_module_unload (GIOModule *module)
 {
 }
+
 
 char **
 g_io_phosh_plugin_simple_custom_quick_setting_query (void)

@@ -1,9 +1,9 @@
 project(
   'phosh',
   'c',
-  version: '0.50.1',
+  version: '0.51.rc1',
   license: 'GPL-3.0-or-later',
-  meson_version: '>= 1.2.0',
+  meson_version: '>= 1.7.0',
   default_options: [
     'warning_level=1',
     'buildtype=debugoptimized',
@@ -32,6 +32,7 @@ systemddir = join_paths(prefix, 'lib/systemd')
 systemduserdir = join_paths(systemddir, 'user')
 plugins_dir = join_paths(prefix, libdir, 'phosh', 'plugins')
 plugin_prefs_dir = join_paths(prefix, libdir, 'phosh', 'plugins', 'prefs')
+phosh_plugin_icon_dir = datadir / 'phosh' / 'plugins' / 'icons'
 servicedir = join_paths(datadir, 'dbus-1', 'services')
 schemasdir = datadir / 'glib-2.0/schemas'
 lib_inc_dir = prefix / get_option('includedir') / lib_inc_subdir

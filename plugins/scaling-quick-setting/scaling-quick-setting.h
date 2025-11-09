@@ -6,16 +6,14 @@
  * Author: Adam Honse <calcprogrammer1@gmail.com>
  */
 
-
-#include <gtk/gtk.h>
+#pragma once
 
 #include "quick-setting.h"
 
-#pragma once
-
 G_BEGIN_DECLS
 
-#define PHOSH_TYPE_SCALING_QUICK_SETTING (phosh_scaling_quick_setting_get_type ())
+#define PHOSH_TYPE_SCALING_QUICK_SETTING phosh_scaling_quick_setting_get_type ()
+
 G_DECLARE_FINAL_TYPE (PhoshScalingQuickSetting, phosh_scaling_quick_setting, PHOSH,
                       SCALING_QUICK_SETTING, PhoshQuickSetting)
 

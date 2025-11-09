@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+export WLR_BACKENDS=headless
+export TOPSRCDIR=@ABS_SRCDIR@
+export TOPBUILDDIR=@ABS_BUILDDIR@
+
+pytest $@

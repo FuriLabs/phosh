@@ -5,7 +5,7 @@
  *
  * Author: Guido Günther <agx@sigxcpu.org>
  */
-#define G_LOG_DOMAIN "phosh-wifimanager"
+#define G_LOG_DOMAIN "phosh-wifi-manager"
 
 #include "phosh-config.h"
 

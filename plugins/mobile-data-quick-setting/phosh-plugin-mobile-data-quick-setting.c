@@ -9,10 +9,9 @@
 #include "mobile-data-quick-setting.h"
 #include "phosh-plugin.h"
 
-#include <gio/gio.h>
-#include <gtk/gtk.h>
 
 char **g_io_phosh_plugin_mobile_data_quick_setting_query (void);
+
 
 void
 g_io_module_load (GIOModule *module)
@@ -29,6 +28,7 @@ void
 g_io_module_unload (GIOModule *module)
 {
 }
+
 
 char **
 g_io_phosh_plugin_mobile_data_quick_setting_query (void)

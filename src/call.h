@@ -15,6 +15,6 @@ G_BEGIN_DECLS
 
 G_DECLARE_FINAL_TYPE (PhoshCall, phosh_call, PHOSH, CALL, GObject)
 
-PhoshCall * phosh_call_new                (PhoshCallsDBusCallsCall *proxy);
+PhoshCall * phosh_call_new                (PhoshDBusCallsCall *proxy);
 
 G_END_DECLS

@@ -1,7 +1,9 @@
 /*
- * Copyright © 2022 Guido Günther <agx@sigxcpu.org>
+ * Copyright (C) 2022 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Author: Guido Günther <agx@sigxcpu.org>
  *
  * BUILDDIR $ ./tools/run_tool ./tools/plugin-prefs-standalone
  *

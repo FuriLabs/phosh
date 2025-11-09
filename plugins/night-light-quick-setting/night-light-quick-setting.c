@@ -6,11 +6,8 @@
  * Author: Guido Günther <agx@sigxcpu.org>
  */
 
-#include "monitor-manager.h"
 #include "night-light-quick-setting.h"
 #include "plugin-shell.h"
-#include "quick-setting.h"
-#include "status-icon.h"
 
 #include <glib/gi18n.h>
 
@@ -19,6 +16,7 @@
  *
  * Enable and disable nightlight.
  */
+
 struct _PhoshNightLightQuickSetting {
   PhoshQuickSetting        parent;
 

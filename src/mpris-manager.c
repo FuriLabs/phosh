@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Phosh Developers
+ * Copyright (C) 2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -36,26 +36,26 @@ enum {
 static GParamSpec *props[PROP_LAST_PROP];
 
 struct _PhoshMprisManager {
-  GObject                           parent;
+  GObject                      parent;
 
-  GCancellable                     *cancel;
+  GCancellable                *cancel;
   /* Base interface to raise player */
-  PhoshMprisDBusMediaPlayer2       *mpris;
+  PhoshDBusMediaPlayer2       *mpris;
   /* Actual player controls */
-  PhoshMprisDBusMediaPlayer2Player *player;
-  GDBusConnection                  *session_bus;
+  PhoshDBusMediaPlayer2Player *player;
+  GDBusConnection             *session_bus;
 
-  guint                             dbus_id;
+  guint                        dbus_id;
 
-  gboolean                          can_raise;
+  gboolean                     can_raise;
 
-  GListStore                       *known_players;
+  GListStore                  *known_players;
 };
 G_DEFINE_TYPE (PhoshMprisManager, phosh_mpris_manager, G_TYPE_OBJECT)
 
 
 static void
-phosh_mpris_manager_set_player (PhoshMprisManager *self, PhoshMprisDBusMediaPlayer2Player *player)
+phosh_mpris_manager_set_player (PhoshMprisManager *self, PhoshDBusMediaPlayer2Player *player)
 {
   if (self->player == player)
     return;
@@ -134,7 +134,7 @@ phosh_mpris_manager_class_init (PhoshMprisManagerClass *klass)
    */
   props[PROP_PLAYER] =
     g_param_spec_object ("player", "", "",
-                         PHOSH_MPRIS_DBUS_TYPE_MEDIA_PLAYER2_PLAYER_PROXY,
+                         PHOSH_DBUS_TYPE_MEDIA_PLAYER2_PLAYER_PROXY,
                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
@@ -156,13 +156,14 @@ cmp_by_name (gconstpointer a, gconstpointer b)
 
 
 static void
-add_to_known_players (PhoshMprisManager *self, PhoshMprisDBusMediaPlayer2Player *player)
+add_to_known_players (PhoshMprisManager *self, PhoshDBusMediaPlayer2Player *player)
 {
   if (g_list_store_find_with_equal_func (self->known_players,
-                                          player,
-                                          cmp_by_name,
-                                          NULL))
+                                         player,
+                                         cmp_by_name,
+                                         NULL)) {
     return;
+  }
 
   g_debug ("Player %s not yet known, adding to known players",
            g_dbus_proxy_get_name (G_DBUS_PROXY (player)));
@@ -191,10 +192,10 @@ static void
 on_attach_player_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
   PhoshMprisManager *self = PHOSH_MPRIS_MANAGER (user_data);
-  g_autoptr (PhoshMprisDBusMediaPlayer2Player) player = NULL;
+  g_autoptr (PhoshDBusMediaPlayer2Player) player = NULL;
   g_autoptr (GError) err = NULL;
 
-  player = phosh_mpris_dbus_media_player2_player_proxy_new_for_bus_finish (res, &err);
+  player = phosh_dbus_media_player2_player_proxy_new_for_bus_finish (res, &err);
   if (player == NULL) {
     if (g_error_matches (err, G_IO_ERROR, G_IO_ERROR_CANCELLED))
       return;
@@ -215,11 +216,11 @@ static void
 on_attach_mpris_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
   PhoshMprisManager *self = PHOSH_MPRIS_MANAGER (user_data);
-  PhoshMprisDBusMediaPlayer2 *mpris;
+  PhoshDBusMediaPlayer2 *mpris;
   g_autoptr (GError) err = NULL;
   gboolean can_raise;
 
-  mpris = phosh_mpris_dbus_media_player2_proxy_new_for_bus_finish (res, &err);
+  mpris = phosh_dbus_media_player2_proxy_new_for_bus_finish (res, &err);
   /* Missing mpris interface is not fatal */
   if (mpris == NULL) {
     phosh_async_error_warn (err, "Failed to get player");
@@ -229,7 +230,7 @@ on_attach_mpris_ready (GObject *source_object, GAsyncResult *res, gpointer user_
   g_return_if_fail (PHOSH_IS_MPRIS_MANAGER (self));
   self->mpris = g_steal_pointer (&mpris);
 
-  can_raise = phosh_mpris_dbus_media_player2_get_can_raise (self->mpris);
+  can_raise = phosh_dbus_media_player2_get_can_raise (self->mpris);
   if (self->can_raise == can_raise)
     return;
 
@@ -247,22 +248,22 @@ attach_player (PhoshMprisManager *self, const char *name)
   g_debug ("Trying to attach player for %s", name);
 
   /* The player interface with the controls */
-  phosh_mpris_dbus_media_player2_player_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-                                                           name,
-                                                           MPRIS_OBJECT_PATH,
-                                                           self->cancel,
-                                                           on_attach_player_ready,
-                                                           self);
+  phosh_dbus_media_player2_player_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                                                     G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+                                                     name,
+                                                     MPRIS_OBJECT_PATH,
+                                                     self->cancel,
+                                                     on_attach_player_ready,
+                                                     self);
 
   /* The player base interface to e.g. raise the player */
-  phosh_mpris_dbus_media_player2_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                                    G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-                                                    name,
-                                                    MPRIS_OBJECT_PATH,
-                                                    self->cancel,
-                                                    on_attach_mpris_ready,
-                                                    self);
+  phosh_dbus_media_player2_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                                              G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+                                              name,
+                                              MPRIS_OBJECT_PATH,
+                                              self->cancel,
+                                              on_attach_mpris_ready,
+                                              self);
 }
 
 
@@ -280,8 +281,9 @@ is_valid_player (const char *bus_name)
 
 
 static void
-find_player_done (GObject *source_object, GAsyncResult *res, PhoshMprisManager *self)
+find_player_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshMprisManager *self = PHOSH_MPRIS_MANAGER (user_data);
   g_autoptr (GVariant) result = NULL;
   g_autoptr (GVariant) names = NULL;
   g_autoptr (GError) err = NULL;
@@ -337,7 +339,7 @@ find_player (PhoshMprisManager *self)
                           G_DBUS_CALL_FLAGS_NO_AUTO_START,
                           1000,
                           self->cancel,
-                          (GAsyncReadyCallback)find_player_done,
+                          find_player_done,
                           self);
 }
 
@@ -376,8 +378,9 @@ on_dbus_name_owner_changed (GDBusConnection *connection,
 
 
 static void
-on_bus_get_finished (GObject *source_object, GAsyncResult *res, PhoshMprisManager *self)
+on_bus_get_finished (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshMprisManager *self = PHOSH_MPRIS_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
   GDBusConnection *session_bus;
 
@@ -410,11 +413,11 @@ static void
 phosh_mpris_manager_init (PhoshMprisManager *self)
 {
   self->cancel = g_cancellable_new ();
-  self->known_players = g_list_store_new (PHOSH_MPRIS_DBUS_TYPE_MEDIA_PLAYER2_PLAYER);
+  self->known_players = g_list_store_new (PHOSH_DBUS_TYPE_MEDIA_PLAYER2_PLAYER);
 
   g_bus_get (G_BUS_TYPE_SESSION,
              self->cancel,
-             (GAsyncReadyCallback)on_bus_get_finished,
+             on_bus_get_finished,
              self);
 }
 
@@ -426,7 +429,7 @@ phosh_mpris_manager_new (void)
 }
 
 
-PhoshMprisDBusMediaPlayer2Player *
+PhoshDBusMediaPlayer2Player *
 phosh_mpris_manager_get_player (PhoshMprisManager *self)
 {
   g_return_val_if_fail (PHOSH_IS_MPRIS_MANAGER (self), NULL);
@@ -461,10 +464,10 @@ static void
 on_raise_done (GObject *object, GAsyncResult *res, gpointer user_data)
 {
   g_autoptr (GTask) task = G_TASK (user_data);
-  PhoshMprisDBusMediaPlayer2 *mpris = PHOSH_MPRIS_DBUS_MEDIA_PLAYER2 (object);
+  PhoshDBusMediaPlayer2 *mpris = PHOSH_DBUS_MEDIA_PLAYER2 (object);
   GError *err = NULL;
 
-  if (!phosh_mpris_dbus_media_player2_call_raise_finish (mpris, res, &err)) {
+  if (!phosh_dbus_media_player2_call_raise_finish (mpris, res, &err)) {
     g_task_return_error (task, err);
     return;
   }
@@ -487,10 +490,10 @@ phosh_mpris_manager_raise_async (PhoshMprisManager  *self,
   task = g_task_new (self, cancel, callback, user_data);
   g_task_set_source_tag (task, phosh_mpris_manager_raise_async);
 
-  phosh_mpris_dbus_media_player2_call_raise (self->mpris,
-                                             self->cancel,
-                                             on_raise_done,
-                                             g_steal_pointer (&task));
+  phosh_dbus_media_player2_call_raise (self->mpris,
+                                       self->cancel,
+                                       on_raise_done,
+                                       g_steal_pointer (&task));
 }
 
 

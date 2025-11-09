@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Guido Günther
+ * Copyright (C) 2024 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *

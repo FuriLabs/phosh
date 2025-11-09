@@ -1,22 +1,42 @@
-phosh 0.50.1
-------------
-Released October 2025
-* Fix upcoming-event's plugin empty state
-* Fix "Open settings" button position on devices with rounded corners
+phosh 0.51~rc1
+--------------
+Released November 2025
+* Add location quick setting
+* caffine: Allow to select duration
+* brightness/auto-brightness improvements:
+  * Handle auto-brightness via a bucket based algorithm
+  * Let brightness slider be an offset around the auto-brightness value
+  * Icon next to brightness slider indicates autobrighness on/off
+  * Gradually transition to new auto-brightness value
+  * Auto-brightness can be enabled/disabled via a status page
+* Fix upcoming-event’s plugin empty state
+* Fix “Open settings” button position on devices with rounded corners
+* Lots of internal cleanups and fixes
 * Issues fixed:
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1255
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1276
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1274
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1272
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/783
 * Contributors:
+    * Arun Mani J
+    * Gotam Gorabh
     * Guido Günther
     * Rudra Pratap Singh
 * UI translations:
+    * Anders Jonsson (sv)
     * Antonio Marin (ro)
     * Artur S0 (ru)
     * Danial Behzadi (fa)
     * Daniel Rusek (cs)
+    * Efstathios Iosifidis (el)
     * Ekaterine Papava (ka)
+    * Emin Tufan Çetin (tr)
     * Juliano de Souza Camargo (pt_BR)
     * Martin (sl)
     * Nathan Follens (nl)
+    * Sabri Ünal (tr)
+    * Yaron Shahrabani (he)
     * Yuri Chornoivan (uk)
 
 phosh 0.50.0

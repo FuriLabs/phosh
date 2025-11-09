@@ -7,20 +7,16 @@
  */
 
 #include "wifi-hotspot-quick-setting.h"
-
 #include "plugin-shell.h"
-#include "quick-setting.h"
-#include "status-icon.h"
 
 #include <glib/gi18n.h>
-
-#include "phosh-settings-enums.h"
 
 /**
  * PhoshWifiHotspotQuickSetting:
  *
  * Toggle Wi-Fi hotspot.
  */
+
 struct _PhoshWifiHotspotQuickSetting {
   PhoshQuickSetting  parent;
 

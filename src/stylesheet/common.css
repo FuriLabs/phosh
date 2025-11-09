@@ -156,6 +156,10 @@ phosh-quick-setting button {
   padding: 8px 12px;
 }
 
+phosh-brightness-settings scale {
+  padding-right: 4px;
+}
+
 /*
  * Volume slider in settings
  */

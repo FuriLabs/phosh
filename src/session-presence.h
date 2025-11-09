@@ -27,7 +27,8 @@ typedef enum {
 
 #define PHOSH_TYPE_SESSION_PRESENCE                 (phosh_session_presence_get_type ())
 
-G_DECLARE_FINAL_TYPE (PhoshSessionPresence, phosh_session_presence, PHOSH, SESSION_PRESENCE, PhoshSessionPresenceDBusPresenceProxy)
+G_DECLARE_FINAL_TYPE (PhoshSessionPresence, phosh_session_presence, PHOSH, SESSION_PRESENCE,
+                      PhoshDBusSessionManagerPresenceProxy)
 
 PhoshSessionPresence *phosh_session_presence_get_default_failable (void);
 

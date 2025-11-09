@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2020 Purism SPC
+ *               2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  * Author: Guido Günther <agx@sigxcpu.org>
@@ -63,32 +64,30 @@ enum {
 static GParamSpec *props[PROP_LAST_PROP];
 
 typedef struct _PhoshLocationManager {
-  PhoshGeoClueDBusOrgFreedesktopGeoClue2AgentSkeleton parent;
+  PhoshDBusGeoClue2AgentSkeleton parent;
 
-  PhoshGeoClueDBusManager                            *manager_proxy;
-  guint                                               dbus_name_id;
-  GSettings                                          *location_settings;
-  gboolean                                            enabled;
-  gboolean                                            active;
-  GDBusConnection                                    *connection;
+  PhoshDBusGeoClue2Manager      *manager_proxy;
+  guint                          dbus_name_id;
+  GSettings                     *location_settings;
+  gboolean                       enabled;
+  gboolean                       active;
+  GDBusConnection               *connection;
 
   /* Current Request */
-  GtkWidget                                          *prompt;
-  GDBusMethodInvocation                              *invocation;
-  AccuracyLevel                                       req_level;
+  GtkWidget                     *prompt;
+  GDBusMethodInvocation         *invocation;
+  AccuracyLevel                  req_level;
 
-  GCancellable                                       *cancel;
+  GCancellable                  *cancel;
 } PhoshLocationManager;
 
-static void phosh_location_manager_geoclue2_agent_iface_init (
-  PhoshGeoClueDBusOrgFreedesktopGeoClue2AgentIface *iface);
+static void phosh_location_manager_geoclue2_agent_iface_init (PhoshDBusGeoClue2AgentIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (PhoshLocationManager,
                          phosh_location_manager,
-                         PHOSH_GEO_CLUE_DBUS_TYPE_ORG_FREEDESKTOP_GEO_CLUE2_AGENT_SKELETON,
-                         G_IMPLEMENT_INTERFACE (
-                           PHOSH_GEO_CLUE_DBUS_TYPE_ORG_FREEDESKTOP_GEO_CLUE2_AGENT,
-                           phosh_location_manager_geoclue2_agent_iface_init));
+                         PHOSH_DBUS_TYPE_GEO_CLUE2_AGENT_SKELETON,
+                         G_IMPLEMENT_INTERFACE (PHOSH_DBUS_TYPE_GEO_CLUE2_AGENT,
+                                                phosh_location_manager_geoclue2_agent_iface_init));
 
 
 static guint
@@ -97,8 +96,9 @@ get_max_level (PhoshLocationManager *self)
   gint level = LEVEL_NONE;
 
   if (self->enabled) {
-    GDesktopLocationAccuracyLevel val = g_settings_get_enum (self->location_settings, "max-accuracy-level");
+    GDesktopLocationAccuracyLevel val;
 
+    val = g_settings_get_enum (self->location_settings, "max-accuracy-level");
     switch (val) {
     case G_DESKTOP_LOCATION_ACCURACY_LEVEL_COUNTRY:
       level = LEVEL_COUNTRY;
@@ -133,8 +133,8 @@ update_accuracy_level (PhoshLocationManager *self, gboolean enabled)
   level = get_max_level (self);
 
   g_debug ("Setting accuracy level to %d", level);
-  phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_set_max_accuracy_level (
-    PHOSH_GEO_CLUE_DBUS_ORG_FREEDESKTOP_GEO_CLUE2_AGENT (self), level);
+  phosh_dbus_geo_clue2_agent_set_max_accuracy_level (
+    PHOSH_DBUS_GEO_CLUE2_AGENT (self), level);
 }
 
 
@@ -194,11 +194,10 @@ on_app_auth_prompt_closed (PhoshLocationManager *self, PhoshAppAuthPrompt *promp
            self->req_level,
            grant_access ? "yes" : "no");
 
-  phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_complete_authorize_app (
-    PHOSH_GEO_CLUE_DBUS_ORG_FREEDESKTOP_GEO_CLUE2_AGENT (self),
-    self->invocation,
-    grant_access,
-    self->req_level);
+  phosh_dbus_geo_clue2_agent_complete_authorize_app (PHOSH_DBUS_GEO_CLUE2_AGENT (self),
+                                                     self->invocation,
+                                                     grant_access,
+                                                     self->req_level);
 
   /* TODO: save in permission store */
 
@@ -211,10 +210,10 @@ on_app_auth_prompt_closed (PhoshLocationManager *self, PhoshAppAuthPrompt *promp
 
 
 static gboolean
-handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
-                      GDBusMethodInvocation                       *invocation,
-                      const char                                  *arg_desktop_id,
-                      guint                                        arg_req_accuracy_level)
+handle_authorize_app (PhoshDBusGeoClue2Agent *object,
+                      GDBusMethodInvocation  *invocation,
+                      const char             *arg_desktop_id,
+                      guint                   arg_req_accuracy_level)
 {
   PhoshLocationManager *self = PHOSH_LOCATION_MANAGER (object);
   g_autofree char *desktop_file = NULL;
@@ -229,11 +228,10 @@ handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
   level = get_max_level (self);
   if (arg_req_accuracy_level > level) {
     g_debug ("Req accuracy level %d > max allowed %d", arg_req_accuracy_level, level);
-    phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_complete_authorize_app (
-      object,
-      invocation,
-      FALSE,
-      arg_req_accuracy_level);
+    phosh_dbus_geo_clue2_agent_complete_authorize_app (object,
+                                                       invocation,
+                                                       FALSE,
+                                                       arg_req_accuracy_level);
     return TRUE;
   }
 
@@ -241,11 +239,10 @@ handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
   app_info = g_desktop_app_info_new (desktop_file);
   if (app_info == NULL) {
     g_debug ("Failed to find %s", desktop_file);
-    phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_complete_authorize_app (
-      object,
-      invocation,
-      FALSE,
-      arg_req_accuracy_level);
+    phosh_dbus_geo_clue2_agent_complete_authorize_app (object,
+                                                       invocation,
+                                                       FALSE,
+                                                       arg_req_accuracy_level);
 
     return TRUE;
   }
@@ -257,7 +254,7 @@ handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
     gtk_widget_destroy (GTK_WIDGET (self->prompt));
 
   if (self->invocation) {
-    phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_complete_authorize_app (
+    phosh_dbus_geo_clue2_agent_complete_authorize_app (
       object,
       self->invocation,
       FALSE,
@@ -290,7 +287,7 @@ handle_authorize_app (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object,
 
 
 static guint
-handle_get_max_accuracy_level (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *object)
+handle_get_max_accuracy_level (PhoshDBusGeoClue2Agent *object)
 {
   PhoshLocationManager *self = PHOSH_LOCATION_MANAGER (object);
   gint level = get_max_level (self);
@@ -301,7 +298,7 @@ handle_get_max_accuracy_level (PhoshGeoClueDBusOrgFreedesktopGeoClue2Agent *obje
 
 
 static void
-phosh_location_manager_geoclue2_agent_iface_init (PhoshGeoClueDBusOrgFreedesktopGeoClue2AgentIface *iface)
+phosh_location_manager_geoclue2_agent_iface_init (PhoshDBusGeoClue2AgentIface *iface)
 {
   iface->handle_authorize_app = handle_authorize_app;
   iface->get_max_accuracy_level = handle_get_max_accuracy_level;
@@ -336,10 +333,10 @@ on_add_agent_ready (GObject      *source_object,
                     GAsyncResult *res,
                     gpointer      user_data)
 {
-  PhoshGeoClueDBusManager *manager = PHOSH_GEO_CLUE_DBUS_MANAGER (source_object);
+  PhoshDBusGeoClue2Manager *manager = PHOSH_DBUS_GEO_CLUE2_MANAGER (source_object);
   g_autoptr (GError) err = NULL;
 
-  if (phosh_geo_clue_dbus_manager_call_add_agent_finish (manager, res, &err))
+  if (phosh_dbus_geo_clue2_manager_call_add_agent_finish (manager, res, &err))
     g_debug ("Added ourself as geoclue agent");
   else
     g_warning ("Failed to add agent: %s", err->message);
@@ -352,9 +349,9 @@ on_agent_in_use_changed (PhoshLocationManager *self)
   gboolean in_use;
 
   g_return_if_fail (PHOSH_IS_LOCATION_MANAGER (self));
-  g_return_if_fail (PHOSH_GEO_CLUE_DBUS_IS_MANAGER (self->manager_proxy));
+  g_return_if_fail (PHOSH_DBUS_IS_GEO_CLUE2_MANAGER (self->manager_proxy));
 
-  in_use = phosh_geo_clue_dbus_manager_get_in_use (self->manager_proxy);
+  in_use = phosh_dbus_geo_clue2_manager_get_in_use (self->manager_proxy);
   g_debug ("In use: %d", in_use);
 
   if (in_use == self->active)
@@ -366,28 +363,25 @@ on_agent_in_use_changed (PhoshLocationManager *self)
 
 
 static void
-on_manager_proxy_ready (GObject              *source_object,
-                        GAsyncResult         *res,
-                        PhoshLocationManager *self)
+on_manager_proxy_ready (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshLocationManager *self = PHOSH_LOCATION_MANAGER (user_data);
   g_autoptr (GError) err = NULL;
 
   g_return_if_fail (PHOSH_IS_LOCATION_MANAGER (self));
 
-  self->manager_proxy = phosh_geo_clue_dbus_manager_proxy_new_for_bus_finish (res, &err);
+  self->manager_proxy = phosh_dbus_geo_clue2_manager_proxy_new_for_bus_finish (res, &err);
   if (self->manager_proxy == NULL) {
-    g_warning ("Failed to create proxy to %s: %s",
-               GEOCLUE_MANAGER_PATH,
-               err->message);
+    g_warning ("Failed to create proxy to %s: %s", GEOCLUE_MANAGER_PATH, err->message);
     return;
   }
 
-  phosh_geo_clue_dbus_manager_call_add_agent (self->manager_proxy,
-                                              /* Agent whitelisted in geoclue conf */
-                                              "sm.puri.Phosh",
-                                              self->cancel,
-                                              on_add_agent_ready,
-                                              NULL);
+  phosh_dbus_geo_clue2_manager_call_add_agent (self->manager_proxy,
+                                               /* Agent whitelisted in geoclue conf */
+                                               "sm.puri.Phosh",
+                                               self->cancel,
+                                               on_add_agent_ready,
+                                               NULL);
   g_signal_connect_swapped (self->manager_proxy,
                             "notify::in-use",
                             G_CALLBACK (on_agent_in_use_changed),
@@ -405,14 +399,13 @@ on_manager_name_appeared (GDBusConnection      *connection,
   g_return_if_fail (PHOSH_IS_LOCATION_MANAGER (self));
   g_debug ("%s appeared", name);
 
-  phosh_geo_clue_dbus_manager_proxy_new_for_bus (
-    G_BUS_TYPE_SYSTEM,
-    G_DBUS_PROXY_FLAGS_NONE,
-    GEOCLUE_SERVICE,
-    GEOCLUE_MANAGER_PATH,
-    self->cancel,
-    (GAsyncReadyCallback)on_manager_proxy_ready,
-    self);
+  phosh_dbus_geo_clue2_manager_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+                                                  G_DBUS_PROXY_FLAGS_NONE,
+                                                  GEOCLUE_SERVICE,
+                                                  GEOCLUE_MANAGER_PATH,
+                                                  self->cancel,
+                                                  on_manager_proxy_ready,
+                                                  self);
 }
 
 static void
@@ -439,11 +432,10 @@ phosh_location_manager_dispose (GObject *object)
   g_clear_pointer (&self->prompt, phosh_cp_widget_destroy);
 
   if (self->invocation) {
-    phosh_geo_clue_dbus_org_freedesktop_geo_clue2_agent_complete_authorize_app (
-      PHOSH_GEO_CLUE_DBUS_ORG_FREEDESKTOP_GEO_CLUE2_AGENT (self),
-      self->invocation,
-      FALSE,
-      LEVEL_NONE);
+    phosh_dbus_geo_clue2_agent_complete_authorize_app (PHOSH_DBUS_GEO_CLUE2_AGENT (self),
+                                                       self->invocation,
+                                                       FALSE,
+                                                       LEVEL_NONE);
     self->invocation = NULL;
   }
 
@@ -474,10 +466,7 @@ phosh_location_manager_constructed (GObject *object)
                    "enabled",
                    G_SETTINGS_BIND_DEFAULT);
 
-  g_bus_get (G_BUS_TYPE_SYSTEM,
-             self->cancel,
-             on_bus_acquired,
-             self);
+  g_bus_get (G_BUS_TYPE_SYSTEM, self->cancel, on_bus_acquired, self);
 
   self->dbus_name_id = g_bus_watch_name (G_BUS_TYPE_SYSTEM,
                                          GEOCLUE_SERVICE,
@@ -500,21 +489,24 @@ phosh_location_manager_class_init (PhoshLocationManagerClass *klass)
   object_class->set_property = phosh_location_manager_set_property;
   object_class->get_property = phosh_location_manager_get_property;
 
+  /**
+   * LocationManager:enabled:
+   *
+   * Whether location services are enabled
+   */
   props[PROP_ENABLED] =
-    g_param_spec_boolean ("enabled",
-                          "enabled",
-                          "Whether location services are enabled",
+    g_param_spec_boolean ("enabled", "", "",
                           FALSE,
-                          G_PARAM_READWRITE |
-                          G_PARAM_STATIC_STRINGS);
-
+                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  /**
+   * LocationManager:active:
+   *
+   * Whether location services are currently active
+   */
   props[PROP_ACTIVE] =
-    g_param_spec_boolean ("active",
-                          "Active",
-                          "Whether location services are currently active",
+    g_param_spec_boolean ("active", "", "",
                           FALSE,
-                          G_PARAM_READABLE |
-                          G_PARAM_STATIC_STRINGS);
+                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 }

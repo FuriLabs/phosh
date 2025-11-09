@@ -61,6 +61,7 @@ lockscreen_plugins = [
 quick_setting_plugins = [
   'caffeine-quick-setting',
   'dark-mode-quick-setting',
+  'location-quick-setting',
   'mobile-data-quick-setting',
   'night-light-quick-setting',
   'pomodoro-quick-setting',

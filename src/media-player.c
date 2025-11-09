@@ -69,32 +69,33 @@ enum {
 static guint signals[N_SIGNALS];
 
 typedef struct _PhoshMediaPlayerPrivate {
-  GtkWidget                        *btn_play;
-  GtkWidget                        *btn_next;
-  GtkWidget                        *btn_prev;
-  GtkWidget                        *btn_details;
-  GtkWidget                        *btn_seek_backward;
-  GtkWidget                        *btn_seek_forward;
-  GtkWidget                        *img_art;
-  GtkWidget                        *img_play;
-  GtkWidget                        *lbl_title;
-  GtkWidget                        *lbl_artist;
-  GtkWidget                        *box_pos_len;
-  GtkWidget                        *prb_position;
-  GtkWidget                        *lbl_position;
-  GtkWidget                        *lbl_length;
+  GtkWidget                   *btn_play;
+  GtkWidget                   *btn_next;
+  GtkWidget                   *btn_prev;
+  GtkWidget                   *btn_details;
+  GtkWidget                   *btn_seek_backward;
+  GtkWidget                   *btn_seek_forward;
+  GtkWidget                   *img_art;
+  GtkWidget                   *img_play;
+  GtkWidget                   *lbl_title;
+  GtkWidget                   *lbl_artist;
+  GtkWidget                   *box_pos_len;
+  GtkWidget                   *prb_position;
+  GtkWidget                   *lbl_position;
+  GtkWidget                   *lbl_length;
 
-  GCancellable                     *cancel;
-  GCancellable                     *fetch_icon_cancel;
-  PhoshMprisManager                *manager;
+  char                        *url;
+  GCancellable                *cancel;
+  GCancellable                *fetch_icon_cancel;
+  PhoshMprisManager           *manager;
   /* Actual player controls */
-  PhoshMprisDBusMediaPlayer2Player *player;
-  PhoshMediaPlayerStatus            status;
-  gboolean                          attached;
-  gboolean                          playable;
-  gint64                            track_length;
-  gint64                            track_position;
-  guint                             pos_poller_id;
+  PhoshDBusMediaPlayer2Player *player;
+  PhoshMediaPlayerStatus       status;
+  gboolean                     attached;
+  gboolean                     playable;
+  gint64                       track_length;
+  gint64                       track_position;
+  guint                        pos_poller_id;
 } PhoshMediaPlayerPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (PhoshMediaPlayer, phosh_media_player, GTK_TYPE_GRID);
@@ -186,8 +187,9 @@ stop_pos_poller (PhoshMediaPlayer *self)
 
 
 static void
-on_poll_position_done (GDBusProxy *proxy, GAsyncResult *res, gpointer user_data)
+on_poll_position_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  GDBusProxy *proxy = G_DBUS_PROXY (source_object);
   PhoshMediaPlayer *self;
   PhoshMediaPlayerPrivate *priv;
   g_autoptr (GError) err = NULL;
@@ -241,7 +243,7 @@ poll_position (PhoshMediaPlayer *self)
                      "org.freedesktop.DBus.Properties.Get",
                      g_variant_new ("(ss)", "org.mpris.MediaPlayer2.Player", "Position"),
                      G_DBUS_CALL_FLAGS_NONE, -1, priv->cancel,
-                     (GAsyncReadyCallback) on_poll_position_done, self);
+                     on_poll_position_done, self);
 
   return G_SOURCE_CONTINUE;
 }
@@ -271,15 +273,14 @@ start_pos_poller (PhoshMediaPlayer *self)
 
 
 static void
-on_play_pause_done (PhoshMprisDBusMediaPlayer2Player *player,
-                    GAsyncResult                     *res,
-                    PhoshMediaPlayer                 *self)
+on_play_pause_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshDBusMediaPlayer2Player *player = PHOSH_DBUS_MEDIA_PLAYER2_PLAYER (source_object);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
 
-  if (!phosh_mpris_dbus_media_player2_player_call_play_pause_finish (player, res, &err))
+  if (!phosh_dbus_media_player2_player_call_play_pause_finish (player, res, &err))
     phosh_async_error_warn (err, "Failed to trigger play/pause");
 }
 
@@ -290,7 +291,7 @@ btn_play_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
 
   g_debug ("Play/pause");
   phosh_media_player_toggle_play_pause (self);
@@ -298,14 +299,16 @@ btn_play_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
 
 
 static void
-on_next_done (PhoshMprisDBusMediaPlayer2Player *player, GAsyncResult *res, PhoshMediaPlayer *self)
+on_next_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshDBusMediaPlayer2Player *player = PHOSH_DBUS_MEDIA_PLAYER2_PLAYER (source_object);
+  PhoshMediaPlayer *self = PHOSH_MEDIA_PLAYER (user_data);
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
 
-  if (!phosh_mpris_dbus_media_player2_player_call_next_finish (player, res, &err)) {
+  if (!phosh_dbus_media_player2_player_call_next_finish (player, res, &err)) {
     phosh_async_error_warn (err, "Failed to trigger next");
     return;
   }
@@ -319,25 +322,24 @@ btn_next_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
 
   g_debug ("next");
-  phosh_mpris_dbus_media_player2_player_call_next (priv->player,
-                                                   priv->cancel,
-                                                   (GAsyncReadyCallback)on_next_done,
-                                                   self);
+  phosh_dbus_media_player2_player_call_next (priv->player, priv->cancel, on_next_done, self);
 }
 
 
 static void
-on_previous_done (PhoshMprisDBusMediaPlayer2Player *player, GAsyncResult *res, PhoshMediaPlayer *self)
+on_previous_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshDBusMediaPlayer2Player *player = PHOSH_DBUS_MEDIA_PLAYER2_PLAYER (source_object);
+  PhoshMediaPlayer *self = PHOSH_MEDIA_PLAYER (user_data);
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
 
-  if (!phosh_mpris_dbus_media_player2_player_call_previous_finish (player, res, &err)) {
+  if (!phosh_dbus_media_player2_player_call_previous_finish (player, res, &err)) {
     phosh_async_error_warn (err, "Failed to trigger prev");
     return;
   }
@@ -351,24 +353,26 @@ btn_prev_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
 
   g_debug ("prev");
-  phosh_mpris_dbus_media_player2_player_call_previous (priv->player,
-                                                       priv->cancel,
-                                                       (GAsyncReadyCallback)on_previous_done,
-                                                       self);
+  phosh_dbus_media_player2_player_call_previous (priv->player,
+                                                 priv->cancel,
+                                                 on_previous_done,
+                                                 self);
 }
 
 
 static void
-on_seek_done (PhoshMprisDBusMediaPlayer2Player *player, GAsyncResult *res, PhoshMediaPlayer *self)
+on_seek_done (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
+  PhoshDBusMediaPlayer2Player *player = PHOSH_DBUS_MEDIA_PLAYER2_PLAYER (source_object);
+  PhoshMediaPlayer *self = PHOSH_MEDIA_PLAYER (user_data);
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (player));
 
-  if (!phosh_mpris_dbus_media_player2_player_call_seek_finish (player, res, &err)) {
+  if (!phosh_dbus_media_player2_player_call_seek_finish (player, res, &err)) {
     g_warning ("Failed to trigger seek: %s", err->message);
     return;
   }
@@ -382,14 +386,14 @@ btn_seek_backward_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
 
-  g_debug ("seek backward for %ds", SEEK_BACK/SEEK_SECOND);
-  phosh_mpris_dbus_media_player2_player_call_seek (priv->player,
-                                                   SEEK_BACK,
-                                                   priv->cancel,
-                                                   (GAsyncReadyCallback)on_seek_done,
-                                                   self);
+  g_debug ("seek backward for %ds", SEEK_BACK / SEEK_SECOND);
+  phosh_dbus_media_player2_player_call_seek (priv->player,
+                                             SEEK_BACK,
+                                             priv->cancel,
+                                             on_seek_done,
+                                             self);
 }
 
 
@@ -399,14 +403,14 @@ btn_seek_forward_clicked_cb (PhoshMediaPlayer *self, GtkButton *button)
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  g_return_if_fail (PHOSH_MPRIS_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
+  g_return_if_fail (PHOSH_DBUS_IS_MEDIA_PLAYER2_PLAYER (priv->player));
 
-  g_debug ("seek forward by %ds", SEEK_FORWARD/SEEK_SECOND);
-  phosh_mpris_dbus_media_player2_player_call_seek (priv->player,
-                                                   SEEK_FORWARD,
-                                                   priv->cancel,
-                                                   (GAsyncReadyCallback)on_seek_done,
-                                                   self);
+  g_debug ("seek forward by %ds", SEEK_FORWARD / SEEK_SECOND);
+  phosh_dbus_media_player2_player_call_seek (priv->player,
+                                             SEEK_FORWARD,
+                                             priv->cancel,
+                                             on_seek_done,
+                                             self);
 }
 
 
@@ -614,8 +618,48 @@ phosh_media_player_load_icon_from_file_async (PhoshMediaPlayer *self, GFile *fil
 }
 
 
+static gboolean
+phosh_media_player_load_icon (PhoshMediaPlayer *self, const char *url)
+{
+  PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
+  gboolean has_art = FALSE;
+
+  if (!g_set_str (&priv->url, url)) {
+    g_debug ("Media URL did not change, skippig load");
+    return TRUE;
+  }
+
+  g_debug ("Loading '%s'", url);
+  /* Cancel any pending icon loads */
+  g_cancellable_cancel (priv->fetch_icon_cancel);
+  g_clear_object (&priv->fetch_icon_cancel);
+
+  if (url && g_strcmp0 (g_uri_peek_scheme (url), "file") == 0) {
+    g_autoptr (GFile) file = g_file_new_for_uri (url);
+
+    phosh_media_player_load_icon_from_file_async (self, file);
+  } else if (url && (g_strcmp0 (g_uri_peek_scheme (url), "http") == 0 ||
+                     g_strcmp0 (g_uri_peek_scheme (url), "https") == 0)) {
+    fetch_icon_async (self, url);
+  } else if (url && g_strcmp0 (g_uri_peek_scheme (url), "data") == 0) {
+    g_autoptr (GdkPixbuf) pixbuf = NULL;
+    g_autoptr (GError) error = NULL;
+
+    pixbuf = phosh_util_data_uri_to_pixbuf (url, &error);
+    if (pixbuf) {
+      phosh_media_player_set_image (self, pixbuf);
+      has_art = TRUE;
+    } else {
+      g_warning_once ("Failed to load album art from base64 string: %s", error->message);
+    }
+  }
+
+  return has_art;
+}
+
+
 static void
-on_metadata_changed (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshMprisDBusMediaPlayer2Player *player)
+on_metadata_changed (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   GVariant *metadata;
@@ -629,7 +673,7 @@ on_metadata_changed (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshMprisDBusMe
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
   g_debug ("Updating metadata");
 
-  metadata = phosh_mpris_dbus_media_player2_player_get_metadata (player);
+  metadata = phosh_dbus_media_player2_player_get_metadata (player);
 
   if (metadata) {
     g_variant_dict_init (&dict, metadata);
@@ -667,29 +711,7 @@ on_metadata_changed (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshMprisDBusMe
   priv->track_length = length;
   update_position (self);
 
-  /* Cancel any pending icon loads */
-  g_cancellable_cancel (priv->fetch_icon_cancel);
-  g_clear_object (&priv->fetch_icon_cancel);
-
-  if (url && g_strcmp0 (g_uri_peek_scheme (url), "file") == 0) {
-    g_autoptr (GFile) file = g_file_new_for_uri (url);
-
-    phosh_media_player_load_icon_from_file_async (self, file);
-  } else if (url && (g_strcmp0 (g_uri_peek_scheme (url), "http") == 0 ||
-                     g_strcmp0 (g_uri_peek_scheme (url), "https") == 0)) {
-    fetch_icon_async (self, url);
-  } else if (url && g_strcmp0 (g_uri_peek_scheme (url), "data") == 0) {
-    g_autoptr (GdkPixbuf) pixbuf = NULL;
-    g_autoptr (GError) error = NULL;
-
-    pixbuf = phosh_util_data_uri_to_pixbuf (url, &error);
-    if (pixbuf) {
-      phosh_media_player_set_image (self, pixbuf);
-      has_art = TRUE;
-    } else {
-      g_warning_once ("Failed to load album art from base64 string: %s", error->message);
-    }
-  }
+  has_art = phosh_media_player_load_icon (self, url);
 
   if (!has_art)
     g_object_set (priv->img_art, "icon-name", "audio-x-generic-symbolic", NULL);
@@ -697,9 +719,9 @@ on_metadata_changed (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshMprisDBusMe
 
 
 static void
-on_playback_status_changed (PhoshMediaPlayer                 *self,
-                            GParamSpec                       *psepc,
-                            PhoshMprisDBusMediaPlayer2Player *player)
+on_playback_status_changed (PhoshMediaPlayer            *self,
+                            GParamSpec                  *psepc,
+                            PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   const char *status, *icon = "media-playback-start-symbolic";
@@ -707,7 +729,7 @@ on_playback_status_changed (PhoshMediaPlayer                 *self,
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
 
-  status = phosh_mpris_dbus_media_player2_player_get_playback_status (player);
+  status = phosh_dbus_media_player2_player_get_playback_status (player);
 
   /* No mpris running, widget will not be shown */
   if (status == NULL)
@@ -741,45 +763,43 @@ on_playback_status_changed (PhoshMediaPlayer                 *self,
 
 
 static void
-on_can_go_next_changed (PhoshMediaPlayer                 *self,
-                        GParamSpec                       *psepc,
-                        PhoshMprisDBusMediaPlayer2Player *player)
+on_can_go_next_changed (PhoshMediaPlayer            *self,
+                        GParamSpec                  *psepc,
+                        PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   gboolean sensitive;
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  sensitive = phosh_mpris_dbus_media_player2_player_get_can_go_next (player);
+  sensitive = phosh_dbus_media_player2_player_get_can_go_next (player);
   g_debug ("Can go next: %d", sensitive);
   gtk_widget_set_sensitive (priv->btn_next, sensitive);
 }
 
 
 static void
-on_can_go_previous_changed (PhoshMediaPlayer                 *self,
-                            GParamSpec                       *psepc,
-                            PhoshMprisDBusMediaPlayer2Player *player)
+on_can_go_previous_changed (PhoshMediaPlayer            *self,
+                            GParamSpec                  *psepc,
+                            PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   gboolean sensitive;
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  sensitive = phosh_mpris_dbus_media_player2_player_get_can_go_previous (player);
+  sensitive = phosh_dbus_media_player2_player_get_can_go_previous (player);
   g_debug ("Can go prev: %d", sensitive);
   gtk_widget_set_sensitive (priv->btn_prev, sensitive);
 }
 
 
 static void
-on_can_play (PhoshMediaPlayer                 *self,
-             GParamSpec                       *psepc,
-             PhoshMprisDBusMediaPlayer2Player *player)
+on_can_play (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   gboolean can_play;
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  can_play = phosh_mpris_dbus_media_player2_player_get_can_play (player);
+  can_play = phosh_dbus_media_player2_player_get_can_play (player);
   g_debug ("Can play: %d", can_play);
   gtk_widget_set_sensitive (priv->btn_play, can_play);
   set_playable (self, can_play);
@@ -787,15 +807,13 @@ on_can_play (PhoshMediaPlayer                 *self,
 
 
 static void
-on_can_seek (PhoshMediaPlayer                 *self,
-             GParamSpec                       *psepc,
-             PhoshMprisDBusMediaPlayer2Player *player)
+on_can_seek (PhoshMediaPlayer *self, GParamSpec *psepc, PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
   gboolean sensitive;
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
-  sensitive = phosh_mpris_dbus_media_player2_player_get_can_seek (player);
+  sensitive = phosh_dbus_media_player2_player_get_can_seek (player);
   g_debug ("Can seek: %d", sensitive);
   gtk_widget_set_sensitive (priv->btn_seek_backward, sensitive);
   gtk_widget_set_sensitive (priv->btn_seek_forward, sensitive);
@@ -817,6 +835,8 @@ phosh_media_player_dispose (GObject *object)
 
   g_clear_object (&priv->manager);
   g_clear_object (&priv->player);
+
+  g_clear_pointer (&priv->url, g_free);
 
   G_OBJECT_CLASS (phosh_media_player_parent_class)->dispose (object);
 }
@@ -962,15 +982,15 @@ phosh_media_player_toggle_play_pause (PhoshMediaPlayer *self)
 
   g_return_if_fail (PHOSH_IS_MEDIA_PLAYER (self));
 
-  phosh_mpris_dbus_media_player2_player_call_play_pause (priv->player,
-                                                         priv->cancel,
-                                                         (GAsyncReadyCallback)on_play_pause_done,
-                                                         self);
+  phosh_dbus_media_player2_player_call_play_pause (priv->player,
+                                                   priv->cancel,
+                                                   on_play_pause_done,
+                                                   self);
 }
 
 
 void
-phosh_media_player_set_player (PhoshMediaPlayer *self, PhoshMprisDBusMediaPlayer2Player *player)
+phosh_media_player_set_player (PhoshMediaPlayer *self, PhoshDBusMediaPlayer2Player *player)
 {
   PhoshMediaPlayerPrivate *priv = phosh_media_player_get_instance_private (self);
 

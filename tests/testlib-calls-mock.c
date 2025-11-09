@@ -21,8 +21,8 @@ on_bus_acquired (GDBusConnection *connection,
                  gpointer         user_data)
 {
   PhoshTestCallsMock *mock = user_data;
-  g_autoptr (PhoshCallsDBusObjectSkeleton) object = NULL;
-  g_autoptr (PhoshCallsDBusCallsCall) iface = NULL;
+  g_autoptr (PhoshDBusObjectSkeleton) object = NULL;
+  g_autoptr (PhoshDBusCallsCall) iface = NULL;
 
 
   g_warning ("Owned %s, creating object manager at %s", name, OBJECT_PATH);
@@ -32,13 +32,13 @@ on_bus_acquired (GDBusConnection *connection,
   mock->bus_acquired = TRUE;
 
   /* Add a call object */
-  iface = phosh_calls_dbus_calls_call_skeleton_new ();
-  phosh_calls_dbus_calls_call_set_state (iface, PHOSH_CALL_STATE_ACTIVE);
-  phosh_calls_dbus_calls_call_set_inbound (iface, TRUE);
-  phosh_calls_dbus_calls_call_set_display_name (iface, "John Doe");
-  phosh_calls_dbus_calls_call_set_id (iface, "123456");
-  phosh_calls_dbus_calls_call_set_image_path (iface, TEST_DATA_DIR "/cat.jpg");
-  object = phosh_calls_dbus_object_skeleton_new (OBJECT_PATH "/Call/1");
+  iface = phosh_dbus_calls_call_skeleton_new ();
+  phosh_dbus_calls_call_set_state (iface, PHOSH_CALL_STATE_ACTIVE);
+  phosh_dbus_calls_call_set_inbound (iface, TRUE);
+  phosh_dbus_calls_call_set_display_name (iface, "John Doe");
+  phosh_dbus_calls_call_set_id (iface, "123456");
+  phosh_dbus_calls_call_set_image_path (iface, TEST_DATA_DIR "/cat.jpg");
+  object = phosh_dbus_object_skeleton_new (OBJECT_PATH "/Call/1");
   g_dbus_object_skeleton_add_interface (G_DBUS_OBJECT_SKELETON (object),
                                         G_DBUS_INTERFACE_SKELETON (iface));
   g_dbus_object_manager_server_export (mock->object_manager, G_DBUS_OBJECT_SKELETON (object));

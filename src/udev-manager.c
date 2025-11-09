@@ -12,6 +12,7 @@
 
 #include "dbus/login1-session-dbus.h"
 #include "monitor/monitor.h"
+#include "shell-priv.h"
 #include "udev-manager.h"
 
 #define BUS_NAME "org.freedesktop.login1"
@@ -193,6 +194,9 @@ phosh_udev_manager_find_backlight (PhoshUdevManager *self, const char *connector
 
   connector_type = phosh_monitor_connector_type_from_name (connector_name);
   is_builtin = phosh_monitor_connector_is_builtin (connector_type);
+
+  if (phosh_shell_get_debug_flags () & PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN)
+    is_builtin = TRUE;
 
   devices = g_udev_client_query_by_subsystem (self->udev_client, BACKLIGHT_SUBSYSTEM);
   if (!devices)

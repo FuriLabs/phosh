@@ -5,3 +5,4 @@ Name=Wi-Fi Hotspot Quick Setting
 Types=quick-setting;
 Comment=Toggle Wi-Fi hotspot on/off
 Plugin=@plugins_dir@/libphosh-plugin-@name@.so
+Icon=wifi-hotspot-quick-setting

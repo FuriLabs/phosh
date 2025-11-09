@@ -37,22 +37,19 @@ on_bus_acquired (GDBusConnection *connection,
   g_autoptr (GError) err = NULL;
   GVariant *metadata;
   GVariantBuilder builder;
-  //const char *const artists[] = {"1, 2, 3, 4", NULL};
   g_autofree char *uri = load_icon ();
 
   g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
   g_variant_builder_add (&builder, "{sv}", "xesam:title",
                          g_variant_new_string ("The Worldhood of the World (As Such)"));
-  //g_variant_builder_add (&builder, "{sv}", "xesam:artist",
-  //                       g_variant_new_bytestring_array (artists, -1));
   g_variant_builder_add (&builder, "{sv}", "mpris:artUrl", g_variant_new_string (uri));
   metadata = g_variant_builder_end (&builder);
 
-  phosh_mpris_dbus_media_player2_player_set_can_go_previous (self->skel, TRUE);
-  phosh_mpris_dbus_media_player2_player_set_can_go_next (self->skel, TRUE);
-  phosh_mpris_dbus_media_player2_player_set_can_play (self->skel, TRUE);
-  phosh_mpris_dbus_media_player2_player_set_playback_status (self->skel, "Playing");
-  phosh_mpris_dbus_media_player2_player_set_metadata (self->skel, metadata);
+  phosh_dbus_media_player2_player_set_can_go_previous (self->skel, TRUE);
+  phosh_dbus_media_player2_player_set_can_go_next (self->skel, TRUE);
+  phosh_dbus_media_player2_player_set_can_play (self->skel, TRUE);
+  phosh_dbus_media_player2_player_set_playback_status (self->skel, "Playing");
+  phosh_dbus_media_player2_player_set_metadata (self->skel, metadata);
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self->skel),
                                     connection,
                                     OBJECT_PATH,
@@ -67,7 +64,7 @@ phosh_test_mpris_mock_new (void)
   PhoshTestMprisMock *self;
 
   self = g_new0 (PhoshTestMprisMock, 1);
-  self->skel = phosh_mpris_dbus_media_player2_player_skeleton_new ();
+  self->skel = phosh_dbus_media_player2_player_skeleton_new ();
   return self;
 }
 

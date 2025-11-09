@@ -23,6 +23,11 @@ def run_phosh():
 
     success = False
     phosh = Phosh(topsrcdir, topbuilddir).spawn_nested()
+
+    # Close stdout/stderr to avoid blocking
+    phosh.process.stdout.close()
+    phosh.process.stderr.close()
+
     yield phosh
     success = phosh.teardown_nested()
     if not success:

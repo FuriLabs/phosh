@@ -49,6 +49,13 @@ i18n.merge_file(
   type: 'desktop',
 )
 
+install_data(
+  'icons/pomodoro-active-symbolic.svg',
+  rename: 'pomodoro-quick-setting-symbolic.svg',
+  install_dir: phosh_plugin_icon_dir,
+)
+
+
 pomodoro_quick_setting_schema = 'mobi.phosh.plugins.pomodoro.gschema.xml'
 compiled = gnome.compile_schemas(depend_files: pomodoro_quick_setting_schema)
 compile_schemas = find_program('glib-compile-schemas', required: false)

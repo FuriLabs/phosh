@@ -16,5 +16,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshAmbient, phosh_ambient, PHOSH, AMBIENT, GObject);
 
 PhoshAmbient *phosh_ambient_new (PhoshSensorProxyManager *sensor_proxy_manager);
+gboolean      phosh_ambient_get_auto_brightness (PhoshAmbient *self);
+double        phosh_ambient_get_light_level (PhoshAmbient *self);
 
 G_END_DECLS

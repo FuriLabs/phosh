@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2025 The Phosh Developers
+ * Copyright (C) 2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -77,7 +77,7 @@ phosh_media_players_class_init (PhoshMediaPlayersClass *klass)
 static GtkWidget *
 create_media_player_row (gpointer item, gpointer user_data)
 {
-  PhoshMprisDBusMediaPlayer2Player *mpris_player = PHOSH_MPRIS_DBUS_MEDIA_PLAYER2_PLAYER (item);
+  PhoshDBusMediaPlayer2Player *mpris_player = PHOSH_DBUS_MEDIA_PLAYER2_PLAYER (item);
   GtkWidget *media_player = phosh_media_player_new ();
 
   g_debug ("Adding new player %s", g_dbus_proxy_get_name (G_DBUS_PROXY (mpris_player)));

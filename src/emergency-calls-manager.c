@@ -57,7 +57,7 @@ static guint signals[N_SIGNALS] = { 0 };
 struct _PhoshEmergencyCallsManager {
   PhoshManager         parent;
 
-  PhoshEmergencyCalls *dbus_proxy;
+  PhoshDBusEmergencyCalls *dbus_proxy;
   GCancellable        *cancel;
 
   GListStore          *emergency_contacts;
@@ -134,20 +134,19 @@ on_emergency_menu_activated (GSimpleAction *action, GVariant *param, gpointer da
  * From the phosh_emergency_calls_manager_idle_init function.
  */
 static void
-on_update_finish (GObject                    *source_object,
-                  GAsyncResult               *res,
-                  PhoshEmergencyCallsManager *self)
+on_update_finish (GObject *source_object, GAsyncResult *res, gpointer user_data)
 {
-  PhoshEmergencyCalls *proxy = PHOSH_EMERGENCY_CALLS (source_object);
+  PhoshEmergencyCallsManager *self = PHOSH_EMERGENCY_CALLS_MANAGER (user_data);
+  PhoshDBusEmergencyCalls *proxy = PHOSH_DBUS_EMERGENCY_CALLS (source_object);
   g_autoptr (GError) err = NULL;
   g_autoptr (GVariant) contacts = NULL;
   GVariantIter iter;
   gboolean success;
 
-  success = phosh_emergency_calls_call_get_emergency_contacts_finish (proxy,
-                                                                      &contacts,
-                                                                      res,
-                                                                      &err);
+  success = phosh_dbus_emergency_calls_call_get_emergency_contacts_finish (proxy,
+                                                                           &contacts,
+                                                                           res,
+                                                                           &err);
   if (success == FALSE) {
     if (phosh_async_error_warn (err, "Failed to get emergency contacts")) {
       /* Return right away on cancel as the manager is already gone */
@@ -193,17 +192,17 @@ on_call_emergency_contact_finish (GObject      *object,
                                   GAsyncResult *res,
                                   gpointer      data)
 {
-  PhoshEmergencyCalls *proxy;
+  PhoshDBusEmergencyCalls *proxy;
   PhoshEmergencyCallsManager *self;
   gboolean success;
   g_autoptr (GError) err = NULL;
 
-  g_return_if_fail (PHOSH_IS_EMERGENCY_CALLS (object));
+  g_return_if_fail (PHOSH_DBUS_IS_EMERGENCY_CALLS (object));
   g_return_if_fail (PHOSH_IS_EMERGENCY_CALLS_MANAGER (data));
-  proxy = PHOSH_EMERGENCY_CALLS (object);
+  proxy = PHOSH_DBUS_EMERGENCY_CALLS (object);
   self = PHOSH_EMERGENCY_CALLS_MANAGER (data);
 
-  success = phosh_emergency_calls_call_call_emergency_contact_finish (proxy, res, &err);
+  success = phosh_dbus_emergency_calls_call_call_emergency_contact_finish (proxy, res, &err);
   if (!success) {
     g_signal_emit (self, signals[DIAL_ERROR], 0, err);
 
@@ -233,10 +232,10 @@ phosh_emergency_calls_manager_update (PhoshEmergencyCallsManager *self)
   g_return_if_fail (PHOSH_IS_EMERGENCY_CALLS_MANAGER (self));
   g_return_if_fail (G_IS_DBUS_PROXY (self->dbus_proxy));
 
-  phosh_emergency_calls_call_get_emergency_contacts (
+  phosh_dbus_emergency_calls_call_get_emergency_contacts (
     self->dbus_proxy,
     self->cancel,
-    (GAsyncReadyCallback) on_update_finish,
+    on_update_finish,
     self);
 }
 
@@ -287,14 +286,14 @@ on_name_owner_changed (PhoshEmergencyCallsManager *self)
  * Called when the DBus proxy is ready
  */
 static void
-on_proxy_new_finish (GObject                    *source_object,
-                     GAsyncResult               *res,
-                     PhoshEmergencyCallsManager *self)
+on_proxy_new_finish (GObject *source_object, GAsyncResult *res, gpointer user_data)
+
 {
-  PhoshEmergencyCalls *proxy;
+  PhoshEmergencyCallsManager *self = PHOSH_EMERGENCY_CALLS_MANAGER (user_data);
+  PhoshDBusEmergencyCalls *proxy;
   g_autoptr (GError) err = NULL;
 
-  proxy = phosh_emergency_calls_proxy_new_for_bus_finish (res, &err);
+  proxy = phosh_dbus_emergency_calls_proxy_new_for_bus_finish (res, &err);
   if (proxy == NULL) {
     phosh_async_error_warn (err, "Failed to get connect to emergency contacts DBus proxy");
     return;
@@ -321,13 +320,13 @@ phosh_emergency_calls_manager_idle_init (PhoshManager *manager)
   PhoshEmergencyCallsManager *self = PHOSH_EMERGENCY_CALLS_MANAGER (manager);
 
   /* Connect to call's emergency call DBus interface */
-  phosh_emergency_calls_proxy_new_for_bus (G_BUS_TYPE_SESSION,
-                                           G_DBUS_PROXY_FLAGS_NONE,
-                                           CALLS_BUS_NAME,
-                                           CALLS_OBJECT_PATH,
-                                           self->cancel,
-                                           (GAsyncReadyCallback) on_proxy_new_finish,
-                                           self);
+  phosh_dbus_emergency_calls_proxy_new_for_bus (G_BUS_TYPE_SESSION,
+                                                G_DBUS_PROXY_FLAGS_NONE,
+                                                CALLS_BUS_NAME,
+                                                CALLS_OBJECT_PATH,
+                                                self->cancel,
+                                                on_proxy_new_finish,
+                                                self);
 }
 
 
@@ -446,9 +445,9 @@ phosh_emergency_calls_manager_call (PhoshEmergencyCallsManager *self,
   g_return_if_fail (PHOSH_IS_EMERGENCY_CALLS_MANAGER (self));
 
   g_debug ("Calling emergency contact ID: '%s'", id);
-  phosh_emergency_calls_call_call_emergency_contact (self->dbus_proxy,
-                                                     id,
-                                                     NULL,
-                                                     on_call_emergency_contact_finish,
-                                                     self);
+  phosh_dbus_emergency_calls_call_call_emergency_contact (self->dbus_proxy,
+                                                          id,
+                                                          NULL,
+                                                          on_call_emergency_contact_finish,
+                                                          self);
 }

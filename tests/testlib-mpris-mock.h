@@ -13,7 +13,7 @@
 G_BEGIN_DECLS
 
 typedef struct _PhoshMprisMock {
-  PhoshMprisDBusMediaPlayer2Player *skel;
+  PhoshDBusMediaPlayer2Player *skel;
   gboolean bus_acquired;
   guint    bus_id;
 } PhoshTestMprisMock;

@@ -10,10 +10,7 @@
 #include "pomodoro-quick-setting.h"
 #include "pomodoro-enums.h"
 #include "plugin-shell.h"
-#include "quick-setting.h"
-#include "notification.h"
 #include "notify-manager.h"
-#include "status-icon.h"
 
 #include <cui-call.h>
 

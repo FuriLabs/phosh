@@ -5,3 +5,4 @@ Name=Mobile Data Quick Setting
 Types=quick-setting;
 Comment=Toggle mobile data on/off
 Plugin=@plugins_dir@/libphosh-plugin-@name@.so
+Icon=mobile-data-quick-setting
