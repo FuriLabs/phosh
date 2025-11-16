@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-11-05 13:50+0000\n"
-"PO-Revision-Date: 2025-11-05 08:00+0300\n"
+"POT-Creation-Date: 2025-11-15 10:33+0000\n"
+"PO-Revision-Date: 2025-11-16 08:00+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
@@ -666,6 +666,7 @@ msgid "Authentication required"
 msgstr "Kimlik doğrulama gerekli"
 
 #: src/ui/network-auth-prompt.ui:37
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:75
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:212
 msgid "_Cancel"
 msgstr "İ_ptal"
@@ -783,16 +784,16 @@ msgid "Cellular"
 msgstr "Hücresel"
 
 #. Translators: Phosh prevents the session from going idle because the caffeine quick setting is toggled
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:68
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:70
 msgid "Phosh on caffeine"
 msgstr "Kafeinli Phosh"
 
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:226
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:245
 msgctxt "caffeine-disabled"
 msgid "Off"
 msgstr "Kapalı"
 
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:231
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:250
 msgctxt "caffeine-enabled"
 msgid "On"
 msgstr "Açık"
@@ -804,6 +805,64 @@ msgstr "Kafein zamanlayıcıları"
 #: plugins/caffeine-quick-setting/qs.ui:37
 msgid "No caffeine intervals"
 msgstr "Kafein aralıkları yok"
+
+#: plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c:253
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:171
+msgid "No timeout (∞)"
+msgstr "Zaman aşımı yok (∞)"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:7
+msgid "Caffeine Quick Setting Preferences"
+msgstr "Kafein Hızlı Ayar Tercihleri"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:11
+msgid "Caffeine Duration"
+msgstr "Kafein Süresi"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:15
+msgid "Manage Caffeine Duration"
+msgstr "Kafein Süresini Yönet"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:16
+msgid "Add or remove custom caffeine intervals"
+msgstr "Özel kafein aralıkları ekle ya da kaldır"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:22
+msgid "Add interval"
+msgstr "Aralık ekle"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:66
+msgid "Add New Interval"
+msgstr "Yeni Aralık Ekle"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:83
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
+msgid "_Add"
+msgstr "_Ekle"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:115
+msgid "Quickstart Intervals"
+msgstr "Hızlı Başlangıç Aralıkları"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:127
+msgid "5 m"
+msgstr "5 dk."
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:138
+msgid "15 m"
+msgstr "15 dk."
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:149
+msgid "30 m"
+msgstr "30 dk."
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:160
+msgid "1 h"
+msgstr "1 sa."
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:188
+msgid "Choose Interval"
+msgstr "Aralık Seç"
 
 #: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
@@ -918,10 +977,6 @@ msgstr "Kişi Ekle"
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:203
 msgid "Add New Contact"
 msgstr "Yeni Kişi Ekle"
-
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
-msgid "_Add"
-msgstr "_Ekle"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"

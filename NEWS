@@ -1,27 +1,33 @@
-phosh 0.51~rc1
---------------
+phosh 0.51.0
+------------
 Released November 2025
 * Add location quick setting
-* caffine: Allow to select duration
+* caffeine: Allow to select duration and configure durations via mobile
+  settings
 * brightness/auto-brightness improvements:
   * Handle auto-brightness via a bucket based algorithm
   * Let brightness slider be an offset around the auto-brightness value
-  * Icon next to brightness slider indicates autobrighness on/off
+  * Icon next to brightness slider indicates auto-brightness on/off
   * Gradually transition to new auto-brightness value
   * Auto-brightness can be enabled/disabled via a status page
+* torch: Allow to configure minimal brightness via hwdb/udev
 * Fix upcoming-event’s plugin empty state
 * Fix “Open settings” button position on devices with rounded corners
 * Lots of internal cleanups and fixes
 * Issues fixed:
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1255
-    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1276
-    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1274
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1272
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1274
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1276
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1281
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1282
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/783
 * Contributors:
     * Arun Mani J
+    * Evangelos Ribeiro Tzaras
     * Gotam Gorabh
     * Guido Günther
+    * Robert Eckelmann
     * Rudra Pratap Singh
 * UI translations:
     * Anders Jonsson (sv)
@@ -76,7 +82,7 @@ Released August 2025
 * Add searchd
 * Issues fixed:
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1242
-    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1245    
+    * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/1245
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/290
     * https://gitlab.gnome.org/World/Phosh/phosh/-/issues/703
 * Contributors:
@@ -97,7 +103,7 @@ Released August 2025
     * Juliano de Souza Camargo (pt_BR)
     * Martin (sl)
     * Yuri Chornoivan (uk)
-    * twlvnn kraftwerk (bg)    
+    * twlvnn kraftwerk (bg)
 
 phosh 0.48.0
 ------------

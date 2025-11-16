@@ -113,6 +113,8 @@ src/wifi-status-page.c
 src/wwan-info.c
 plugins/caffeine-quick-setting/caffeine-quick-setting.c
 plugins/caffeine-quick-setting/qs.ui
+plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c
+plugins/caffeine-quick-setting/prefs/prefs.ui
 plugins/dark-mode-quick-setting/dark-mode-quick-setting.c
 plugins/emergency-info/emergency-info.c
 plugins/emergency-info/emergency-info.ui

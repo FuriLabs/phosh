@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-11-06 07:24+0000\n"
-"PO-Revision-Date: 2025-11-06 09:40+0100\n"
+"POT-Creation-Date: 2025-11-12 09:11+0000\n"
+"PO-Revision-Date: 2025-11-12 11:46+0100\n"
 "Last-Translator: Antonio Marin <gnmer.6qxyg@slmail.me>\n"
 "Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -224,15 +224,15 @@ msgstr "Eroare internă"
 
 #: src/end-session-dialog.c:173
 msgid "Log Out"
-msgstr "Deconectare"
+msgstr "Termină sesiunea"
 
 #: src/end-session-dialog.c:176
 #, c-format
 msgid "%s will be logged out automatically in %d second."
 msgid_plural "%s will be logged out automatically in %d seconds."
-msgstr[0] "%s se va deconecta automat în %d secundă."
-msgstr[1] "%s se va deconecta automat în %d secunde."
-msgstr[2] "%s se va deconecta automat în %d de secunde."
+msgstr[0] "%s va fi deconectat automat după %d secundă."
+msgstr[1] "%s va fi deconectat automat după %d secunde."
+msgstr[2] "%s va fi deconectat automat după %d de secunde."
 
 #: src/end-session-dialog.c:182 src/ui/power-menu.ui:72
 msgid "Power Off"
@@ -689,6 +689,7 @@ msgid "Authentication required"
 msgstr "Autentificare necesară"
 
 #: src/ui/network-auth-prompt.ui:37
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:50
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:212
 msgid "_Cancel"
 msgstr "_Anulează"
@@ -747,7 +748,7 @@ msgstr "_Suspendă…"
 
 #: src/ui/top-panel.ui:115
 msgid "_Log Out…"
-msgstr "_Deconectare…"
+msgstr "_Termină sesiunea…"
 
 #: src/ui/wifi-status-page.ui:6 src/wifi-info.c:90
 msgid "Wi-Fi"
@@ -827,6 +828,64 @@ msgstr "Timpi Cafeină"
 #: plugins/caffeine-quick-setting/qs.ui:37
 msgid "No caffeine intervals"
 msgstr "Niciun interval Cafeină"
+
+#: plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c:251
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:146
+msgid "No timeout (∞)"
+msgstr "Nelimitat (∞)"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:6
+msgid "Caffeine Quick Setting Preferences"
+msgstr "Preferințe pentru Cafeină"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:10
+msgid "Caffeine Duration"
+msgstr "Timpi Cafeină"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:14
+msgid "Manage Caffeine Duration"
+msgstr "Gestionează durata pentru Cafeină"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:15
+msgid "Add or remove custom caffeine intervals"
+msgstr "Adaugă sau elimină intervale pentru Cafeină"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:21
+msgid "Add interval"
+msgstr "Adaugă un interval"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:41
+msgid "Add New Interval"
+msgstr "Adaugă un interval nou"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:58
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
+msgid "_Add"
+msgstr "_Adaugă"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:90
+msgid "Quickstart Intervals"
+msgstr "Intervale rapide"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:102
+msgid "5 m"
+msgstr "5 m"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:113
+msgid "15 m"
+msgstr "15 m"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:124
+msgid "30 m"
+msgstr "30 m"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:135
+msgid "1 h"
+msgstr "1 h"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:163
+msgid "Choose Interval"
+msgstr "Alege intervalul"
 
 #: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
@@ -941,10 +1000,6 @@ msgstr "Adaugă un contact"
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:203
 msgid "Add New Contact"
 msgstr "Adaugă un contact nou"
-
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
-msgid "_Add"
-msgstr "_Adaugă"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"

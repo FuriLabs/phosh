@@ -28,13 +28,14 @@ class Phosh:
     wl_display = None
     process = None
 
-    def __init__(self, topsrcdir, topbuilddir, env={}):
+    def __init__(self, topsrcdir, topbuilddir, env={}, wrapper=[]):
         self.topsrcdir = topsrcdir
         self.topbuilddir = topbuilddir
         self.tmpdir = tempfile.TemporaryDirectory(dir=topbuilddir)
         self.stdout = ""
         self.stderr = ""
         self.env = env
+        self.wrapper = wrapper
 
         # Set Wayland socket
         self.wl_display = os.path.join(self.tmpdir.name, "wayland-socket")
@@ -82,7 +83,7 @@ class Phosh:
         env = env | self.env
 
         # Spawn phoc -E .../run
-        cmd = [
+        cmd = self.wrapper + [
             "phoc",
             "--no-xwayland",
             "-C",

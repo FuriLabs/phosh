@@ -1374,6 +1374,9 @@ static GDebugKey debug_keys[] =
  { .key = "fake-builtin",
    .value = PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN,
  },
+ { .key = "backlight-non-linear",
+   .value = PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR,
+ },
 };
 
 

@@ -52,6 +52,7 @@ struct _PhoshTorchManager {
   const char            *icon_name;
   gboolean               can_scale;
   int                    brightness;
+  int                    min_brightness;
   int                    max_brightness;
   int                    last_brightness;
 
@@ -189,12 +190,19 @@ find_torch_device (PhoshTorchManager *self, PhoshUdevManager *udev_manager)
     return FALSE;
   }
 
+  self->min_brightness = g_udev_device_get_property_as_int (self->udev_device,
+                                                            "GM_TORCH_MIN_BRIGHTNESS");
   self->max_brightness = g_udev_device_get_sysfs_attr_as_int (self->udev_device,
                                                               "max_brightness");
-  g_debug ("Found torch device '%s' with max brightness %d",
-           g_udev_device_get_name (self->udev_device), self->max_brightness);
 
-  self->can_scale = self->max_brightness > 1;
+  /* setting min_brightness to 5% to have a proper lower limit */
+  if (!self->min_brightness)
+    self->min_brightness = MAX (self->max_brightness * 0.05, 1);
+
+  g_debug ("Found torch device '%s' with min brightness %d and max brightness %d",
+           g_udev_device_get_name (self->udev_device),self->min_brightness,self->max_brightness);
+
+  self->can_scale = self->min_brightness < self->max_brightness && self->max_brightness > 1;
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_CAN_SCALE]);
 
   return TRUE;
@@ -367,14 +375,21 @@ phosh_torch_manager_get_brightness (PhoshTorchManager *self)
  * phosh_torch_manager_get_scaled_brightness:
  * @self: The #PhoshTorchManager
  *
- * Gets the current brightness as fraction between 0 (off) and 1 (maximum brightness)
+ * Gets the current brightness as fraction between 0.01 (minimum_brightness) and 1.0
+ * (maximum brightness).
  */
 double
 phosh_torch_manager_get_scaled_brightness (PhoshTorchManager *self)
 {
+  double val;
+
   g_return_val_if_fail (PHOSH_IS_TORCH_MANAGER (self), 0);
 
-  return (double)self->brightness / (double)self->max_brightness;
+  val = (double)(self->brightness - self->min_brightness) /
+    (double)(self->max_brightness - self->min_brightness);
+
+  /* Since the torch should never be fully off when enabled, always return a non-0 value */
+  return MAX (0.01, val);
 }
 
 /**
@@ -382,7 +397,7 @@ phosh_torch_manager_get_scaled_brightness (PhoshTorchManager *self)
  * @self: The #PhoshTorchManager
  * @frac: The brightness as fraction
  *
- * Sets the current brightness as fraction between 0 (off) and 1 (maximum brightness)
+ * Sets the current brightness as fraction between 0 (minimum_brightness) and 1 (maximum brightness)
  */
 void
 phosh_torch_manager_set_scaled_brightness (PhoshTorchManager *self, double frac)
@@ -392,7 +407,7 @@ phosh_torch_manager_set_scaled_brightness (PhoshTorchManager *self, double frac)
   g_return_if_fail (PHOSH_IS_TORCH_MANAGER (self));
   g_return_if_fail (frac >= 0.0 && frac <= 1.0);
 
-  brightness = round (frac * self->max_brightness);
+  brightness = round (self->min_brightness + frac * (self->max_brightness - self->min_brightness));
   if (brightness > self->max_brightness)
     brightness = self->max_brightness;
 

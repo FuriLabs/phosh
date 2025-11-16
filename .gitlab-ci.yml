@@ -203,14 +203,12 @@ integration:native-debian-forky:
     # exports
     LC_ALL: C.UTF-8
     NO_AT_BRIDGE: 1
-    WLR_RENDERER: pixman
-    WLR_BACKENDS: headless
   script:
     - export TOPSRCDIR="${PWD}"
     - export TOPBUILDDIR="${PWD}/_build"
     # Make sure tests can find the plugins and po files
     - "meson install -C _build"
-    - ${XVFB_RUN} dbus-run-session pytest --junitxml=report-integration-${CI_JOB_NAME}.xml -v tests/integration
+    - ${XVFB_RUN} dbus-run-session _build/tests/integration/run-pytest --junitxml=report-integration-${CI_JOB_NAME}.xml -v tests/integration
   after_script:
     - gcovr --json --gcov-ignore-errors=no_working_dir_found --output=coverage-integration-${CI_JOB_NAME}.json
   artifacts:

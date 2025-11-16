@@ -335,7 +335,7 @@ setup_torch (PhoshSettings *self)
   g_object_bind_property (self->torch_manager, "enabled",
                           self->revealer, "reveal-child",
                           G_BINDING_SYNC_CREATE);
-  gtk_range_set_range (GTK_RANGE (self->scale_torch), 40, 100);
+  gtk_range_set_range (GTK_RANGE (self->scale_torch), 0, 100);
   gtk_range_set_value (GTK_RANGE (self->scale_torch),
                        phosh_torch_manager_get_scaled_brightness (self->torch_manager) * 100.0);
   g_signal_connect_object (self->torch_manager,
