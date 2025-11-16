@@ -1,3 +1,73 @@
+phosh (0.51.0) experimental; urgency=medium
+
+  [ Artur S0 ]
+  * Update Russian translation
+
+  [ Evangelos Ribeiro Tzaras ]
+  * subprojects: Switch to libcall-ui 0.1.5.
+    We have a tagged version now.
+
+  [ Antonio Marin ]
+  * Update Romanian translation
+
+  [ Rudra Pratap Singh ]
+  * caffeine-quick-setting: Add plugin preferences.
+    We now have 'caffeine-quick-setting-prefs'
+    preferences that allow one to add or remove
+    caffeine intervals.
+  * caffeine-prefs: Add empty-state for no intervals
+  * caffeine: Close status page on selecting interval
+  * caffeine-quick-setting: Activate timer on selecting interval
+
+  [ Martin ]
+  * Update Slovenian translation
+
+  [ Guido Günther ]
+  * caffeine-quick-setting: Make prefs dialog follow content size.
+    Otherwise in bottom sheet mode adding new rows doesn't make the dialog
+    resize and the user doesn't see the new rows.
+  * backlight: Allow to force non linear backlight scale.
+    Add a debug flag that allows us to assume the backlight uses
+    a non-linear scale. This is meant for situations where the
+    kernel information is incorrect.
+  * tests/integration: Use pixman renderer.
+    Our udev mocks confuse wlroots when trying to get a render node
+    otherwise
+  * ci: Use our pytest runner.
+    This avoids duplicating env vars in multiple places
+  * tests/integration: Allow to launch Phosh under a wrapper.
+    Can be used for udev mocks or valgrind
+  * tests/integration: Mock and test torch and backlight.
+  * caffeine/prefs: Make empty state compact.
+    It's for a dialog, not a main window
+  * torch-manager: Don't return 0 when torch is on.
+    This makes it simpler for UI elements to display a sane value. 0% with
+    the LED still on looks confusing and we require
+    GM_TORCH_MINIMUM_BRIGHTNESS to indicate a still visible LED brightness.
+
+  [ Yuri Chornoivan ]
+  * Update Ukrainian translation
+
+  [ Ekaterine Papava ]
+  * Update Georgian translation
+
+  [ Danial Behzadi ]
+  * Update Persian translation
+
+  [ Robert Eckelmann ]
+  * torch-manager: Add minimum brightness.
+    We get it from udev when available and fall back to 5% of maximum
+    brightness otherwise.
+    The udev rule to provide minimum brightness overrides via hwdb is
+    shipped in gmobile.
+  * settings: Drop minimum brightness.
+    This is now handeld by torch manager
+
+  [ Sabri Ünal ]
+  * Update Turkish translation
+
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 16 Nov 2025 11:27:16 +0100
+
 phosh (0.51~rc1) experimental; urgency=medium
 
   [ Rudra Pratap Singh ]

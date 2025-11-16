@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-11-06 08:42+0000\n"
-"PO-Revision-Date: 2025-11-06 16:01+0330\n"
+"POT-Creation-Date: 2025-11-14 03:05+0000\n"
+"PO-Revision-Date: 2025-11-14 07:51+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian\n"
 "Language: fa\n"
@@ -679,6 +679,7 @@ msgid "Authentication required"
 msgstr "نیاز به تأیید هویت است"
 
 #: src/ui/network-auth-prompt.ui:37
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:51
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:212
 msgid "_Cancel"
 msgstr "_لغو"
@@ -818,6 +819,64 @@ msgstr "شمارش معکوس کافئین"
 msgid "No caffeine intervals"
 msgstr "بدون دورهٔ کافئین"
 
+#: plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c:251
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:147
+msgid "No timeout (∞)"
+msgstr "بدون مهلت زمانی (∞)"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:7
+msgid "Caffeine Quick Setting Preferences"
+msgstr "ترجیحات تنظیمات سریع کافئین"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:11
+msgid "Caffeine Duration"
+msgstr "مدّت کافئین"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:15
+msgid "Manage Caffeine Duration"
+msgstr "مدیریت مدّت کافئین"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:16
+msgid "Add or remove custom caffeine intervals"
+msgstr "افزودن یا برداشتن دورهٔ سفارشی کافئین"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:22
+msgid "Add interval"
+msgstr "افزودن دوره"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:42
+msgid "Add New Interval"
+msgstr "افزودن دورهٔ جدید"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:59
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
+msgid "_Add"
+msgstr "_افزودن"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:91
+msgid "Quickstart Intervals"
+msgstr "دوره‌های آغاز سریع"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:103
+msgid "5 m"
+msgstr "۵ د"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:114
+msgid "15 m"
+msgstr "۱۵ د"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:125
+msgid "30 m"
+msgstr "۳۰ د"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:136
+msgid "1 h"
+msgstr "۱ س"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:164
+msgid "Choose Interval"
+msgstr "گزینش دوره"
+
 #: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
 msgstr "سبک پیش‌گزیده"
@@ -931,10 +990,6 @@ msgstr "افزودن آشنا"
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:203
 msgid "Add New Contact"
 msgstr "افزودن آشنای جدید"
-
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
-msgid "_Add"
-msgstr "_افزودن"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"

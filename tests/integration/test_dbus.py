@@ -16,6 +16,7 @@ import dbusmock
 from collections import OrderedDict
 from dbusmock import DBusTestCase
 from dbus.mainloop.glib import DBusGMainLoop
+from pathlib import Path
 
 from gi.repository import Gio
 
@@ -28,6 +29,8 @@ class PhoshDBusTestCase(DBusTestCase):
     @classmethod
     def setUpClass(klass):
         klass.mocks = OrderedDict()
+        topsrcdir = os.environ["TOPSRCDIR"]
+        topbuilddir = os.environ["TOPBUILDDIR"]
         env = {}
 
         # Start system bus
@@ -44,6 +47,11 @@ class PhoshDBusTestCase(DBusTestCase):
         )
 
         # Add the templates we want running before phosh starts
+        flash_mock = (
+            Path(topsrcdir) / "tests" / "integration" / "oneplus,fajita.umockdev"
+        )
+        udev_mock_script = ["umockdev-run", "-d", str(flash_mock), "--"]
+
         # TODO: start udev mock for e.g. backlight
         klass.start_from_template("bluez5")
         klass.start_from_template("gsd_rfkill")
@@ -53,8 +61,13 @@ class PhoshDBusTestCase(DBusTestCase):
         # Setup logging
         env["G_MESSAGES_DEBUG"] = " ".join(
             [
+                "phosh-brightness-manager",
+                "phosh-backlight",
+                "phosh-backlight-sysfs",
                 "phosh-bt-manager",
                 "phosh-cell-broadcast-manager",
+                "phosh-udev-manager",
+                "phosh-torch-manager",
                 "phosh-wifi-manager",
                 "phosh-wwan-manager",
                 "phosh-wwan-mm",
@@ -62,9 +75,9 @@ class PhoshDBusTestCase(DBusTestCase):
         )
         env["XDG_CURRENT_DESKTOP"] = "Phosh:GNOME"
 
-        topsrcdir = os.environ["TOPSRCDIR"]
-        topbuilddir = os.environ["TOPBUILDDIR"]
-        klass.phosh = Phosh(topsrcdir, topbuilddir, env).spawn_nested()
+        klass.phosh = Phosh(
+            topsrcdir, topbuilddir, env, wrapper=udev_mock_script
+        ).spawn_nested()
 
     @classmethod
     def tearDownClass(klass):
@@ -130,9 +143,25 @@ class PhoshDBusTestCase(DBusTestCase):
     def test_bt(self):
         adapter_name = "hci0"
 
-        assert self.phosh.wait_for_output(" BT present: 1", ignore_present=True)
         assert self.phosh.check_for_stdout(" BT enabled: 1")
 
         bt = self.mocks["bluez5"][1]
         bt.AddAdapter(adapter_name, "my-phone")
         assert self.phosh.wait_for_output(" State: BLUETOOTH_ADAPTER_STATE_ON")
+
+    def test_torch(self):
+        assert self.phosh.wait_for_output(
+            " Found torch device 'white:flash' with min brightness 1 and max brightness 255",
+            ignore_present=True,
+        )
+
+    def test_backlight(self):
+        assert self.phosh.wait_for_output(
+            " Backlight brightness maps to linear brightness curve",
+            ignore_present=True,
+        )
+
+        assert self.phosh.wait_for_output(
+            " Found HEADLESS-1 for brightness control",
+            ignore_present=True,
+        )

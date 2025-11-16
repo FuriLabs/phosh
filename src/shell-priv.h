@@ -62,6 +62,7 @@ typedef enum {
  * @PHOSH_SHELL_DEBUG_FLAG_ALWAYS_SPLASH: always use splash (even when docked)
  * @PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN: When calculatiog layout treat the first
  *     virtual output like a built-in output.
+ * @PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR: Assume backlight uses non-linear scale
  *
  * These flags are to enable/disable debugging features.
  */
@@ -69,6 +70,7 @@ typedef enum {
   PHOSH_SHELL_DEBUG_FLAG_NONE          = 0,
   PHOSH_SHELL_DEBUG_FLAG_ALWAYS_SPLASH = 1 << 0,
   PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN  = 1 << 1,
+  PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR = 1 << 2,
 } PhoshShellDebugFlags;
 
 

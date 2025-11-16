@@ -9,6 +9,7 @@
 #include "caffeine-quick-setting.h"
 #include "interval-row.h"
 #include "plugin-shell.h"
+#include "status-page.h"
 
 #include <cui-call.h>
 
@@ -38,6 +39,7 @@ static GParamSpec *props[LAST_PROP];
 struct _PhoshCaffeineQuickSetting {
   PhoshQuickSetting        parent;
 
+  PhoshStatusPage         *status_page;
   PhoshStatusIcon         *info;
   guint                    cookie;
 
@@ -174,6 +176,18 @@ on_clicked (PhoshCaffeineQuickSetting *self)
 
 
 static void
+phosh_caffeine_quick_setting_set_selected_row (PhoshCaffeineQuickSetting *self,
+                                               GtkListBoxRow             *row)
+{
+  if (self->cur_row)
+    phosh_interval_row_set_selected (PHOSH_INTERVAL_ROW (self->cur_row), FALSE);
+
+  self->cur_row = row;
+  phosh_interval_row_set_selected (PHOSH_INTERVAL_ROW (self->cur_row), TRUE);
+}
+
+
+static void
 on_interval_row_activated (GtkListBox                *listbox,
                            GtkListBoxRow             *row,
                            PhoshCaffeineQuickSetting *self)
@@ -181,20 +195,25 @@ on_interval_row_activated (GtkListBox                *listbox,
   uint selected_idx = 0;
   g_autoptr (GList) children = NULL;
 
-  if (self->cur_row == row)
-    return;
+  if (self->cur_row != row) {
+    phosh_caffeine_quick_setting_clear_timer (self);
 
-  phosh_caffeine_quick_setting_clear_timer (self);
+    children = gtk_container_get_children (GTK_CONTAINER (self->listbox));
+    for (GList *child = children; child; child = child->next) {
+      if (child->data == row)
+        break;
 
-  children = gtk_container_get_children (GTK_CONTAINER (self->listbox));
-  for (GList *child = children; child; child = child->next) {
-    if (child->data == row)
-      break;
+      selected_idx++;
+    }
 
-    selected_idx++;
+    g_settings_set_uint (self->settings, CAFFEINE_SELECTED_KEY, selected_idx);
+    /* Setting selected-index will update row selection, but
+     * do it here too to start the timer */
+    phosh_caffeine_quick_setting_set_selected_row (self, row);
+    on_clicked (self);
   }
 
-  g_settings_set_uint (self->settings, CAFFEINE_SELECTED_KEY, selected_idx);
+  g_signal_emit_by_name (self->status_page, "done", TRUE);
 }
 
 
@@ -270,6 +289,7 @@ phosh_caffeine_quick_setting_class_init (PhoshCaffeineQuickSettingClass *klass)
                                                "/mobi/phosh/plugins/caffeine-quick-setting/qs.ui");
 
   gtk_widget_class_bind_template_child (widget_class, PhoshCaffeineQuickSetting, info);
+  gtk_widget_class_bind_template_child (widget_class, PhoshCaffeineQuickSetting, status_page);
   gtk_widget_class_bind_template_child (widget_class, PhoshCaffeineQuickSetting, listbox);
   gtk_widget_class_bind_template_child (widget_class, PhoshCaffeineQuickSetting, stack);
 
@@ -304,6 +324,8 @@ on_selected_index_changed (PhoshCaffeineQuickSetting *self)
 
   /* Possible that we don't have any intervals */
   if (len) {
+    GtkListBoxRow *row;
+
     /* If index is out of bounds, select the last in the list */
     if (selected_idx >= len) {
       g_debug ("Invalid interval index, defaulting to last interval");
@@ -311,11 +333,8 @@ on_selected_index_changed (PhoshCaffeineQuickSetting *self)
       selected_idx = len - 1;
     }
 
-    if (self->cur_row)
-      phosh_interval_row_set_selected (PHOSH_INTERVAL_ROW (self->cur_row), FALSE);
-
-    self->cur_row = gtk_list_box_get_row_at_index (self->listbox, selected_idx);
-    phosh_interval_row_set_selected (PHOSH_INTERVAL_ROW (self->cur_row), TRUE);
+    row = gtk_list_box_get_row_at_index (self->listbox, selected_idx);
+    phosh_caffeine_quick_setting_set_selected_row (self, row);
   }
 }
 

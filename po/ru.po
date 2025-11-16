@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-10-14 22:47+0000\n"
-"PO-Revision-Date: 2025-10-15 12:55+0300\n"
+"POT-Creation-Date: 2025-11-13 11:55+0000\n"
+"PO-Revision-Date: 2025-11-13 15:22+0300\n"
 "Last-Translator: Artur So <arturios2005@mail.ru>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/mobi.phosh.Shell.desktop.in.in:3 data/wayland-sessions/phosh.desktop:3
 msgid "Phone Shell"
@@ -76,6 +76,14 @@ msgid "Add launchers to the lock screen. <b>This plugin is experimental.</b>"
 msgstr ""
 "Добавить ярлыки на экран блокировки. <b>Этот модуль является "
 "экспериментальным.</b>"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:4
+msgid "Location Quick Setting"
+msgstr "Быстрая настройка геолокации"
+
+#: plugins/location-quick-setting/location-quick-setting.desktop.in.in:6
+msgid "Toggle location services on/off"
+msgstr "Включение/выключение служб геолокации"
 
 #: plugins/media-players/media-players.desktop.in.in:3
 #: plugins/media-players/media-players.ui:19
@@ -268,20 +276,20 @@ msgctxt "feedback:enabled"
 msgid "On"
 msgstr "Вкл"
 
-#: src/location-manager.c:269
+#: src/location-manager.c:266
 #, c-format
 msgid "Allow '%s' to access your location information?"
 msgstr "Разрешить '%s' доступ к информации о вашем местоположении?"
 
-#: src/location-manager.c:274
+#: src/location-manager.c:271
 msgid "Geolocation"
 msgstr "Геолокация"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "Yes"
 msgstr "Да"
 
-#: src/location-manager.c:275
+#: src/location-manager.c:272
 msgid "No"
 msgstr "Нет"
 
@@ -322,12 +330,12 @@ msgid "Screenshot from %s%s.png"
 msgstr "Снимок экрана от %s%s.png"
 
 #. Translators: Used when the title of a song is unknown
-#: src/media-player.c:646 src/ui/media-player.ui:208
+#: src/media-player.c:690 src/ui/media-player.ui:208
 msgid "Unknown Title"
 msgstr "Неизвестное название"
 
 #. Translators: Used when the artist of a song is unknown
-#: src/media-player.c:654 src/ui/media-player.ui:196
+#: src/media-player.c:698 src/ui/media-player.ui:196
 msgid "Unknown Artist"
 msgstr "Неизвестный исполнитель"
 
@@ -372,7 +380,7 @@ msgstr "Открыть"
 #. We don't just set the app_info but name and icon separately to
 #. * not overwrite values set by the caller
 #: src/notifications/notification.c:422 src/notifications/notification.c:695
-#: src/notifications/notify-manager.c:1012
+#: src/notifications/notify-manager.c:1009
 msgid "Notification"
 msgstr "Уведомление"
 
@@ -589,6 +597,14 @@ msgstr "Устройства ввода"
 msgid "Sound Settings"
 msgstr "Настройки звука"
 
+#: src/ui/brightness-settings.ui:87
+msgid "Automatic Brightness"
+msgstr "Автоматическая яркость"
+
+#: src/ui/brightness-settings.ui:120
+msgid "Brightness Settings"
+msgstr "Настройки яркости"
+
 #: src/ui/bt-status-page.ui:39
 msgid "Enable Bluetooth"
 msgstr "Включить Bluetooth"
@@ -671,6 +687,7 @@ msgid "Authentication required"
 msgstr "Требуется аутентификация"
 
 #: src/ui/network-auth-prompt.ui:37
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:51
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:212
 msgid "_Cancel"
 msgstr "_Отменить"
@@ -699,15 +716,15 @@ msgstr "Помощь"
 msgid "Run Command"
 msgstr "Выполнить команду"
 
-#: src/ui/settings.ui:138
+#: src/ui/settings.ui:121
 msgid "No notifications"
 msgstr "Нет уведомлений"
 
-#: src/ui/settings.ui:167
+#: src/ui/settings.ui:150
 msgid "Notifications"
 msgstr "Уведомления"
 
-#: src/ui/settings.ui:176
+#: src/ui/settings.ui:159
 msgid "Clear all"
 msgstr "Очистить все"
 
@@ -788,29 +805,95 @@ msgid "Cellular"
 msgstr "Мобильная сеть"
 
 #. Translators: Phosh prevents the session from going idle because the caffeine quick setting is toggled
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:53
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:68
 msgid "Phosh on caffeine"
 msgstr "Phosh на кофеине"
 
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
-msgctxt "caffeine-enabled"
-msgid "On"
-msgstr "Вкл"
-
-#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:132
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:226
 msgctxt "caffeine-disabled"
 msgid "Off"
 msgstr "Выкл"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
+#: plugins/caffeine-quick-setting/caffeine-quick-setting.c:231
+msgctxt "caffeine-enabled"
+msgid "On"
+msgstr "Вкл"
+
+#: plugins/caffeine-quick-setting/qs.ui:15
+msgid "Caffeine timers"
+msgstr "Таймеры кофеина"
+
+#: plugins/caffeine-quick-setting/qs.ui:37
+msgid "No caffeine intervals"
+msgstr "Нет интервалов кофеина"
+
+#: plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c:251
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:147
+msgid "No timeout (∞)"
+msgstr "Нет перерыва (∞)"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:7
+msgid "Caffeine Quick Setting Preferences"
+msgstr "Параметры быстрой настройки кофеина"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:11
+msgid "Caffeine Duration"
+msgstr "Длительность кофеина"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:15
+msgid "Manage Caffeine Duration"
+msgstr "Управление длительностью кофеина"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:16
+msgid "Add or remove custom caffeine intervals"
+msgstr "Добавить или удалить пользовательские интервалы кофеина"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:22
+msgid "Add interval"
+msgstr "Добавить интервал"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:42
+msgid "Add New Interval"
+msgstr "Добавить новый интервал"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:59
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
+msgid "_Add"
+msgstr "_Добавить"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:91
+msgid "Quickstart Intervals"
+msgstr "Интервалы быстрого запуска"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:103
+msgid "5 m"
+msgstr "5 мин"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:114
+msgid "15 m"
+msgstr "15 мин"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:125
+msgid "30 m"
+msgstr "30 мин"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:136
+msgid "1 h"
+msgstr "1 час"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:164
+msgid "Choose Interval"
+msgstr "Выбрать интервал"
+
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
 msgstr "Стиль по умолчанию"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:37
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:35
 msgid "Dark mode"
 msgstr "Темный стиль"
 
-#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:38
+#: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:36
 msgid "Light mode"
 msgstr "Светлый стиль"
 
@@ -916,10 +999,6 @@ msgstr "Добавить контакт"
 msgid "Add New Contact"
 msgstr "Добавить новый контакт"
 
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
-msgid "_Add"
-msgstr "_Добавить"
-
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"
 msgstr "Имя _контакта"
@@ -940,52 +1019,60 @@ msgstr "Ярлыки не настроены"
 msgid "Launchers"
 msgstr "Ярлыки"
 
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location On"
+msgstr "Геолокация вкл"
+
+#: plugins/location-quick-setting/location-quick-setting.c:65
+msgid "Location Off"
+msgstr "Геолокация выкл"
+
 #: plugins/media-players/media-players.ui:20
 msgid "No running media players"
 msgstr "Нет запущенных медиапроигрывателей"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data On"
 msgstr "Моб. данные включены"
 
-#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:82
+#: plugins/mobile-data-quick-setting/mobile-data-quick-setting.c:79
 msgid "Mobile Data Off"
 msgstr "Моб. данные выключены"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light On"
 msgstr "Ночной свет включен"
 
-#: plugins/night-light-quick-setting/night-light-quick-setting.c:65
+#: plugins/night-light-quick-setting/night-light-quick-setting.c:63
 msgid "Night Light Off"
 msgstr "Ночной свет выключен"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:75
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:72
 msgid "Pomodoro start"
 msgstr "Запустить Pomodoro"
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:76
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:73
 #, c-format
 msgid "Focus on your task for %d minutes"
 msgstr "Сфокусироваться на задаче на %d мин."
 
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:81
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:78
 msgid "Take a break"
 msgstr "Сделать перерыв"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:83
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:80
 #, c-format
 msgid "You have %d minutes until next Pomodoro"
 msgstr "У вас осталось %d мин. до следующего Pomodoro"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:98
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:95
 msgid "Pomodoro Timer"
 msgstr "Таймер Pomodoro"
 
 #. Translators: Pomodoro is a technique, no need to translate it
-#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:121
+#: plugins/pomodoro-quick-setting/pomodoro-quick-setting.c:118
 #, c-format
 msgid "Pomodoro Off"
 msgstr "Pomodoro выключен"
@@ -1133,16 +1220,16 @@ msgstr "Масштаб экрана"
 
 #. Translators: This is scale factor of a monitor in percent
 #: plugins/scaling-quick-setting/scale-row.c:48
-#: plugins/scaling-quick-setting/scaling-quick-setting.c:93
+#: plugins/scaling-quick-setting/scaling-quick-setting.c:91
 #, c-format
 msgid "%d%%"
 msgstr "%d%%"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:79
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:75
 msgid "Hotspot On"
 msgstr "Точка доступа включена"
 
-#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:81
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.c:77
 msgid "Hotspot Off"
 msgstr "Точка доступа выключена"
 

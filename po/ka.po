@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2025-11-07 07:41+0000\n"
-"PO-Revision-Date: 2025-11-07 15:39+0100\n"
+"POT-Creation-Date: 2025-11-13 13:36+0000\n"
+"PO-Revision-Date: 2025-11-14 04:03+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -37,7 +37,7 @@ msgstr "ეს სესია Phosh-ში შეგიყვანთ"
 
 #: plugins/caffeine-quick-setting/caffeine-quick-setting.desktop.in.in:4
 msgid "Caffeine Quick Setting"
-msgstr "Caffeine-ის სწრაფი მორგება"
+msgstr "კოფეინის სწრაფი მორგება"
 
 #: plugins/caffeine-quick-setting/caffeine-quick-setting.desktop.in.in:6
 msgid "Prevent the session from going idle"
@@ -667,6 +667,7 @@ msgid "Authentication required"
 msgstr "საჭროა ავთენტიკაცია"
 
 #: src/ui/network-auth-prompt.ui:37
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:51
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:212
 msgid "_Cancel"
 msgstr "_გაუქმება"
@@ -806,6 +807,64 @@ msgstr "კოფეინის ტაიმერები"
 msgid "No caffeine intervals"
 msgstr "კოფეინის შუალედების გარეშე"
 
+#: plugins/caffeine-quick-setting/prefs/caffeine-quick-setting-prefs.c:251
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:147
+msgid "No timeout (∞)"
+msgstr "უვადო (∞)"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:7
+msgid "Caffeine Quick Setting Preferences"
+msgstr "კოფეინის სწრაფი მორგების პარამეტრები"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:11
+msgid "Caffeine Duration"
+msgstr "კოფეინის ხანგრძლივობა"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:15
+msgid "Manage Caffeine Duration"
+msgstr "კოფეინის ხანგრძლივობის მართვა"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:16
+msgid "Add or remove custom caffeine intervals"
+msgstr "მომხმარებლის კოფეინის შუალედების დამატება ან წაშლა"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:22
+msgid "Add interval"
+msgstr "ინტერვალის დამატება"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:42
+msgid "Add New Interval"
+msgstr "ახალი ინტერვალის დამატება"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:59
+#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
+msgid "_Add"
+msgstr "_დამატება"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:91
+msgid "Quickstart Intervals"
+msgstr "სწრაფი გაშვების ინტერვალები"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:103
+msgid "5 m"
+msgstr "5 წთ"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:114
+msgid "15 m"
+msgstr "15 წთ"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:125
+msgid "30 m"
+msgstr "30 წთ"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:136
+msgid "1 h"
+msgstr "1 სთ"
+
+#: plugins/caffeine-quick-setting/prefs/prefs.ui:164
+msgid "Choose Interval"
+msgstr "აირჩიეთ ინტერვალი"
+
 #: plugins/dark-mode-quick-setting/dark-mode-quick-setting.c:34
 msgid "Default style"
 msgstr "ნაგულისხმევი სტილი"
@@ -919,10 +978,6 @@ msgstr "კონტაქტის დამატება"
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:203
 msgid "Add New Contact"
 msgstr "ახალი კონტაქტის დამატება"
-
-#: plugins/emergency-info/prefs/emergency-info-prefs.ui:220
-msgid "_Add"
-msgstr "_დამატება"
 
 #: plugins/emergency-info/prefs/emergency-info-prefs.ui:240
 msgid "_Contact Name"

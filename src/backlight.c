@@ -13,6 +13,7 @@
 #include "phosh-config.h"
 
 #include "backlight-priv.h"
+#include "shell-priv.h"
 
 #include <gtk/gtk.h>
 
@@ -237,11 +238,20 @@ void
 phosh_backlight_set_range (PhoshBacklight *self, int min, int max, PhoshBacklightScale scale)
 {
   PhoshBacklightPrivate *priv = phosh_backlight_get_instance_private (self);
-
+  gboolean force_non_linear;
 
   priv->level.min = min;
   priv->level.max = max;
   priv->scale = scale;
+
+  force_non_linear = !!(phosh_shell_get_debug_flags () & PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR);
+  if (force_non_linear)
+    priv->scale = PHOSH_BACKLIGHT_SCALE_NON_LINEAR;
+
+  if (priv->scale == PHOSH_BACKLIGHT_SCALE_NON_LINEAR)
+    g_debug ("Backlight brightness maps to non-linear brightness curve");
+  else
+    g_debug ("Backlight brightness maps to linear brightness curve");
 
   phosh_backlight_set_curve (self);
 }
