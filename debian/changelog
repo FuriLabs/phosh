@@ -1,8 +1,13 @@
-phosh (0.51.0-1) UNRELEASED; urgency=medium
+phosh (0.51.0-1) unstable; urgency=medium
 
   * New upstream release
+   * caffeine: Allow one to configure durations via mobile
+  * torch: Allow one to configure minimal brightness via hwdb/udev
+  * Disable reporotest in CI: We see spurious "GFileInfo created without
+    standard::type" in one test case since some time breaking our test
+    expectations and it doesn't reproduce locally.
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 16 Nov 2025 12:39:00 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 16 Nov 2025 12:41:09 +0100
 
 phosh (0.51~rc1-1) unstable; urgency=medium
 
