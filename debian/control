@@ -44,7 +44,6 @@ Build-Depends:
  dbus-daemon <!nocheck>,
  gnome-settings-daemon-common <!nocheck>,
  gnome-shell-common <!nocheck>,
- gnome-themes-extra-data <!nocheck>,
  gsettings-desktop-schemas <!nocheck>,
  gtk-4-examples <!nocheck>,
  librsvg2-common <!nocheck>,
