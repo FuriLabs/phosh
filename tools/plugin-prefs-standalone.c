@@ -1,13 +1,13 @@
 /*
- * Copyright (C) 2022 Phosh.mobi e.V.
+ * Copyright (C) 2022-2025 Phosh.mobi e.V.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
  * Author: Guido Günther <agx@sigxcpu.org>
  *
- * BUILDDIR $ ./tools/run_tool ./tools/plugin-prefs-standalone
+ * BUILDDIR $ ./tools/run_tool ./tools/plugin-prefs
  *
- * plugin-prefs-standalone: A simple wrapper to look at plugin preferenes
+ * plugin-prefs-standalone: A simple wrapper to look at plugin preferences
  */
 
 #include "phosh-config.h"
@@ -18,6 +18,7 @@
 #include <plugin-loader.h>
 
 #include <glib/gi18n.h>
+#include <glib-unix.h>
 
 
 typedef struct _PluginInfo {
@@ -130,6 +131,18 @@ on_app_activated (GtkApplication *app)
 }
 
 
+static gboolean
+on_sigterm (gpointer user_data)
+{
+  GApplication *app = user_data;
+
+  g_debug ("Got SIGTERM, quitting");
+  g_application_quit (app);
+
+  return G_SOURCE_REMOVE;
+}
+
+
 static GActionEntry entries[] =
 {
   { .name = "show-prefs", .parameter_type = "s", .activate = on_activated },
@@ -142,8 +155,10 @@ main (int argc, char *argv[])
   g_autoptr (AdwApplication) app = NULL;
   g_autoptr (GOptionContext) opt_context = NULL;
   g_autoptr (GError) err = NULL;
-  gboolean quick_settings = FALSE;
+  gboolean quick_settings = FALSE, lock_screen = FALSE;
   const GOptionEntry options [] = {
+    {"lock-screen", 'l', 0, G_OPTION_ARG_NONE, &lock_screen,
+     "Load quick setting plugin prefs", NULL},
     {"quick-settings", 'q', 0, G_OPTION_ARG_NONE, &quick_settings,
      "Load quick setting plugin prefs", NULL},
     { NULL, 0, 0, G_OPTION_ARG_NONE, NULL, NULL, NULL }
@@ -159,6 +174,12 @@ main (int argc, char *argv[])
     g_warning ("%s", err->message);
     return 1;
   }
+
+  if (lock_screen && quick_settings) {
+    g_warning ("Can show either lock screen or quick setting plugins");
+    return 1;
+  }
+
   plugin_info = &plugin_infos[quick_settings ? 1 : 0];
 
   app = g_object_new (ADW_TYPE_APPLICATION,
@@ -169,6 +190,8 @@ main (int argc, char *argv[])
                                    entries,
                                    G_N_ELEMENTS (entries),
                                    app);
+
+  g_unix_signal_add (SIGTERM, on_sigterm, app);
   g_application_run (G_APPLICATION (app), argc, argv);
 
   return EXIT_SUCCESS;

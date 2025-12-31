@@ -1,3 +1,11 @@
+libcall-ui 0.1.5
+----------------
+Released: October 2024
+* Avoid libcall-ui deprecations. This breaks downstream builds
+  and they have little choice.
+* Contributors:
+    * Guido Günther
+
 libcall-ui 0.1.4
 ----------------
 Released: September 2024

@@ -7,12 +7,16 @@
 # Author: Guido Günther <agx@sigxcpu.org>
 
 
+import dbus
 import time
 import fcntl
 import os
 import subprocess
 import tempfile
 import sys
+from dbus.mainloop.glib import DBusGMainLoop
+
+DBusGMainLoop(set_as_default=True)
 
 
 def set_nonblock(fd):
@@ -28,21 +32,27 @@ class Phosh:
     wl_display = None
     process = None
 
-    def __init__(self, topsrcdir, topbuilddir, env={}, wrapper=[]):
+    def __init__(
+        self, topsrcdir, topbuilddir, env={}, wrapper=[], gsettings_backend="memory"
+    ):
         self.topsrcdir = topsrcdir
         self.topbuilddir = topbuilddir
         self.tmpdir = tempfile.TemporaryDirectory(dir=topbuilddir)
+        self.rundir = os.path.join(self.tmpdir.name, "run", "user")
+        self.homedir = os.path.join(self.tmpdir.name, "home")
         self.stdout = ""
         self.stderr = ""
         self.env = env
         self.wrapper = wrapper
+        self.gsettings_backend = gsettings_backend
 
         # Set Wayland socket
-        self.wl_display = os.path.join(self.tmpdir.name, "wayland-socket")
+        os.makedirs(self.rundir, exist_ok=True)
+        self.wl_display = os.path.join(self.rundir, "wayland-socket")
+        os.environ["XDG_RUNTIME_DIR"] = self.rundir
 
-        if not os.getenv("XDG_RUNTIME_DIR"):
-            print(f"'XDG_RUNTIME_DIR' unset, setting to {topbuilddir}")
-            os.environ["XDG_RUNTIME_DIR"] = topbuilddir
+        os.makedirs(self.homedir, exist_ok=True)
+        os.environ["HOME"] = self.homedir
 
     def teardown_nested(self):
         self.process.send_signal(15)
@@ -75,7 +85,7 @@ class Phosh:
         runscript = os.path.join(self.topbuilddir, "run")
 
         env = os.environ.copy()
-        env["GSETTINGS_BACKEND"] = "memory"
+        env["GSETTINGS_BACKEND"] = self.gsettings_backend
         backend = self.find_wlr_backend()
         env["WLR_BACKENDS"] = backend
 
@@ -107,10 +117,16 @@ class Phosh:
             stderr: {self.stderr}
             stdout: {self.stdout}"""
 
-        print("Phosh ready")
+        bus = dbus.SessionBus()
+        proxy = bus.get_object(
+            "mobi.phosh.Shell.DebugControl", "/mobi/phosh/Shell/DebugControl"
+        )
+        iface = dbus.Interface(proxy, "org.freedesktop.DBus.Properties")
+        props = iface.GetAll("mobi.phosh.Shell.DebugControl", timeout=5)
+        if "LogDomains" not in props:
+            return None
 
-        # TODO: Check availability on DBus
-        time.sleep(2)
+        print("Phosh ready")
         return self
 
     def wait_for_output(
@@ -127,9 +143,6 @@ class Phosh:
             assert stderr_msg not in self.stderr
 
         while timeout >= 0:
-            # Phosh still running?
-            if self.process.poll() is not None:
-                return False
 
             out = self.process.stdout.read()
             if out:
@@ -138,6 +151,10 @@ class Phosh:
             out = self.process.stderr.read()
             if out:
                 self.stderr += out.decode("utf-8")
+
+            # Phosh still running?
+            if self.process.poll() is not None:
+                return False
 
             if stdout_msg and stdout_msg in self.stdout:
                 found_stdout = True

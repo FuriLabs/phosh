@@ -39,6 +39,7 @@ Build-Depends:
  valac,
 # for the plugins
  libecal2.0-dev,
+ libqrcodegen-dev,
  evolution-data-server-dev,
  universal-ctags,
 # to run the tests
@@ -57,6 +58,7 @@ Build-Depends:
  phoc (>= 0.44~) <!nocheck>,
  python3-dbusmock (>= 0.32.1) <!nocheck>,
  python3-pytest <!nocheck>,
+ gir1.2-umockdev-1.0 <!nocheck>,
  umockdev <!nocheck>,
  wlr-randr <!nocheck>,
  xauth <!nocheck>,
@@ -75,6 +77,7 @@ Depends:
  gnome-shell-common,
  gsettings-desktop-schemas (>= 47),
  libcap2-bin,
+ libqrcodegen1,
  phoc (>= 0.45.0),
  phosh-common (= ${source:Version}),
 Recommends:

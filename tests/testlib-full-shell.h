@@ -15,13 +15,13 @@ typedef struct _PhoshTestFullShellFixture {
   GAsyncQueue              *queue;
   PhoshTestCompositorState *state;
   GTestDBus                *bus;
-  char                     *log_domains;
+  GStrv                     log_domains;
   char                     *tmpdir;
 } PhoshTestFullShellFixture;
 
 
 typedef struct _PhoshTestFullShellFixtureCfg {
-  char *log_domains;
+  GStrv log_domains;
 } PhoshTestFullShellFixtureCfg;
 
 

@@ -318,10 +318,13 @@ on_ambient_released (GObject *source_object, GAsyncResult *res, gpointer user_da
   g_return_if_fail (proxy == PHOSH_DBUS_SENSOR_PROXY (self->sensor_proxy_manager));
 
   success = phosh_dbus_sensor_proxy_call_release_light_finish (proxy, res, &err);
-  if (success)
+  if (success) {
     g_debug ("Released ambient light sensor");
-  else
+  } else {
+    if (g_error_matches (err, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+      return;
     g_warning ("Failed to release ambient sensor: %s", err->message);
+  }
 
   self->claimed--;
   update_auto_brightness_enabled (self);

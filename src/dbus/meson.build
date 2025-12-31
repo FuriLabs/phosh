@@ -117,6 +117,13 @@ dbus_client_protos = [
 dbus_server_protos = [
   # Sorted by xml filename:
   [
+    'phosh-dbus-debug-control',
+    'mobi.phosh.Shell.DebugControl.xml',
+    'mobi.phosh.Shell',
+    false,
+    false,
+  ],
+  [
     'geoclue-agent-dbus',
     'org.freedesktop.GeoClue2.Agent.xml',
     'org.freedesktop',
@@ -213,5 +220,5 @@ targets = gnome.gdbus_codegen(
   object_manager: true,
   namespace: 'PhoshIdleDBus',
 )
-generated_dbus_headers += targets[0]
-generated_dbus_sources += targets[1]
+generated_dbus_sources += targets[0]
+generated_dbus_headers += targets[1]
