@@ -7,7 +7,6 @@
  */
 
 #include "phosh-idle-dbus.h"
-#include "log.h"
 #include "shell-priv.h"
 
 #include "testlib-full-shell.h"

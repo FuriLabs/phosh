@@ -10,11 +10,12 @@
 #include "testlib-full-shell.h"
 
 #include "fake-clock.h"
-#include "log.h"
 #include "shell-priv.h"
 
-#include <handy.h>
 #include <call-ui.h>
+#include <gmobile.h>
+#include <handy.h>
+
 
 /**
  * PhoshTestFullShellFixture:
@@ -67,7 +68,7 @@ phosh_test_full_shell_thread (gpointer data)
   hdy_init ();
   cui_init (TRUE);
 
-  phosh_log_set_log_domains (fixture->log_domains);
+  g_log_writer_default_set_debug_domains ((const char *const *)fixture->log_domains);
 
   /* Drop warnings from the fatal log mask since there's plenty
    * when running without recommended DBus services */
@@ -105,7 +106,7 @@ phosh_test_full_shell_thread (gpointer data)
   while (g_main_context_pending (NULL))
     g_main_context_iteration (NULL, FALSE);
 
-  phosh_log_set_log_domains (NULL);
+  g_log_writer_default_set_debug_domains (NULL);
   return NULL;
 }
 
@@ -113,14 +114,9 @@ PhoshTestFullShellFixtureCfg *
 phosh_test_full_shell_fixture_cfg_new (const char *log_domains)
 {
   PhoshTestFullShellFixtureCfg *self = g_new0 (PhoshTestFullShellFixtureCfg, 1);
-  const char *domains;
 
-  domains = g_getenv ("G_MESSAGES_DEBUG");
-  if (domains != NULL && strlen (domains))
-    log_domains = domains;
-
-  if (log_domains)
-    self->log_domains = g_strdup (log_domains);
+  if (!gm_str_is_null_or_empty (log_domains))
+    self->log_domains = g_strsplit (log_domains, " ", -1);
 
   return self;
 }
@@ -128,7 +124,7 @@ phosh_test_full_shell_fixture_cfg_new (const char *log_domains)
 void
 phosh_test_full_shell_fixture_cfg_dispose (PhoshTestFullShellFixtureCfg *self)
 {
-  g_clear_pointer (&self->log_domains, g_free);
+  g_clear_pointer (&self->log_domains, g_strfreev);
 
   g_free (self);
 }
@@ -159,11 +155,12 @@ phosh_test_full_shell_setup (PhoshTestFullShellFixture *fixture, gconstpointer d
   g_setenv ("XDG_RUNTIME_DIR", fixture->tmpdir, TRUE);
 
   if (cfg->log_domains)
-    fixture->log_domains = g_strdup (cfg->log_domains);
+    fixture->log_domains = g_strdupv (cfg->log_domains);
 
   /* Run shell in a thread so we can sync call to the DBus interfaces */
   fixture->queue = g_async_queue_new ();
-  fixture->comp_and_shell = g_thread_new ("comp-and-shell-thread", phosh_test_full_shell_thread, fixture);
+  fixture->comp_and_shell = g_thread_new ("comp-and-shell-thread",
+                                          phosh_test_full_shell_thread, fixture);
 }
 
 /**
@@ -191,5 +188,5 @@ phosh_test_full_shell_teardown (PhoshTestFullShellFixture *fixture, gconstpointe
   phosh_test_remove_tree (file);
   g_free (fixture->tmpdir);
 
-  g_free (fixture->log_domains);
+  g_strfreev (fixture->log_domains);
 }

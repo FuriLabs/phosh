@@ -29,9 +29,10 @@
 #include "background.h"
 #include "brightness-manager.h"
 #include "drag-surface.h"
+#include "debug-control.h"
 #include "shell-priv.h"
 #include "app-tracker.h"
-#include "batteryinfo.h"
+#include "battery-info.h"
 #include "background-manager.h"
 #include "bt-info.h"
 #include "bt-manager.h"
@@ -128,6 +129,7 @@ enum {
   PROP_PRIMARY_MONITOR,
   PROP_SHELL_STATE,
   PROP_OVERVIEW_VISIBLE,
+  PROP_LOG_DOMAINS,
   PROP_LAST_PROP
 };
 static GParamSpec *props[PROP_LAST_PROP];
@@ -140,84 +142,86 @@ static guint signals[N_SIGNALS] = { 0 };
 
 static PhoshShellDebugFlags debug_flags;
 
-typedef struct
-{
-  PhoshDragSurface *top_panel;
-  PhoshDragSurface *home;
-  gboolean          overview_visible;
-  GPtrArray *faders;              /* for final fade out */
+typedef struct {
+  PhoshDragSurface           *top_panel;
+  PhoshDragSurface           *home;
+  gboolean                    overview_visible;
+  GPtrArray                  *faders; /* for final fade out */
+  GStrv log_domains;
 
-  PhoshOsdWindow   *osd;
-  gint              osd_timeoutid;
-  gboolean          osd_continue;
+  PhoshOsdWindow             *osd;
+  gint osd_timeoutid;
+  gboolean                    osd_continue;
 
-  GtkWidget *notification_banner;
+  GtkWidget                  *notification_banner;
 
-  PhoshUdevManager *udev_manager;
-  PhoshAppTracker *app_tracker;
-  PhoshSessionManager *session_manager;
-  PhoshBackgroundManager *background_manager;
-  PhoshCallsManager *calls_manager;
-  PhoshMonitor *primary_monitor;
-  PhoshMonitor *builtin_monitor;
-  PhoshMonitorManager *monitor_manager;
-  PhoshLockscreenManager *lockscreen_manager;
-  PhoshIdleManager *idle_manager;
-  PhoshOskManager  *osk_manager;
-  PhoshToplevelManager *toplevel_manager;
-  PhoshWifiManager *wifi_manager;
-  PhoshPolkitAuthAgent *polkit_auth_agent;
-  PhoshScreenSaverManager *screen_saver_manager;
-  PhoshScreenshotManager *screenshot_manager;
-  PhoshNotifyManager *notify_manager;
-  PhoshFeedbackManager *feedback_manager;
-  PhoshBtManager *bt_manager;
-  PhoshMountManager *mount_manager;
-  PhoshWWan *wwan;
-  PhoshTorchManager *torch_manager;
-  PhoshModeManager *mode_manager;
-  PhoshDockedManager *docked_manager;
-  PhoshGtkMountManager *gtk_mount_manager;
-  PhoshHksManager *hks_manager;
-  PhoshKeyboardEvents *keyboard_events;
-  PhoshLocationManager *location_manager;
-  PhoshGnomeShellManager *gnome_shell_manager;
-  PhoshSplashManager *splash_manager;
-  PhoshRunCommandManager *run_command_manager;
-  PhoshNetworkAuthManager *network_auth_manager;
-  PhoshVpnManager *vpn_manager;
-  PhoshPortalAccessManager *portal_access_manager;
-  PhoshSuspendManager *suspend_manager;
+  PhoshUdevManager           *udev_manager;
+  PhoshAppTracker            *app_tracker;
+  PhoshSessionManager        *session_manager;
+  PhoshBackgroundManager     *background_manager;
+  PhoshCallsManager          *calls_manager;
+  PhoshMonitor               *primary_monitor;
+  PhoshMonitor               *builtin_monitor;
+  PhoshMonitorManager        *monitor_manager;
+  PhoshLockscreenManager     *lockscreen_manager;
+  PhoshIdleManager           *idle_manager;
+  PhoshOskManager            *osk_manager;
+  PhoshToplevelManager       *toplevel_manager;
+  PhoshWifiManager           *wifi_manager;
+  PhoshPolkitAuthAgent       *polkit_auth_agent;
+  PhoshScreenSaverManager    *screen_saver_manager;
+  PhoshScreenshotManager     *screenshot_manager;
+  PhoshNotifyManager         *notify_manager;
+  PhoshFeedbackManager       *feedback_manager;
+  PhoshBatteryManager        *battery_manager;
+  PhoshBtManager             *bt_manager;
+  PhoshMountManager          *mount_manager;
+  PhoshWWan                  *wwan;
+  PhoshTorchManager          *torch_manager;
+  PhoshModeManager           *mode_manager;
+  PhoshDockedManager         *docked_manager;
+  PhoshGtkMountManager       *gtk_mount_manager;
+  PhoshHksManager            *hks_manager;
+  PhoshKeyboardEvents        *keyboard_events;
+  PhoshLocationManager       *location_manager;
+  PhoshGnomeShellManager     *gnome_shell_manager;
+  PhoshSplashManager         *splash_manager;
+  PhoshRunCommandManager     *run_command_manager;
+  PhoshNetworkAuthManager    *network_auth_manager;
+  PhoshVpnManager            *vpn_manager;
+  PhoshPortalAccessManager   *portal_access_manager;
+  PhoshSuspendManager        *suspend_manager;
   PhoshEmergencyCallsManager *emergency_calls_manager;
-  PhoshPowerMenuManager *power_menu_manager;
-  PhoshLayoutManager *layout_manager;
-  PhoshStyleManager *style_manager;
-  PhoshLauncherEntryManager *launcher_entry_manager;
-  PhoshCellBroadcastManager *cell_broadcast_manager;
-  PhoshConnectivityManager *connectivity_manager;
-  PhoshMprisManager *mpris_manager;
-  PhoshBrightnessManager *brightness_manager;
+  PhoshPowerMenuManager      *power_menu_manager;
+  PhoshLayoutManager         *layout_manager;
+  PhoshStyleManager          *style_manager;
+  PhoshLauncherEntryManager  *launcher_entry_manager;
+  PhoshCellBroadcastManager  *cell_broadcast_manager;
+  PhoshConnectivityManager   *connectivity_manager;
+  PhoshMprisManager          *mpris_manager;
+  PhoshBrightnessManager     *brightness_manager;
+  PhoshDebugControl          *debug_control;
 
   /* sensors */
-  PhoshSensorProxyManager *sensor_proxy_manager;
-  PhoshProximity *proximity;
-  PhoshAmbient *ambient;
-  PhoshRotationManager *rotation_manager;
+  PhoshSensorProxyManager    *sensor_proxy_manager;
+  PhoshProximity             *proximity;
+  PhoshAmbient               *ambient;
+  PhoshRotationManager       *rotation_manager;
 
-  gboolean             startup_finished;
-  guint                startup_finished_id;
+  gboolean                    startup_finished;
+  guint startup_finished_id;
 
-  GSimpleActionGroup  *action_map;
+  GSimpleActionGroup         *action_map;
 
   /* Mirrors PhoshLockscreenManager's locked property */
-  gboolean locked;
+  gboolean                    locked;
 
   /* Mirrors PhoshDockedManager's docked property */
-  gboolean docked;
+  gboolean                    docked;
 
-  PhoshShellStateFlags shell_state;
+  PhoshShellStateFlags        shell_state;
 
-  GSettings      *settings;
+  GSettings                  *settings;
 } PhoshShellPrivate;
 
 static void phosh_shell_action_group_iface_init (GActionGroupInterface *iface);
@@ -379,6 +383,9 @@ setup_primary_monitor_signal_handlers (PhoshShell *self)
 {
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
+  if (!priv->primary_monitor)
+    return;
+
   g_signal_connect_swapped (priv->primary_monitor,
                             "notify::power-mode",
                             G_CALLBACK (on_primary_monitor_power_mode_changed),
@@ -479,6 +486,29 @@ set_locked (PhoshShell *self, gboolean locked)
 
 
 static void
+phosh_shell_set_log_domains (PhoshShell *self, const char *const *log_domains)
+{
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+
+  if (!priv->log_domains && !log_domains)
+    return;
+
+  if (priv->log_domains && log_domains &&
+      g_strv_equal ((const char *const *)priv->log_domains, log_domains))
+    return;
+
+  g_strfreev (priv->log_domains);
+  priv->log_domains = g_strdupv ((GStrv)log_domains);
+
+  g_log_writer_default_set_debug_domains (log_domains);
+
+  g_object_notify_by_pspec (G_OBJECT (self), props[PROP_LOG_DOMAINS]);
+}
+
+
+static void
 phosh_shell_set_property (GObject      *object,
                           guint         property_id,
                           const GValue *value,
@@ -501,6 +531,9 @@ phosh_shell_set_property (GObject      *object,
     break;
   case PROP_OVERVIEW_VISIBLE:
     priv->overview_visible = g_value_get_boolean (value);
+    break;
+  case PROP_LOG_DOMAINS:
+    phosh_shell_set_log_domains (self, g_value_get_boxed (value));
     break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -537,6 +570,9 @@ phosh_shell_get_property (GObject    *object,
   case PROP_OVERVIEW_VISIBLE:
     g_value_set_boolean (value, priv->overview_visible);
     break;
+  case PROP_LOG_DOMAINS:
+    g_value_set_boxed (value, priv->log_domains);
+    break;
   default:
     G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
     break;
@@ -558,6 +594,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_pointer (&priv->notification_banner, phosh_cp_widget_destroy);
 
   /* dispose managers in opposite order of declaration */
+  g_clear_object (&priv->debug_control);
   g_clear_object (&priv->brightness_manager);
   g_clear_object (&priv->mpris_manager);
   g_clear_object (&priv->connectivity_manager);
@@ -581,6 +618,7 @@ phosh_shell_dispose (GObject *object)
   g_clear_object (&priv->gnome_shell_manager);
   g_clear_object (&priv->wwan);
   g_clear_object (&priv->mount_manager);
+  g_clear_object (&priv->battery_manager);
   g_clear_object (&priv->bt_manager);
   g_clear_object (&priv->feedback_manager);
   g_clear_object (&priv->notify_manager);
@@ -620,6 +658,11 @@ phosh_shell_dispose (GObject *object)
 static void
 phosh_shell_finalize (GObject *object)
 {
+  PhoshShell *self = PHOSH_SHELL (object);
+  PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  g_clear_pointer (&priv->log_domains, g_strfreev);
+
   cui_uninit ();
   G_OBJECT_CLASS (phosh_shell_parent_class)->finalize (object);
 }
@@ -789,6 +832,7 @@ setup_idle_cb (PhoshShell *self)
   g_autoptr (GError) err = NULL;
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
 
+  priv->debug_control = phosh_debug_control_new ();
   priv->app_tracker = phosh_app_tracker_new ();
   priv->session_manager = phosh_session_manager_new ();
   priv->mode_manager = phosh_mode_manager_new ();
@@ -871,6 +915,9 @@ setup_idle_cb (PhoshShell *self)
   setup_primary_monitor_signal_handlers (self);
   /* Setup event hooks late so state changes in UI files don't trigger feedback */
   phosh_feedback_manager_setup_event_hooks (priv->feedback_manager);
+
+  /* Export the debug interface late so everything is up when the name appears */
+  phosh_debug_control_set_exported (priv->debug_control, TRUE);
 
   /* Delay signaling to the compositor a bit so that idle handlers get a chance to run and
      the user can unlock right away. Ideally we'd not need this */
@@ -1346,6 +1393,16 @@ phosh_shell_class_init (PhoshShellClass *klass)
     g_param_spec_boolean ("overview-visible", "", "",
                           TRUE,
                           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+  /**
+   * PhoshShell:log-domains
+   *
+   * The current log domains
+   */
+  props[PROP_LOG_DOMAINS] =
+    g_param_spec_boxed ("log-domains", "", "",
+                        G_TYPE_STRV,
+                        G_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY | G_PARAM_STATIC_STRINGS);
+
 
   g_object_class_install_properties (object_class, PROP_LAST_PROP, props);
 
@@ -1383,7 +1440,12 @@ static GDebugKey debug_keys[] =
 static void
 phosh_shell_init (PhoshShell *self)
 {
+  const char *messages_debug;
   PhoshShellPrivate *priv = phosh_shell_get_instance_private (self);
+
+  messages_debug = g_getenv ("G_MESSAGES_DEBUG");
+  if (messages_debug)
+    priv->log_domains = g_strsplit (messages_debug, " ", -1);
 
   cui_init (TRUE);
   gtk_icon_theme_add_resource_path (gtk_icon_theme_get_default (), "/mobi/phosh/icons");
@@ -1934,6 +1996,29 @@ phosh_shell_get_brightness_manager (PhoshShell *self)
   g_return_val_if_fail (PHOSH_IS_BRIGHTNESS_MANAGER (priv->brightness_manager), NULL);
 
   return priv->brightness_manager;
+}
+
+/**
+ * phosh_shell_get_battery_manager:
+ * @self: The shell singleton
+ *
+ * Get the battery manager
+ *
+ * Returns: (transfer none): The battery manager
+ */
+PhoshBatteryManager *
+phosh_shell_get_battery_manager (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_val_if_fail (PHOSH_IS_SHELL (self), NULL);
+  priv = phosh_shell_get_instance_private (self);
+
+  if (!priv->battery_manager)
+    priv->battery_manager = phosh_battery_manager_new ();
+
+  g_return_val_if_fail (PHOSH_IS_BATTERY_MANAGER (priv->battery_manager), NULL);
+  return priv->battery_manager;
 }
 
 /**

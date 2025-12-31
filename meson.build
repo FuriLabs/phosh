@@ -1,7 +1,7 @@
 project(
   'phosh',
   'c',
-  version: '0.51.0',
+  version: '0.52.rc1',
   license: 'GPL-3.0-or-later',
   meson_version: '>= 1.7.0',
   default_options: [
@@ -48,7 +48,7 @@ else
   sysconfdir = get_option('sysconfdir')
 endif
 
-glib_ver = '2.76'
+glib_ver = '2.80'
 glib_ver_str = 'GLIB_VERSION_@0@'.format(glib_ver.replace('.', '_'))
 glib_ver_cmp = '>=@0@'.format(glib_ver)
 

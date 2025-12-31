@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-#include "log.h"
 #include "testlib-wait-for-shell-state.h"
 
 #include "testlib-full-shell.h"

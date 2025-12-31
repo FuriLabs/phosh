@@ -8,7 +8,6 @@
 
 #include "testlib-compositor.h"
 
-#include "log.h"
 #include "shell-priv.h"
 #include "background-manager.h"
 #include "phosh-wayland.h"
@@ -70,12 +69,12 @@ phosh_test_get_shell (GLogLevelFlags *saved_flags)
   gtk_init (NULL, NULL);
   hdy_init ();
 
-  phosh_log_set_log_domains ("all");
+  g_log_writer_default_set_debug_domains ((const char * const[]){ "all", NULL });
 
   /* Drop warnings from the fatal log mask since there's plenty
    * when running without recommended DBus services */
   flags = g_log_set_always_fatal (0);
-  g_log_set_always_fatal(flags & ~G_LOG_LEVEL_WARNING);
+  g_log_set_always_fatal (flags & ~G_LOG_LEVEL_WARNING);
 
   shell = phosh_shell_new ();
   g_assert_true (PHOSH_IS_SHELL (shell));

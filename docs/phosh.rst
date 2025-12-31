@@ -49,6 +49,26 @@ e.g.
 
     gsettings set  sm.puri.phosh.plugins lock-screen "['ticket-box', 'upcoming-events']"
 
+DBUS INTERFACE
+--------------
+
+``phosh`` allows to enable and disable certain debug flags at runtime via DBus. To see a list of
+available flags use:
+
+::
+
+  busctl --user introspect mobi.phosh.Shell.DebugControl /mobi/phosh/Shell/DebugControl mobi.phosh.Shell.DebugControl
+
+To toggle individual values:
+
+::
+
+  busctl --user set-property mobi.phosh.Shell.DebugControl /mobi/phosh/Shell/DebugControl mobi.phosh.Shell.DebugControl LogDomains as 2 phosh-shell phosh-brightness-manager
+
+Note that the flags are not considered stable API so can change
+between releases.
+
+
 ENVIRONMENT VARIABLES
 ---------------------
 

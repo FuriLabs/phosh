@@ -10,22 +10,67 @@
 #
 # Author: Guido Günther <agx@sigxcpu.org>
 
+import gi
 import os
 import subprocess
+import dbus
 import dbusmock
+import shutil
 from collections import OrderedDict
 from dbusmock import DBusTestCase
-from dbus.mainloop.glib import DBusGMainLoop
-from pathlib import Path
+from dbusmock.templates.networkmanager import (
+    InfrastructureMode,
+    MANAGER_IFACE,
+    NM80211ApSecurityFlags,
+    SETTINGS_IFACE,
+    SETTINGS_OBJ,
+)
 
-from gi.repository import Gio
-
-from . import Phosh, set_nonblock
-
-DBusGMainLoop(set_as_default=True)
+gi.require_version("UMockdev", "1.0")
+gi.require_version("GUdev", "1.0")
+from gi.repository import Gio, UMockdev  # noqa: 402
+from . import Phosh, set_nonblock  # noqa: 402
 
 
 class PhoshDBusTestCase(DBusTestCase):
+
+    @classmethod
+    def setup_udev_mock(klass):
+        klass.umock = UMockdev.Testbed.new()
+
+        # Torch
+        klass.torch_syspath = klass.umock.add_device(
+            "leds",
+            "white:flash",
+            None,
+            ["brightness", "0", "max_brightness", "255"],
+            ["GM_TORCH_MIN_BRIGHTNESS", "1"],
+        )
+        assert klass.torch_syspath == "/sys/devices/white:flash"
+
+        # Backlight
+        klass.backlight_syspath = klass.umock.add_device(
+            "backlight",
+            "intel_backlight",
+            None,
+            [
+                "actual_brightness",
+                "76255",
+                "brightness",
+                "76255",
+                "max_brightness",
+                "19200",
+                "scale",
+                "unknown",
+                "type",
+                "raw",
+            ],
+            [],
+        )
+        assert klass.backlight_syspath == "/sys/devices/intel_backlight"
+
+        return klass.umock.get_root_dir()
+
     @classmethod
     def setUpClass(klass):
         klass.mocks = OrderedDict()
@@ -46,21 +91,25 @@ class PhoshDBusTestCase(DBusTestCase):
             klass.session_test_bus.get_bus_address()
         )
 
-        # Add the templates we want running before phosh starts
-        flash_mock = (
-            Path(topsrcdir) / "tests" / "integration" / "oneplus,fajita.umockdev"
-        )
-        udev_mock_script = ["umockdev-run", "-d", str(flash_mock), "--"]
+        # Setup udev mocks
+        env["UMOCKDEV_DIR"] = klass.setup_udev_mock()
 
         # TODO: start udev mock for e.g. backlight
         klass.start_from_template("bluez5")
         klass.start_from_template("gsd_rfkill")
         klass.start_from_template("modemmanager")
         klass.start_from_template("networkmanager")
+        klass.start_from_template(
+            "upower",
+            {
+                "OnBattery": True,
+            },
+        )
 
         # Setup logging
         env["G_MESSAGES_DEBUG"] = " ".join(
             [
+                "phosh-battery-manager",
                 "phosh-brightness-manager",
                 "phosh-backlight",
                 "phosh-backlight-sysfs",
@@ -68,16 +117,40 @@ class PhoshDBusTestCase(DBusTestCase):
                 "phosh-cell-broadcast-manager",
                 "phosh-udev-manager",
                 "phosh-torch-manager",
+                "phosh-vpn-manager",
                 "phosh-wifi-manager",
                 "phosh-wwan-manager",
                 "phosh-wwan-mm",
+                "phosh-plugin-wifi-hotspot-quick-setting",
             ]
         )
         env["XDG_CURRENT_DESKTOP"] = "Phosh:GNOME"
 
         klass.phosh = Phosh(
-            topsrcdir, topbuilddir, env, wrapper=udev_mock_script
-        ).spawn_nested()
+            topsrcdir,
+            topbuilddir,
+            env,
+            wrapper=["umockdev-wrapper"],
+            gsettings_backend="keyfile",
+        )
+
+        # Install keyfile with gsettings
+        assert os.environ.get("XDG_CONFIG_HOME") is None
+        keyfile_dir = os.path.join(
+            klass.phosh.homedir, ".config", "glib-2.0", "settings"
+        )
+        os.makedirs(keyfile_dir, exist_ok=True)
+
+        srcdir = os.path.dirname(os.path.abspath(__file__))
+        keyfile = os.path.join(srcdir, "keyfile")
+        shutil.copy(keyfile, keyfile_dir)
+
+        if os.getenv("SAVE_DBUS_LOGS"):
+            os.system("dbus-monitor --system --pcap > pcap.session &")
+            os.system("dbus-monitor --session --pcap > pcap.session &")
+
+        # Spawn phosh
+        klass.phosh.spawn_nested()
 
     @classmethod
     def tearDownClass(klass):
@@ -129,16 +202,110 @@ class PhoshDBusTestCase(DBusTestCase):
         mm.AddCbm(2, cbm_channel, cbm_text)
         assert self.phosh.wait_for_output(f" Received cbm {cbm_channel}: {cbm_text}")
 
+    def test_vpn(self):
+        self.mocks["networkmanager"][1]
+
+        assert self.phosh.wait_for_output(
+            " VPN present: 0, uuid: (null)\n", ignore_present=True
+        )
+
+        # Add a VPN connection
+        connection = {
+            "connection": {
+                "timestamp": 1441979296,
+                "type": "vpn",
+                "id": "a",
+                "uuid": "11111111-1111-1111-1111-111111111111",
+            },
+            "vpn": {
+                "service-type": "org.freedesktop.NetworkManager.openvpn",
+                "data": {"connection-type": "tls"},
+            },
+        }
+
+        dbuscon = self.get_dbus(True)
+        settings = dbus.Interface(
+            dbuscon.get_object(MANAGER_IFACE, SETTINGS_OBJ), SETTINGS_IFACE
+        )
+        settings.AddConnection(connection)
+        assert self.phosh.wait_for_output(
+            " VPN present: 1, uuid: 11111111-1111-1111-1111-111111111111\n"
+        )
+
+        # Add a wireguard connection with newer timestamp
+        connection = {
+            "connection": {
+                "timestamp": 1441979300,
+                "type": "vpn",
+                "id": "b",
+                "uuid": "22222222-2222-2222-2222-222222222222",
+            },
+            "wireguard": {},
+        }
+
+        dbuscon = self.get_dbus(True)
+        settings = dbus.Interface(
+            dbuscon.get_object(MANAGER_IFACE, SETTINGS_OBJ), SETTINGS_IFACE
+        )
+        settings.AddConnection(connection)
+        assert self.phosh.wait_for_output(
+            " VPN present: 1, uuid: 22222222-2222-2222-2222-222222222222\n"
+        )
+
     def test_wifi(self):
         nm = self.mocks["networkmanager"][1]
 
         assert self.phosh.check_for_stdout(" NM Wi-Fi enabled: 0, present: 0")
 
         # Add and enable Wi-Fi
-        nm.AddWiFiDevice(
+        wifi = nm.AddWiFiDevice(
             "wifi0", "wlan0", dbusmock.templates.networkmanager.DeviceState.ACTIVATED
         )
         assert self.phosh.wait_for_output(" NM Wi-Fi enabled: 1, present: 1")
+        assert self.phosh.check_for_stdout(" Wi-Fi device connected at 0")
+        # From the hotspot quick setting
+        assert self.phosh.check_for_stdout(" State: 0, Hotspot: 0 Wi-Fi: 0")
+
+        nm.AddAccessPoint(
+            wifi,
+            "ap0",
+            "SSID1",
+            "00:de:ad:be:ef:00",
+            InfrastructureMode.NM_802_11_MODE_INFRA,
+            2425,
+            5400,
+            11,  # weak signal
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_PSK,
+        )
+        assert self.phosh.wait_for_output(" Creating network: SSID1\n")
+
+        nm.AddAccessPoint(
+            wifi,
+            "ap1",
+            "SSID1",
+            "00:de:ad:be:ef:01",
+            InfrastructureMode.NM_802_11_MODE_INFRA,
+            2425,
+            5400,
+            82,  # stronger signal
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_PSK,
+        )
+        assert self.phosh.wait_for_output(
+            " Adding access point to existing network: SSID1\n"
+        )
+
+        nm.AddAccessPoint(
+            wifi,
+            "ap2",
+            "SSID2",
+            "00:de:ad:be:ef:01",
+            InfrastructureMode.NM_802_11_MODE_INFRA,
+            2425,
+            5400,
+            82,
+            NM80211ApSecurityFlags.NM_802_11_AP_SEC_KEY_MGMT_PSK,
+        )
+        assert self.phosh.wait_for_output(" Creating network: SSID2\n")
 
     def test_bt(self):
         adapter_name = "hci0"
@@ -164,4 +331,79 @@ class PhoshDBusTestCase(DBusTestCase):
         assert self.phosh.wait_for_output(
             " Found HEADLESS-1 for brightness control",
             ignore_present=True,
+        )
+
+        subprocess.check_output(
+            [
+                "busctl",
+                "call",
+                "--user",
+                "org.gnome.Shell",
+                "/org/gnome/Shell/Brightness",
+                "org.gnome.Shell.Brightness",
+                "SetDimming",
+                "b",
+                "true",
+            ]
+        )
+        # schema default of "org.gnome.settings-daemon.plugins.power" "idle-dim"
+        # is enabled so the above DBus call should change brightness
+        assert self.phosh.wait_for_output(" Setting target brightness to 764\n")
+        assert self.phosh.wait_for_output(
+            " Setting brightness via logind: 764\n",
+            ignore_present=True,
+        )
+
+    def test_bat(self):
+        upower = self.mocks["upower"][1]
+
+        assert self.phosh.wait_for_output(
+            " Got upower display device\n",
+            ignore_present=True,
+        )
+
+        assert self.phosh.wait_for_output(
+            " New icon: battery-level-0-symbolic",
+            ignore_present=True,
+        )
+
+        upower.SetupDisplayDevice(
+            # UP_DEVICE_KIND_BATTERY
+            2,
+            # UP_DEVICE_STATE_DISCHARGING
+            2,
+            33.0,
+            33.0,
+            100.0,
+            0.01,
+            3600,
+            0,
+            True,
+            "",
+            # UP_DEVICE_LEVEL,
+            1,
+        )
+
+        assert self.phosh.wait_for_output(" New icon: battery-level-30-symbolic")
+
+        upower.SetDeviceProperties(
+            "/org/freedesktop/UPower/devices/DisplayDevice",
+            {
+                "State": dbus.UInt32(1),
+            },
+        )
+
+        assert self.phosh.wait_for_output(
+            " New icon: battery-level-30-charging-symbolic"
+        )
+
+        upower.SetDeviceProperties(
+            "/org/freedesktop/UPower/devices/DisplayDevice",
+            {
+                "Percentage": 43.0,
+            },
+        )
+
+        assert self.phosh.wait_for_output(
+            " New icon: battery-level-40-charging-symbolic"
         )

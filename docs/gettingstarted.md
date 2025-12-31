@@ -125,6 +125,35 @@ gdbus call --session -d org.gnome.SettingsDaemon.Rfkill \
                      -m org.freedesktop.DBus.Mock.SetAirplaneMode true
 ```
 
+### Integration tests
+
+#### Running with DBus mocks
+
+We have some tests checking integration with system services like
+ModemManager using python-dbusmock. You can run them using
+
+```sh
+_build/tests/integration/run-pytest -v -s tests/integration/test_dbus.py
+```
+
+If you want to inspect phosh's log output use
+
+```sh
+SAVE_TEST_LOGS=1 _build-test/tests/integration/run-pytest -s tests/integration/test_dbus.py
+```
+
+and `stderr` and `stdout` will be written into `log.stderr` and
+`log.stdout` in the current directory.
+
+#### Running the Screenshot Tests
+
+One testcase brings up different parts of the shell and takes screenshots from them
+to ease finding visual regressions. You can run them locally via
+
+```sh
+PHOSH_TEST_TYPE=doesnotmatter _build-test/tests/test-take-screenshots
+```
+
 ### GTK Inspector
 
 Since phosh is a GTK application you can use
