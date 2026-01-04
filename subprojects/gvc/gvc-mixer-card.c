@@ -165,7 +165,7 @@ gvc_mixer_card_get_profile (GvcMixerCard *card)
                 }
         }
 
-        //g_assert_not_reached ();
+        g_assert_not_reached ();
 
         return NULL;
 }
