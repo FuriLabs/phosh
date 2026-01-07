@@ -1,7 +1,7 @@
 phosh (0.52.1-1) unstable; urgency=medium
 
   * New upstream release
-    * Avoid newer pipewire/pipewire crashing gvc and thus phosh
+    * Avoid newer wireplumber/pipewire crashing gvc and thus phosh
 
  -- Guido Günther <agx@sigxcpu.org>  Wed, 07 Jan 2026 17:40:40 +0100
 
