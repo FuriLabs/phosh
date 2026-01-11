@@ -19,6 +19,9 @@
 
 #include <gudev/gudev.h>
 
+#include <glib/gstdio.h>
+#include <fcntl.h>
+
 /**
  * PhoshBacklightSysfs:
  *
@@ -32,6 +35,10 @@ enum {
 };
 static GParamSpec *props[PROP_LAST_PROP];
 
+#define LED_BACKLIGHT_DIR            "/sys/class/leds/lcd-backlight"
+#define LED_BACKLIGHT_BRIGHTNESS     LED_BACKLIGHT_DIR "/brightness"
+#define LED_BACKLIGHT_MAX_BRIGHTNESS LED_BACKLIGHT_DIR "/max_brightness"
+
 struct _PhoshBacklightSysfs {
   PhoshBacklight parent;
 
@@ -43,12 +50,153 @@ struct _PhoshBacklightSysfs {
 
   GUdevDevice   *device;
   PhoshDBusLoginSession *session_proxy;
+
+  gboolean       manual_sysfs;
+  char          *manual_brightness_path;
+  char          *manual_max_brightness_path;
+  char          *manual_name;
 };
 
 static void initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (PhoshBacklightSysfs, phosh_backlight_sysfs, PHOSH_TYPE_BACKLIGHT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, initable_iface_init))
+
+static gboolean
+sysfs_read_int (const char *path, int *out, GError **error)
+{
+  g_autofree char *contents = NULL;
+
+  g_return_val_if_fail (path != NULL, FALSE);
+  g_return_val_if_fail (out != NULL, FALSE);
+
+  if (!g_file_get_contents (path, &contents, NULL, error))
+    return FALSE;
+
+  *out = (int)g_ascii_strtoll (contents, NULL, 0);
+  return TRUE;
+}
+
+
+static gboolean
+sysfs_write_int (const char *path, int value, GError **error)
+{
+  char buf[32];
+  int len;
+  int fd;
+  ssize_t written;
+
+  g_return_val_if_fail (path != NULL, FALSE);
+
+  len = g_snprintf (buf, sizeof (buf), "%d\n", value);
+
+  fd = g_open (path, O_WRONLY | O_CLOEXEC, 0);
+  if (fd < 0) {
+    g_set_error (error,
+                 G_IO_ERROR,
+                 g_io_error_from_errno (errno),
+                 "Failed to open '%s' for writing: %s",
+                 path,
+                 g_strerror (errno));
+    return FALSE;
+  }
+
+  written = write (fd, buf, (size_t) len);
+  if (written < 0) {
+    int saved_errno = errno;
+    close (fd);
+    g_set_error (error,
+                 G_IO_ERROR,
+                 g_io_error_from_errno (saved_errno),
+                 "Failed to write to '%s': %s",
+                 path,
+                 g_strerror (saved_errno));
+    return FALSE;
+  }
+
+  if (written != len) {
+    close (fd);
+    g_set_error (error,
+                 G_IO_ERROR,
+                 G_IO_ERROR_FAILED,
+                 "Short write to '%s' (wrote %zd of %d bytes)",
+                 path,
+                 written,
+                 len);
+    return FALSE;
+  }
+
+  if (close (fd) < 0) {
+    g_set_error (error,
+                 G_IO_ERROR,
+                 g_io_error_from_errno (errno),
+                 "Failed to close '%s': %s",
+                 path,
+                 g_strerror (errno));
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+
+static gboolean
+phosh_backlight_sysfs_manual_available (void)
+{
+  return g_file_test (LED_BACKLIGHT_BRIGHTNESS, G_FILE_TEST_EXISTS) &&
+         g_file_test (LED_BACKLIGHT_MAX_BRIGHTNESS, G_FILE_TEST_EXISTS);
+}
+
+
+static gboolean
+phosh_backlight_sysfs_manual_init (PhoshBacklightSysfs *self, GError **error)
+{
+  int max = 0;
+  int min = 0;
+
+  g_return_val_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self), FALSE);
+
+  if (!phosh_backlight_sysfs_manual_available ()) {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                 "LED backlight sysfs nodes not found (%s, %s)",
+                 LED_BACKLIGHT_BRIGHTNESS, LED_BACKLIGHT_MAX_BRIGHTNESS);
+    return FALSE;
+  }
+
+  self->manual_brightness_path = g_strdup (LED_BACKLIGHT_BRIGHTNESS);
+  self->manual_max_brightness_path = g_strdup (LED_BACKLIGHT_MAX_BRIGHTNESS);
+  self->manual_name = g_strdup ("lcd-backlight");
+  self->manual_sysfs = TRUE;
+
+  if (!sysfs_read_int (self->manual_max_brightness_path, &max, error))
+    return FALSE;
+
+  /*
+   * allow "off" as 0, but set the minimum usable brightness to 1% of max.
+   * ensure at least 1 so we don't end up with a 0 min on small ranges.
+   */
+  min = MAX (1, (max + 99) / 100);
+
+  if (max <= min) {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                 "LED backlight has invalid brightness range [%d,%d]", min, max);
+    return FALSE;
+  }
+
+  phosh_backlight_set_range (PHOSH_BACKLIGHT (self), min, max, PHOSH_BACKLIGHT_SCALE_NON_LINEAR);
+
+  phosh_backlight_set_name (PHOSH_BACKLIGHT (self),
+                            self->connector_name ? self->connector_name : self->manual_name);
+
+  g_debug ("Using manual LED sysfs backlight: brightness=%s max_brightness=%s (min=%d max=%d)",
+           self->manual_brightness_path,
+           self->manual_max_brightness_path,
+           min,
+           max);
+
+  return TRUE;
+}
+
 
 static void
 on_dbus_login_session_brightness_set (GObject      *source_object,
@@ -84,6 +232,35 @@ phosh_backlight_sysfs_set_level_finish (PhoshBacklight  *backlight,
   return g_task_propagate_int (G_TASK (result), error);
 }
 
+static void
+phosh_backlight_sysfs_set_level_manual (PhoshBacklightSysfs *self,
+                                        int                  brightness,
+                                        GCancellable        *cancellable,
+                                        GAsyncReadyCallback  callback,
+                                        gpointer             user_data)
+{
+  g_autoptr (GTask) task = NULL;
+  g_autoptr (GError) err = NULL;
+
+  g_return_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self));
+
+  task = g_task_new (self, cancellable, callback, user_data);
+  g_task_set_task_data (task, GINT_TO_POINTER (brightness), NULL);
+  g_task_set_source_tag (task, phosh_backlight_sysfs_set_level_manual);
+
+  if (!self->manual_sysfs || !self->manual_brightness_path) {
+    g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                             "Manual sysfs backend not initialized");
+    return;
+  }
+
+  if (!sysfs_write_int (self->manual_brightness_path, brightness, &err)) {
+    g_task_return_error (task, g_steal_pointer (&err));
+    return;
+  }
+
+  g_task_return_int (task, brightness);
+}
 
 static void
 phosh_backlight_sysfs_set_level (PhoshBacklight      *backlight,
@@ -97,12 +274,21 @@ phosh_backlight_sysfs_set_level (PhoshBacklight      *backlight,
 
   g_return_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self));
 
+  /* if we are in manual sysfs mode, bypass logind and write directly */
+  if (self->manual_sysfs) {
+    phosh_backlight_sysfs_set_level_manual (self, brightness, cancellable, callback, user_data);
+    return;
+  }
+
   task = g_task_new (self, cancellable, callback, user_data);
   g_task_set_task_data (task, GINT_TO_POINTER (brightness), NULL);
   g_task_set_source_tag (task, phosh_backlight_sysfs_set_level);
 
-  if (!self->session_proxy)
+  if (!self->session_proxy) {
+    g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                             "No logind session proxy");
     return;
+  }
 
   g_debug ("Setting brightness via logind: %d", brightness);
   phosh_dbus_login_session_call_set_brightness (self->session_proxy,
@@ -121,6 +307,17 @@ phosh_backlight_sysfs_update (PhoshBacklightSysfs *self)
   g_autoptr (GError) err = NULL;
   g_autofree char *contents = NULL;
   int level;
+
+  if (self->manual_sysfs) {
+    if (!sysfs_read_int (self->manual_brightness_path, &level, &err)) {
+      g_warning ("Backlight %s: Could not get brightness from manual sysfs: %s",
+                 self->connector_name ? self->connector_name : "(unknown)",
+                 err->message);
+      return;
+    }
+    phosh_backlight_backend_update_level (PHOSH_BACKLIGHT (self), level);
+    return;
+  }
 
   if (!g_file_get_contents (self->brightness_path, &contents, NULL, &err)) {
     g_warning ("Backlight %s: Could not get brightness from sysfs: %s",
@@ -141,6 +338,10 @@ on_backlight_changed (PhoshBacklightSysfs *self,
 {
   g_assert (PHOSH_IS_BACKLIGHT_SYSFS (self));
   g_assert (PHOSH_IS_UDEV_MANAGER (udev_manager));
+
+  /* manual sysfs mode: no udev path to match */
+  if (self->manual_sysfs)
+    return;
 
   if (g_strcmp0 (g_udev_device_get_sysfs_path (udev_device), self->device_path) != 0)
     return;
@@ -215,32 +416,39 @@ initable_init (GInitable *initable, GCancellable *cancel, GError **error)
   }
 
   self->device = phosh_udev_manager_find_backlight (udev_manager, self->connector_name);
-  if (!self->device) {
-    g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-                 "No matching backlight device found");
-    return FALSE;
+  if (self->device) {
+    if (!phosh_backlight_sysfs_get_udev_info (self->device, &min, &max, &scale, error))
+      return FALSE;
+
+    phosh_backlight_set_range (PHOSH_BACKLIGHT (self), min, max, scale);
+
+    self->device_name = g_strdup (g_udev_device_get_name (self->device));
+    self->device_path = realpath (g_udev_device_get_sysfs_path (self->device), NULL);
+    if (!self->device_path) {
+      g_set_error (error, G_IO_ERROR,
+                   g_io_error_from_errno (errno),
+                   "Could not get real path for %s", self->device_name);
+      return FALSE;
+    }
+    self->brightness_path = g_build_filename (self->device_path, "brightness", NULL);
+    self->session_proxy = phosh_udev_manager_get_session_proxy (udev_manager);
+
+    g_signal_connect_object (udev_manager, "backlight-changed",
+                             G_CALLBACK (on_backlight_changed),
+                             self,
+                             G_CONNECT_SWAPPED);
+
+    phosh_backlight_sysfs_update (self);
+    return TRUE;
   }
 
-  if (!phosh_backlight_sysfs_get_udev_info (self->device, &min, &max, &scale, error))
+  /* if udev lookup failed, try manual LED sysfs fallback */
+  g_debug ("No matching udev backlight device found for %s, trying LED sysfs fallback",
+           self->connector_name);
+
+  if (!phosh_backlight_sysfs_manual_init (self, error))
     return FALSE;
 
-  phosh_backlight_set_range (PHOSH_BACKLIGHT (self), min, max, scale);
-
-  self->device_name = g_strdup (g_udev_device_get_name (self->device));
-  self->device_path = realpath (g_udev_device_get_sysfs_path (self->device), NULL);
-  if (!self->device_path) {
-    g_set_error (error, G_IO_ERROR,
-                 g_io_error_from_errno (errno),
-                 "Could not get real path for %s", self->device_name);
-    return FALSE;
-  }
-  self->brightness_path = g_build_filename (self->device_path, "brightness", NULL);
-  self->session_proxy = phosh_udev_manager_get_session_proxy (udev_manager);
-
-  g_signal_connect_object (udev_manager, "backlight-changed",
-                           G_CALLBACK (on_backlight_changed),
-                           self,
-                           G_CONNECT_SWAPPED);
   phosh_backlight_sysfs_update (self);
 
   return TRUE;
@@ -285,6 +493,10 @@ phosh_backlight_sysfs_dispose (GObject *object)
   g_clear_pointer (&self->connector_name, g_free);
   g_clear_object (&self->device);
   g_clear_object (&self->session_proxy);
+
+  g_clear_pointer (&self->manual_brightness_path, g_free);
+  g_clear_pointer (&self->manual_max_brightness_path, g_free);
+  g_clear_pointer (&self->manual_name, g_free);
 
   G_OBJECT_CLASS (phosh_backlight_sysfs_parent_class)->dispose (object);
 }
