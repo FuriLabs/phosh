@@ -7,6 +7,7 @@
 #pragma once
 
 #include "phosh-brightness-dbus.h"
+#include "backlight.h"
 
 #include <gtk/gtk.h>
 
@@ -17,6 +18,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshBrightnessManager, phosh_brightness_manager, PHOSH, BRIGHTNESS_MANAGER,
                       PhoshDBusBrightnessSkeleton)
 
+PhoshBacklight         *phosh_brightness_manager_get_backlight (PhoshBrightnessManager *self);
 PhoshBrightnessManager *phosh_brightness_manager_new (void);
 GtkAdjustment *         phosh_brightness_manager_get_adjustment (PhoshBrightnessManager *self);
 gboolean                phosh_brightness_manager_get_auto_brightness_enabled (PhoshBrightnessManager *self);
