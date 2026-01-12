@@ -15,6 +15,9 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PhoshBacklightSysfs, phosh_backlight_sysfs, PHOSH, BACKLIGHT_SYSFS,
                       PhoshBacklight)
 
+void                 phosh_backlight_sysfs_force_off (PhoshBacklightSysfs *self);
+void                 phosh_backlight_sysfs_restore   (PhoshBacklightSysfs *self);
+
 PhoshBacklightSysfs *phosh_backlight_sysfs_new (const char *connector_name, GError **error);
 
 G_END_DECLS
