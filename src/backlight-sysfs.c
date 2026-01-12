@@ -55,6 +55,9 @@ struct _PhoshBacklightSysfs {
   char          *manual_brightness_path;
   char          *manual_max_brightness_path;
   char          *manual_name;
+
+  int            saved_brightness;
+  gboolean       have_saved_brightness;
 };
 
 static void initable_iface_init (GInitableIface *iface);
@@ -145,6 +148,105 @@ phosh_backlight_sysfs_manual_available (void)
 {
   return g_file_test (LED_BACKLIGHT_BRIGHTNESS, G_FILE_TEST_EXISTS) &&
          g_file_test (LED_BACKLIGHT_MAX_BRIGHTNESS, G_FILE_TEST_EXISTS);
+}
+
+
+static const char *
+phosh_backlight_sysfs_get_brightness_path (PhoshBacklightSysfs *self)
+{
+  g_return_val_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self), NULL);
+
+  if (self->manual_sysfs)
+    return self->manual_brightness_path;
+
+  return self->brightness_path;
+}
+
+
+static gboolean
+phosh_backlight_sysfs_read_current_brightness (PhoshBacklightSysfs *self, int *out, GError **error)
+{
+  const char *path;
+
+  g_return_val_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self), FALSE);
+  g_return_val_if_fail (out != NULL, FALSE);
+
+  path = phosh_backlight_sysfs_get_brightness_path (self);
+  if (!path) {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "No brightness path available");
+    return FALSE;
+  }
+
+  return sysfs_read_int (path, out, error);
+}
+
+
+static gboolean
+phosh_backlight_sysfs_write_brightness (PhoshBacklightSysfs *self, int value, GError **error)
+{
+  const char *path;
+
+  g_return_val_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self), FALSE);
+
+  path = phosh_backlight_sysfs_get_brightness_path (self);
+  if (!path) {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "No brightness path available");
+    return FALSE;
+  }
+
+  return sysfs_write_int (path, value, error);
+}
+
+
+void
+phosh_backlight_sysfs_force_off (PhoshBacklightSysfs *self)
+{
+  g_autoptr (GError) err = NULL;
+  int current = 0;
+
+  g_return_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self));
+
+  if (!self->have_saved_brightness) {
+    if (!phosh_backlight_sysfs_read_current_brightness (self, &current, &err)) {
+      g_warning ("Failed to read current brightness before forcing off: %s", err->message);
+      return;
+    }
+    self->saved_brightness = current;
+    self->have_saved_brightness = TRUE;
+  }
+
+  if (!phosh_backlight_sysfs_write_brightness (self, 0, &err)) {
+    g_warning ("Failed to force backlight off: %s", err->message);
+    return;
+  }
+
+  /* keep backend state in sync */
+  phosh_backlight_backend_update_level (PHOSH_BACKLIGHT (self), 0);
+}
+
+
+void
+phosh_backlight_sysfs_restore (PhoshBacklightSysfs *self)
+{
+  g_autoptr (GError) err = NULL;
+  int restore;
+
+  g_return_if_fail (PHOSH_IS_BACKLIGHT_SYSFS (self));
+
+  if (!self->have_saved_brightness)
+    return;
+
+  restore = self->saved_brightness;
+
+  if (!phosh_backlight_sysfs_write_brightness (self, restore, &err)) {
+    g_warning ("Failed to restore backlight brightness to %d: %s", restore, err->message);
+    return;
+  }
+
+  self->have_saved_brightness = FALSE;
+
+  /* keep backend state in sync */
+  phosh_backlight_backend_update_level (PHOSH_BACKLIGHT (self), restore);
 }
 
 
@@ -497,6 +599,9 @@ phosh_backlight_sysfs_dispose (GObject *object)
   g_clear_pointer (&self->manual_brightness_path, g_free);
   g_clear_pointer (&self->manual_max_brightness_path, g_free);
   g_clear_pointer (&self->manual_name, g_free);
+
+  self->saved_brightness = 0;
+  self->have_saved_brightness = FALSE;
 
   G_OBJECT_CLASS (phosh_backlight_sysfs_parent_class)->dispose (object);
 }
