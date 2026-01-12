@@ -8,6 +8,7 @@
 
 #define G_LOG_DOMAIN "phosh-screen-saver-manager"
 
+#include "backlight-sysfs.h"
 #include "screen-saver-manager.h"
 #include "session-presence.h"
 #include "shell-priv.h"
@@ -827,6 +828,18 @@ on_primary_monitor_power_mode_changed (PhoshScreenSaverManager *self,
     self->active = active;
     g_object_notify_by_pspec(G_OBJECT (self), props[PROP_ACTIVE]);
     notify_active_changed (self);
+  }
+
+  {
+    PhoshBrightnessManager *bm = phosh_shell_get_brightness_manager (phosh_shell_get_default ());
+    PhoshBacklight *bl = bm ? phosh_brightness_manager_get_backlight (bm) : NULL;
+
+    if (bl && PHOSH_IS_BACKLIGHT_SYSFS (bl)) {
+      if (active)
+        phosh_backlight_sysfs_force_off (PHOSH_BACKLIGHT_SYSFS (bl));
+      else
+        phosh_backlight_sysfs_restore (PHOSH_BACKLIGHT_SYSFS (bl));
+    }
   }
 
   if (active) {
