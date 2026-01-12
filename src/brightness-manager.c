@@ -957,3 +957,12 @@ phosh_brightness_manager_set_value (PhoshBrightnessManager *self,
   if (osd)
     show_osd (self, value);
 }
+
+PhoshBacklight *
+phosh_brightness_manager_get_backlight (PhoshBrightnessManager *self)
+{
+  g_return_val_if_fail (PHOSH_IS_BRIGHTNESS_MANAGER (self), NULL);
+
+  /* borrowed reference. caller must not unref */
+  return self->backlight;
+}
