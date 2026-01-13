@@ -46,7 +46,7 @@ if [ -f "$HOME/.phoshdebug" ]; then
   . "$HOME/.phoshdebug"
 fi
 
-if which systemd-cat >/dev/null 2>&1; then
+if which systemd-cat >/dev/null 2>&1 && systemctl is-active systemd-journald --quiet; then
   SYSTEMD_CAT="systemd-cat -t phoc"
 fi
 
