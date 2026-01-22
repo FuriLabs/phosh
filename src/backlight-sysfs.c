@@ -219,9 +219,6 @@ phosh_backlight_sysfs_force_off (PhoshBacklightSysfs *self)
     g_warning ("Failed to force backlight off: %s", err->message);
     return;
   }
-
-  /* keep backend state in sync */
-  phosh_backlight_backend_update_level (PHOSH_BACKLIGHT (self), 0);
 }
 
 
