@@ -10,7 +10,7 @@
           <object class="GtkBox" id="box_ouput_vol_slider">
             <property name="visible">1</property>
             <child>
-              <object class="GvcChannelBar" id="output_vol_bar">
+              <object class="PhoshChannelBar" id="output_vol_bar">
                 <property name="visible">1</property>
                 <property name="icon-name">audio-speakers</property>
               </object>
@@ -129,7 +129,7 @@
                   <object class="GtkButton">
                     <property name="visible">1</property>
                     <property name="action-name">panel.launch-panel</property>
-                    <property name="action-target">&quot;sound&quot;</property>
+                    <property name="action-target">(&quot;sound&quot;, [&lt;&quot;&quot;&gt;])</property>
                     <child>
                       <object class="GtkLabel">
                         <property name="visible">1</property>

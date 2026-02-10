@@ -265,7 +265,7 @@ gvc_mixer_control_lookup_device_from_stream (GvcMixerControl *control,
                 if (stream_id != gvc_mixer_stream_get_id (stream))
                         continue;
 
-                if (!ports) {
+                if (ports == NULL) {
                         g_debug ("lookup-device-from-stream - %s - is portless ",
                                  gvc_mixer_ui_device_get_description (device));
                         ret = device;
@@ -273,8 +273,7 @@ gvc_mixer_control_lookup_device_from_stream (GvcMixerControl *control,
                 }
 
                 port = gvc_mixer_stream_get_port (stream);
-                if (g_strcmp0 (gvc_mixer_ui_device_get_port (device),
-                                       port->port) == 0) {
+                if (g_strcmp0 (gvc_mixer_ui_device_get_port (device), port->port) == 0) {
                         g_debug ("lookup-device-from-stream found device: device description '%s', device port = '%s', device stream id %i AND stream port = '%s' stream id '%u' and stream description '%s'",
                                  gvc_mixer_ui_device_get_description (device),
                                  gvc_mixer_ui_device_get_port (device),
@@ -608,7 +607,7 @@ gvc_mixer_control_change_output (GvcMixerControl *control,
 
         if (!gvc_mixer_ui_device_has_ports (output)) {
                 g_debug ("Did we try to move to a software/bluetooth sink ?");
-                if (gvc_mixer_control_set_default_sink (control, stream) == FALSE) {
+                if (!gvc_mixer_control_set_default_sink (control, stream)) {
                         g_warning ("Failed to set default sink with stream from output %s",
                                    gvc_mixer_ui_device_get_description (output));
                 }
@@ -632,7 +631,7 @@ gvc_mixer_control_change_output (GvcMixerControl *control,
         if (stream != default_stream) {
                 g_debug ("Attempting to swap over to stream %s ",
                          gvc_mixer_stream_get_description (stream));
-                if (gvc_mixer_control_set_default_sink (control, stream) == FALSE) {
+                if (!gvc_mixer_control_set_default_sink (control, stream)) {
                         g_warning ("Failed to set default sink from output %s",
                                    gvc_mixer_ui_device_get_description (output));
                 }
@@ -702,7 +701,7 @@ gvc_mixer_control_change_input (GvcMixerControl *control,
         if (stream != default_stream) {
                 g_debug ("change-input - attempting to swap over to stream %s",
                          gvc_mixer_stream_get_description (stream));
-                if (gvc_mixer_control_set_default_source (control, stream) == FALSE) {
+                if (!gvc_mixer_control_set_default_source (control, stream)) {
                         g_warning ("Failed to set default source from input %s",
                                    gvc_mixer_ui_device_get_description (input));
                 }
@@ -1190,6 +1189,13 @@ remove_stream (GvcMixerControl *control,
         g_object_unref (stream);
 }
 
+/**
+ * add_stream: (skip)
+ * @control: The control to add the stream to
+ * @stream:(transfer full): The stream to add
+ *
+ * Add a stream to the hash table of all known streams
+ */
 static void
 add_stream (GvcMixerControl *control,
             GvcMixerStream  *stream)
@@ -1337,6 +1343,7 @@ clear_stream_from_devices (GvcMixerControl    *control,
 static void
 sync_devices (GvcMixerControl *control,
               GvcMixerStream*  stream,
+              gboolean         is_new,
               gboolean         is_bluetooth)
 {
         /* Go through ports to see what outputs can be created. */
@@ -1351,7 +1358,7 @@ sync_devices (GvcMixerControl *control,
                 return;
         }
 
-        if (stream_ports == NULL) {
+        if (stream_ports == NULL && is_new) {
                 GvcMixerUIDevice *device;
                 GObject *object;
 
@@ -1367,7 +1374,7 @@ sync_devices (GvcMixerControl *control,
 
                 g_hash_table_insert (is_output ? control->priv->ui_outputs : control->priv->ui_inputs,
                                      GUINT_TO_POINTER (gvc_mixer_ui_device_get_id (device)),
-                                     g_object_ref (device));
+                                     device);
 
                 g_signal_emit (G_OBJECT (control),
                                signals[is_output ? OUTPUT_ADDED : INPUT_ADDED],
@@ -1467,7 +1474,7 @@ is_bluetooth (const pa_proplist *proplist)
 {
         const char *bus = pa_proplist_gets (proplist, "device.bus");
 
-        if (!bus)
+        if (bus == NULL)
                 return FALSE;
 
         if (g_str_equal ("bluetooth", bus))
@@ -1548,7 +1555,7 @@ update_sink (GvcMixerControl    *control,
         is_bt = is_bluetooth (info->proplist);
         /* Sync devices as the port on the stream might have changed */
         if (!is_new)
-                sync_devices (control, stream, is_bt);
+                sync_devices (control, stream, is_new, is_bt);
 
         /* Messy I know but to set the port everytime regardless of whether it has changed will cost us a
          * port change notify signal which causes the frontend to resync.
@@ -1577,7 +1584,7 @@ update_sink (GvcMixerControl    *control,
                 add_stream (control, stream);
                 /* Always sync on a new stream to able to assign the right stream id
                  * to the appropriate outputs (multiple potential outputs per stream). */
-                sync_devices (control, stream, is_bt);
+                sync_devices (control, stream, is_new, is_bt);
         } else {
                 g_signal_emit (G_OBJECT (control),
                                signals[STREAM_CHANGED],
@@ -1686,7 +1693,7 @@ update_source (GvcMixerControl      *control,
         is_bt = is_bluetooth (info->proplist);
         /* Sync devices as the port on the stream might have changed */
         if (!is_new)
-                sync_devices (control, stream, is_bt);
+                sync_devices (control, stream, is_new, is_bt);
 
         if (info->active_port != NULL) {
                 if (is_new)
@@ -1708,7 +1715,7 @@ update_source (GvcMixerControl      *control,
                                      GUINT_TO_POINTER (info->index),
                                      g_object_ref (stream));
                 add_stream (control, stream);
-                sync_devices (control, stream, is_bt);
+                sync_devices (control, stream, is_new, is_bt);
         } else {
                 g_signal_emit (G_OBJECT (control),
                                signals[STREAM_CHANGED],
