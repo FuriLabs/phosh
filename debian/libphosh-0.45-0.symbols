@@ -116,6 +116,8 @@ libphosh-0.45.so.0 libphosh-0.45-0 #MINVER#
  phosh_status_page_set_footer@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_set_header@LIBPHOSH_0_45_0 0.45~rc1
  phosh_status_page_set_title@LIBPHOSH_0_45_0 0.45~rc1
+ phosh_util_activate_action@LIBPHOSH_0_45_0 0.53~rc1
+ phosh_util_activate_action_finish@LIBPHOSH_0_45_0 0.53~rc1
  phosh_util_append_to_strv@LIBPHOSH_0_45_0 0.45~rc1
  phosh_util_calculate_supported_mode_scales@LIBPHOSH_0_45_0 0.45~rc1
  phosh_util_data_uri_to_pixbuf@LIBPHOSH_0_45_0 0.45~rc1
