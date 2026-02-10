@@ -1,8 +1,28 @@
-phosh (0.53~rc1-1) UNRELEASED; urgency=medium
+phosh (0.53~rc1-1) unstable; urgency=medium
 
+  [ Guido Günther ]
   * New upstream release
+    * Various auto brightness improvements, e.g.
+      * remember auto brightness offset
+      * compensate for night light
+    * overview: Show thumbnails for launching apps
+    * overview: Style improvements
+    * polkit-prompt: Show more user data
+    * Activation fixes for notifications
+      (Needs https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/9269)
+    * caffeine: Allow to open plugin prefs from the status page
+    * Multiple other fixes (Use alias for Bluetooth devices, improve app icon
+      lookup, …)
+  * Update symbols
 
- -- Guido Günther <agx@sigxcpu.org>  Tue, 10 Feb 2026 19:44:22 +0100
+  [ Jeremy Bícha ]
+  * Remove unnecessary Build-Depends: gnome-themes-extra-data.
+    This Build-Depends was added in 2019 and appears to no longer be needed
+    Also, the Debian GNOME team is proposing to remove the
+    gnome-themes-extra source package in https://bugs.debian.org/1112387
+  * Update Build-Depends: libevince-dev → libevince-gtk3-dev
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 10 Feb 2026 19:55:59 +0100
 
 phosh (0.52.1-1) unstable; urgency=medium
 
