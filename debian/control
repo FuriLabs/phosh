@@ -10,7 +10,7 @@ Build-Depends:
  gi-docgen <!nodoc>,
  libadwaita-1-dev,
  libcallaudio-dev,
- libevince-dev,
+ libevince-gtk3-dev,
  libgmobile-dev,
  libsecret-1-dev,
  libsystemd-dev,
