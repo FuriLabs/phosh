@@ -10,7 +10,6 @@ usr/share/dbus-1/services/mobi.phosh.Shell.CalendarServer.service
 usr/share/dbus-1/services/mobi.phosh.Shell.Search.service
 usr/share/gnome-session/sessions/phosh.session
 usr/share/icons/hicolor/symbolic/apps/mobi.phosh.Shell-symbolic.svg
-usr/share/locale
 usr/share/phosh/phoc.ini
 usr/share/wayland-sessions/phosh.desktop
 usr/share/xdg-desktop-portal/phosh-portals.conf

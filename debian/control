@@ -111,8 +111,10 @@ Architecture: all
 Multi-Arch: foreign
 Depends:
  ${misc:Depends},
-Conflicts:
- phosh (<< 0.45~rc1-3~),
+Breaks:
+ phosh (<< 0.53.0-2~),
+Replaces:
+ phosh (<< 0.53.0-2~),
 Description: Pure Wayland shell for mobile devices - Common files
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
