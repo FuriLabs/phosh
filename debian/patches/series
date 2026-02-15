@@ -1,1 +1,2 @@
 tests-Skip-symbol-check-on-some-architectures.patch
+Revert-portal-Use-Rust-based-GUI-variants-by-default.patch
