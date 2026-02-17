@@ -1,3 +1,11 @@
+phosh (0.53.0-2) UNRELEASED; urgency=medium
+
+  * Move translations from phosh to phosh-common. This allows the Mobian PlaMo
+    images to use phrog without having the phosh package installed. See
+    #1128020 for a discussion
+
+ -- Guido Günther <agx@sigxcpu.org>  Tue, 17 Feb 2026 19:12:06 +0100
+
 phosh (0.53.0-1) unstable; urgency=medium
 
   * New upstream release
