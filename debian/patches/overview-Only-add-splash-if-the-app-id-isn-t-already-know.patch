@@ -1,0 +1,58 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Mon, 16 Feb 2026 12:20:09 +0100
+Subject: overview: Only add splash if the app-id isn't already known
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+This if for the case of 2nd activation: app already running and being
+reactivated by another instance.
+
+If we knew an activated toplevel's `startup-id` (token) we could use a
+timer in `on_app_ready` and see if that toplevel shows up right before/after
+the app told us it is ready. We don't have this atm though See
+https://gitlab.freedesktop.org/wayland/wayland-protocols/-/merge_requests/196#note_3333038
+for the Wayland protocol that will hopefully help there.
+
+We could go the other way around and see if a recently activated
+toplevel's `app-id` matches an `app-id` of a recently activated app but
+due to e.g. https://gitlab.gnome.org/GNOME/gtk/-/merge_requests/9269 we
+can't even assume that the app sends a token as the compositor might
+have rejected it.
+
+So all we can do is not add another splash in theses cases.
+
+This fixes the case where an app is already open and then another
+activation happens, e.g. by activating a `https://` URL in chatty.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Part-of: <https://gitlab.gnome.org/World/Phosh/phosh/-/merge_requests/1876>
+(cherry picked from commit b355401898d9bc9c7f630b2188e3a5fa03ed54fe)
+---
+ src/overview.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/src/overview.c b/src/overview.c
+index fc74ffe..b706e69 100644
+--- a/src/overview.c
++++ b/src/overview.c
+@@ -1,6 +1,6 @@
+ /*
+  * Copyright (C) 2018 Purism SPC
+- *               2025 Phosh.mobi e.V.
++ *               2025-2026 Phosh.mobi e.V.
+  *
+  * SPDX-License-Identifier: GPL-3.0-or-later
+  *
+@@ -174,6 +174,11 @@ on_app_launch_started (PhoshOverview   *self,
+   g_return_if_fail (PHOSH_IS_OVERVIEW (self));
+   g_return_if_fail (G_IS_APP_INFO (info));
+ 
++  if (find_activity_by_app_info (self, info)) {
++    g_debug ("Already have an activity for '%s'", g_app_info_get_id (info));
++    return;
++  }
++
+   g_debug ("Building splash for '%s'", g_app_info_get_id (info));
+ 
+   activity = create_new_activity (self, info, NULL, NULL, NULL);
