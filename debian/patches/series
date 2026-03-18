@@ -1,4 +1,2 @@
 tests-Skip-symbol-check-on-some-architectures.patch
 Revert-portal-Use-Rust-based-GUI-variants-by-default.patch
-overview-Only-activate-if-we-have-a-toplevel.patch
-overview-Only-add-splash-if-the-app-id-isn-t-already-know.patch
