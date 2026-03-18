@@ -1,8 +1,11 @@
-phosh (0.53.1-1) UNRELEASED; urgency=medium
+phosh (0.53.1-1) unstable; urgency=medium
 
-  * New upstream release
+  * New upstream bugfix release
+  * Drop overview patches. Applied upstream.
+  * data: Remove gsd-wacom as required component from session.
+    Plugin got dropped.
 
- -- Guido Günther <agx@sigxcpu.org>  Wed, 18 Mar 2026 17:36:11 +0100
+ -- Guido Günther <agx@sigxcpu.org>  Wed, 18 Mar 2026 17:41:18 +0100
 
 phosh (0.53.0-2) unstable; urgency=medium
 
