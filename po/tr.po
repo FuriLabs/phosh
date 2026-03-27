@@ -2,16 +2,16 @@
 # Copyright (C) 2019-2025 sm.puri.Phosh's copyright holder
 # This file is distributed under the same license as the sm.puri.Phosh package.
 #
-# Sabri Ünal <yakushabb@gmail.com>, 2023, 2024.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2019-2025.
+# Sabri Ünal <yakushabb@gmail.com>, 2023, 2024, 2026.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2019-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2026-02-04 11:02+0000\n"
-"PO-Revision-Date: 2026-02-06 00:18+0300\n"
-"Last-Translator: Sabri Ünal <yakushabb@gmail.com>\n"
+"POT-Creation-Date: 2026-03-20 08:01+0000\n"
+"PO-Revision-Date: 2026-03-19 08:00+0300\n"
+"Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Turkish <takim@gnome.org.tr>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -195,12 +195,12 @@ msgid "Wi-Fi network '%s' uses a captive portal"
 msgstr "'%s' Wi-Fi ağı oturum kapısı kullanıyor"
 
 #: src/connectivity-manager.c:116
-msgid "The Wi-Fi network uses a captive portal"
-msgstr "Wi-Fi ağı oturum kapısı kullanıyor"
+msgid "The network uses a captive portal"
+msgstr "Ağ oturum kapısı kullanıyor"
 
 #: src/connectivity-manager.c:123
-msgid "Sign into Wi-Fi network"
-msgstr "Wi-Fi ağında oturum aç"
+msgid "Sign into network"
+msgstr "Ağda oturum aç"
 
 #: src/docked-info.c:81
 msgid "Docked"
@@ -477,6 +477,10 @@ msgstr[0] "%d yılı aşkın"
 msgid "Almost %dy"
 msgid_plural "Almost %dy"
 msgstr[0] "Neredeyse %d yıl"
+
+#: src/overview.c:221
+msgid "Application failed to start"
+msgstr "Uygulama başlatılamadı"
 
 #: src/polkit-auth-agent.c:275
 msgid "Authentication dialog was dismissed by the user"
@@ -1003,13 +1007,54 @@ msgstr "Başlatıcı yapılandırılmadı"
 msgid "Launchers"
 msgstr "Başlatıcılar"
 
-#: plugins/location-quick-setting/location-quick-setting.c:65
+#. Translators: Location precision level - country-wide
+#: plugins/location-quick-setting/accuracy-row.c:44
+msgid "Country"
+msgstr "Ülke"
+
+#. Translators: Location precision level - city-wide
+#: plugins/location-quick-setting/accuracy-row.c:47
+msgid "City"
+msgstr "Şehir"
+
+#. Translators: Location precision level - neighborhood
+#: plugins/location-quick-setting/accuracy-row.c:50
+msgid "Neighborhood"
+msgstr "Yöre"
+
+#. Translators: Location precision level - street
+#: plugins/location-quick-setting/accuracy-row.c:53
+msgid "Street"
+msgstr "Sokak"
+
+#. Translators: Location precision level - exact position
+#: plugins/location-quick-setting/accuracy-row.c:56
+msgid "Exact"
+msgstr "Tam"
+
+#: plugins/location-quick-setting/location-quick-setting.c:91
 msgid "Location On"
 msgstr "Konum Açık"
 
-#: plugins/location-quick-setting/location-quick-setting.c:65
+#: plugins/location-quick-setting/location-quick-setting.c:91
 msgid "Location Off"
 msgstr "Konum Kapalı"
+
+#: plugins/location-quick-setting/qs.ui:15
+msgid "Location Accuracy"
+msgstr "Konum Doğruluğu"
+
+#: plugins/location-quick-setting/qs.ui:62
+msgid "Location Disabled"
+msgstr "Konum Devre Dışı"
+
+#: plugins/location-quick-setting/qs.ui:72
+msgid "Enable Location"
+msgstr "Konumu Etkinleştir"
+
+#: plugins/location-quick-setting/qs.ui:87
+msgid "Location Settings"
+msgstr "Konum Ayarları"
 
 #: plugins/media-players/media-players.ui:20
 msgid "No running media players"

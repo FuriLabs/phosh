@@ -1424,17 +1424,23 @@ phosh_shell_class_init (PhoshShellClass *klass)
 }
 
 
-static GDebugKey debug_keys[] =
-{
- { .key = "always-splash",
-   .value = PHOSH_SHELL_DEBUG_FLAG_ALWAYS_SPLASH,
- },
- { .key = "fake-builtin",
-   .value = PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN,
- },
- { .key = "backlight-non-linear",
-   .value = PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR,
- },
+static GDebugKey debug_keys[] = {
+  {
+    .key = "always-splash",
+    .value = PHOSH_SHELL_DEBUG_FLAG_ALWAYS_SPLASH,
+  },
+  {
+    .key = "app-activation",
+    .value = PHOSH_SHELL_DEBUG_APP_ACTIVATION,
+  },
+  {
+    .key = "backlight-non-linear",
+    .value = PHOSH_SHELL_DEBUG_BACKLIGHT_NON_LINEAR,
+  },
+  {
+    .key = "fake-builtin",
+    .value = PHOSH_SHELL_DEBUG_FLAG_FAKE_BUILTIN,
+  },
 };
 
 
@@ -1455,6 +1461,7 @@ phosh_shell_init (PhoshShell *self)
 
   g_io_extension_point_register (PHOSH_EXTENSION_POINT_LOCKSCREEN_WIDGET);
   g_io_extension_point_register (PHOSH_EXTENSION_POINT_QUICK_SETTING_WIDGET);
+  g_io_extension_point_register (PHOSH_EXTENSION_POINT_STATUS_ICON_WIDGET);
 
   debug_flags = g_parse_debug_string (g_getenv ("PHOSH_DEBUG"),
                                       debug_keys,
