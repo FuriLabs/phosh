@@ -113,14 +113,14 @@ portal_auth (PhoshConnectivityManager *self)
   if (self->ssid)
     body = g_strdup_printf (_("Wi-Fi network '%s' uses a captive portal"), self->ssid);
   else
-    body = g_strdup (_("The Wi-Fi network uses a captive portal"));
+    body = g_strdup (_("The network uses a captive portal"));
 
   if (self->noti) {
     phosh_notification_set_body (self->noti, body);
     phosh_notification_expires (self->noti, NOTI_TIMEOUT);
   } else {
     self->noti = g_object_new (PHOSH_TYPE_NOTIFICATION,
-                               "summary", _("Sign into Wi-Fi network"),
+                               "summary", _("Sign into network"),
                                "body", body,
                                "image", icon,
                                NULL);
@@ -257,6 +257,7 @@ phosh_connectivity_manager_finalize (GObject *object)
   g_clear_object (&self->nmclient);
   g_clear_object (&self->noti);
   g_clear_pointer (&self->ssid, g_free);
+  g_clear_pointer (&self->icon_name, g_free);
 
   G_OBJECT_CLASS (phosh_connectivity_manager_parent_class)->finalize (object);
 }

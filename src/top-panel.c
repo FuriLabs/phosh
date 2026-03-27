@@ -18,9 +18,11 @@
 
 #include "layersurface-priv.h"
 #include "layout-manager.h"
+#include "plugin-loader.h"
 #include "shell-priv.h"
 #include "session-manager.h"
 #include "settings.h"
+#include "status-icons-box.h"
 #include "top-panel.h"
 #include "top-panel-bg.h"
 #include "arrow.h"
@@ -36,6 +38,9 @@
 
 #define KEYBINDINGS_SCHEMA_ID "org.gnome.shell.keybindings"
 #define KEYBINDING_KEY_TOGGLE_MESSAGE_TRAY "toggle-message-tray"
+
+#define CUSTOM_STATUS_ICONS_SCHEMA "mobi.phosh.shell.plugins"
+#define CUSTOM_STATUS_ICONS_KEY "status-icons"
 
 #define PHOSH_TOP_PANEL_DRAG_THRESHOLD 0.3
 
@@ -85,6 +90,11 @@ typedef struct _PhoshTopPanel {
   GtkWidget *box_top_bar;
   GtkWidget *lbl_clock;      /* top-bar clock */
   GtkWidget *lbl_lang;
+  PhoshStatusIconsBox *status_icons_box;
+
+  GSettings           *custom_status_icons_settings;
+  PhoshPluginLoader   *custom_status_icons_loader;
+  GPtrArray           *custom_status_icons;
 
   GtkWidget *settings;       /* settings menu */
   GtkWidget *batteryinfo;
@@ -716,10 +726,9 @@ phosh_top_panel_constructed (GObject *object)
     g_simple_action_set_enabled (G_SIMPLE_ACTION (action), FALSE);
   }
 
-  g_settings_bind (phosh_settings,
-                   "enable-suspend",
-                   g_action_map_lookup_action (G_ACTION_MAP (self->actions), "suspend"),
-                   "enabled",
+  action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "suspend");
+  g_settings_bind (phosh_settings, "enable-suspend",
+                   action, "enabled",
                    G_SETTINGS_BIND_GET);
 
   action = g_action_map_lookup_action (G_ACTION_MAP (self->actions), "launch-panel");
@@ -738,10 +747,8 @@ phosh_top_panel_constructed (GObject *object)
                           G_BINDING_SYNC_CREATE | G_BINDING_INVERT_BOOLEAN);
 
   self->interface_settings = g_settings_new ("org.gnome.desktop.interface");
-  g_settings_bind (self->interface_settings,
-                   "show-battery-percentage",
-                   self->batteryinfo,
-                   "show-detail",
+  g_settings_bind (self->interface_settings, "show-battery-percentage",
+                   self->batteryinfo, "show-detail",
                    G_SETTINGS_BIND_GET);
 
   g_signal_connect_swapped (self->kb_settings,
@@ -769,6 +776,9 @@ phosh_top_panel_dispose (GObject *object)
 
   g_cancellable_cancel (self->cancel);
   g_clear_object (&self->cancel);
+  g_clear_object (&self->custom_status_icons_settings);
+  g_clear_object (&self->custom_status_icons_loader);
+  g_clear_pointer (&self->custom_status_icons, g_ptr_array_unref);
 
   g_clear_object (&self->kb_settings);
   g_clear_object (&self->xkbinfo);
@@ -888,6 +898,7 @@ phosh_top_panel_class_init (PhoshTopPanelClass *klass)
                                      0);
 
   g_type_ensure (PHOSH_TYPE_ARROW);
+  g_type_ensure (PHOSH_TYPE_STATUS_ICONS_BOX);
 
   gtk_widget_class_set_template_from_resource (widget_class,
                                                "/mobi/phosh/ui/top-panel.ui");
@@ -907,6 +918,7 @@ phosh_top_panel_class_init (PhoshTopPanelClass *klass)
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, menu_system);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, settings);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, stack);
+  gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, status_icons_box);
   gtk_widget_class_bind_template_child (widget_class, PhoshTopPanel, top_bar_bin);
   gtk_widget_class_bind_template_callback (widget_class, on_settings_drag_handle_offset_changed);
   gtk_widget_class_bind_template_callback (widget_class, phosh_top_panel_fold);
@@ -920,14 +932,47 @@ phosh_top_panel_class_init (PhoshTopPanelClass *klass)
 
 
 static void
+remove_custom_status_icon (GtkWidget *status_icon)
+{
+  GtkWidget *box = gtk_widget_get_ancestor (status_icon, PHOSH_TYPE_STATUS_ICONS_BOX);
+  phosh_status_icons_box_remove (PHOSH_STATUS_ICONS_BOX (box), status_icon);
+}
+
+
+static void
+load_custom_status_icons (PhoshTopPanel *self, GSettings *settings, char *key)
+{
+  g_auto (GStrv) plugins = NULL;
+  GtkWidget *widget;
+
+  g_ptr_array_remove_range (self->custom_status_icons, 0, self->custom_status_icons->len);
+  plugins = g_settings_get_strv (self->custom_status_icons_settings, CUSTOM_STATUS_ICONS_KEY);
+
+  if (plugins == NULL)
+    return;
+
+  for (int i = 0; plugins[i]; i++) {
+    g_debug ("Loading custom status-icon: %s", plugins[i]);
+    widget = phosh_plugin_loader_load_plugin (self->custom_status_icons_loader, plugins[i]);
+
+    if (widget == NULL) {
+      g_warning ("Custom status-icon '%s' not found", plugins[i]);
+    } else {
+      phosh_status_icons_box_append (self->status_icons_box, widget);
+      g_ptr_array_add (self->custom_status_icons, widget);
+    }
+  }
+}
+
+
+static void
 set_clock_position (PhoshTopPanel *self, PhoshLayoutManager *layout_manager)
 {
   PhoshLayoutClockPosition pos;
   guint top_margin = 0;
 
-  pos = phosh_layout_manager_get_clock_pos (layout_manager);
-
   /* Top-bar clock */
+  pos = phosh_layout_manager_get_clock_pos (layout_manager);
   gtk_container_remove (GTK_CONTAINER (self->box_top_bar), self->lbl_clock);
   phosh_util_toggle_style_class (self->lbl_clock, "left", FALSE);
   phosh_util_toggle_style_class (self->lbl_clock, "right", FALSE);
@@ -937,13 +982,11 @@ set_clock_position (PhoshTopPanel *self, PhoshLayoutManager *layout_manager)
     gtk_box_pack_start (GTK_BOX (self->box_top_bar), self->lbl_clock, FALSE, FALSE, 0);
     gtk_box_reorder_child (GTK_BOX (self->box_top_bar), self->lbl_clock, 0);
     phosh_util_toggle_style_class (self->lbl_clock, "left", TRUE);
-    top_margin = phosh_layout_manager_get_clock_shift (layout_manager);
     break;
   case PHOSH_LAYOUT_CLOCK_POS_RIGHT:
     gtk_box_pack_end (GTK_BOX (self->box_top_bar), self->lbl_clock, FALSE, FALSE, 0);
     gtk_box_reorder_child (GTK_BOX (self->box_top_bar), self->lbl_clock, 1);
     phosh_util_toggle_style_class (self->lbl_clock, "right", TRUE);
-    top_margin = phosh_layout_manager_get_clock_shift (layout_manager);
     break;
   case PHOSH_LAYOUT_CLOCK_POS_CENTER:
     gtk_box_set_center_widget (GTK_BOX (self->box_top_bar), self->lbl_clock);
@@ -953,6 +996,7 @@ set_clock_position (PhoshTopPanel *self, PhoshLayoutManager *layout_manager)
   }
 
   /* Shift down settings menu clock */
+  top_margin = phosh_layout_manager_get_clock_box_shift (layout_manager);
   gtk_widget_set_margin_top (self->box_clock, top_margin);
 }
 
@@ -1006,6 +1050,7 @@ static void
 phosh_top_panel_init (PhoshTopPanel *self)
 {
   PhoshLayoutManager *layout_manager;
+  const char *plugin_dirs[] = { PHOSH_PLUGINS_DIR, NULL};
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
@@ -1021,6 +1066,16 @@ phosh_top_panel_init (PhoshTopPanel *self)
                            self,
                            G_CONNECT_SWAPPED);
   on_layout_changed (self, layout_manager);
+
+  self->custom_status_icons_settings = g_settings_new (CUSTOM_STATUS_ICONS_SCHEMA);
+  self->custom_status_icons_loader = phosh_plugin_loader_new ((GStrv) plugin_dirs,
+                                                              PHOSH_EXTENSION_POINT_STATUS_ICON_WIDGET);
+  self->custom_status_icons = g_ptr_array_new_with_free_func ((GDestroyNotify) remove_custom_status_icon);
+
+  g_signal_connect_object (self->custom_status_icons_settings, "changed::" CUSTOM_STATUS_ICONS_KEY,
+                           G_CALLBACK (load_custom_status_icons), self, G_CONNECT_SWAPPED);
+
+  load_custom_status_icons (self, NULL, NULL);
 }
 
 

@@ -1,14 +1,14 @@
 # Georgian translation for phosh.
 # Copyright (C) 2023, phosh authors
 # This file is distributed under the same license as the phosh package.
-# Ekaterine Papava <papava.e@gtu.ge>, 2023-2025.
+# Ekaterine Papava <papava.e@gtu.ge>, 2023-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2026-02-04 11:02+0000\n"
-"PO-Revision-Date: 2026-02-05 08:39+0100\n"
+"POT-Creation-Date: 2026-03-20 08:01+0000\n"
+"PO-Revision-Date: 2026-03-23 03:35+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #: data/mobi.phosh.Shell.desktop.in.in:3 data/wayland-sessions/phosh.desktop:3
 msgid "Phone Shell"
@@ -196,12 +196,12 @@ msgid "Wi-Fi network '%s' uses a captive portal"
 msgstr "Wifi ქსელი '%s' ავტორიზაციის პორტალს იყენებს"
 
 #: src/connectivity-manager.c:116
-msgid "The Wi-Fi network uses a captive portal"
-msgstr "WiFi ქსელი ავტორიზაციის პორტალს იყენებს"
+msgid "The network uses a captive portal"
+msgstr "ქსელი ავტორიზაციის პორტალს იყენებს"
 
 #: src/connectivity-manager.c:123
-msgid "Sign into Wi-Fi network"
-msgstr "შესვლა Wi-Fi ქსელში"
+msgid "Sign into network"
+msgstr "შესვლა ქსელში"
 
 #: src/docked-info.c:81
 msgid "Docked"
@@ -488,6 +488,10 @@ msgid "Almost %dy"
 msgid_plural "Almost %dy"
 msgstr[0] "თითქმის %dწ"
 msgstr[1] "თითქმის %dწ"
+
+#: src/overview.c:221
+msgid "Application failed to start"
+msgstr "აპლიკაციის გაშვება ჩავარდა"
 
 #: src/polkit-auth-agent.c:275
 msgid "Authentication dialog was dismissed by the user"
@@ -819,7 +823,6 @@ msgid "No caffeine intervals"
 msgstr "კოფეინის შუალედების გარეშე"
 
 #: plugins/caffeine-quick-setting/qs.ui:55
-#| msgid "Caffeine Quick Setting"
 msgid "Caffeine Settings"
 msgstr "Caffeine-iის მორგება"
 
@@ -1015,13 +1018,54 @@ msgstr "გამშვებები მორგებული არაა"
 msgid "Launchers"
 msgstr "გამშვებები"
 
-#: plugins/location-quick-setting/location-quick-setting.c:65
+#. Translators: Location precision level - country-wide
+#: plugins/location-quick-setting/accuracy-row.c:44
+msgid "Country"
+msgstr "ქვეყანა"
+
+#. Translators: Location precision level - city-wide
+#: plugins/location-quick-setting/accuracy-row.c:47
+msgid "City"
+msgstr "ქალაქი"
+
+#. Translators: Location precision level - neighborhood
+#: plugins/location-quick-setting/accuracy-row.c:50
+msgid "Neighborhood"
+msgstr "სამეზობლო"
+
+#. Translators: Location precision level - street
+#: plugins/location-quick-setting/accuracy-row.c:53
+msgid "Street"
+msgstr "ქუჩა"
+
+#. Translators: Location precision level - exact position
+#: plugins/location-quick-setting/accuracy-row.c:56
+msgid "Exact"
+msgstr "ზუსტი"
+
+#: plugins/location-quick-setting/location-quick-setting.c:91
 msgid "Location On"
 msgstr "გეოლოკაცია ჩართულია"
 
-#: plugins/location-quick-setting/location-quick-setting.c:65
+#: plugins/location-quick-setting/location-quick-setting.c:91
 msgid "Location Off"
 msgstr "გეოლოკაცია გამორთულია"
+
+#: plugins/location-quick-setting/qs.ui:15
+msgid "Location Accuracy"
+msgstr "მდებარეობის სიზუსტე"
+
+#: plugins/location-quick-setting/qs.ui:62
+msgid "Location Disabled"
+msgstr "გეოლოკაცია გამორთულია"
+
+#: plugins/location-quick-setting/qs.ui:72
+msgid "Enable Location"
+msgstr "გეოლოკაციის ჩართვა"
+
+#: plugins/location-quick-setting/qs.ui:87
+msgid "Location Settings"
+msgstr "მდებარეობის მორგება"
 
 #: plugins/media-players/media-players.ui:20
 msgid "No running media players"
