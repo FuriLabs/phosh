@@ -7,7 +7,7 @@ phosh (0.54~rc1-1) unstable; urgency=medium
     * Make sure cutouts don't overlap buttons in settings panel
     * Update list of adaptive apps
     * Make sure phosh-session always has a DBus session
-    * Drop gsd-wwan from session, it's gone in gsd
+    * Drop gsd-wacom from session, it's gone in gsd
     * Leak fixes and internal cleanups
   * Drop gsd-wacom patch.
     Fixed upstream
