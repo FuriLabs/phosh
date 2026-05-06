@@ -21,7 +21,7 @@ RefuseManualStop=on
 
 [Service]
 Type=notify
-ExecStart=@libexecdir@/phosh
+ExecStart=/bin/bash -l -c "@libexecdir@/phosh"
 Restart=on-failure
 Slice=session.slice
 OOMScoreAdjust=-1000
