@@ -1,8 +1,11 @@
-phosh (0.55.0-1) UNRELEASED; urgency=medium
+phosh (0.55.0-1) unstable; urgency=medium
 
   * New upstream release
+    * New syncthing quick setting (needs syncbus not yet in Debian)
+    * Don't dim screen when there's no ambient sensor
+    * Various other bug fixes including leak fixes
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 17 May 2026 11:58:00 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 17 May 2026 12:00:27 +0200
 
 phosh (0.54.0-1) unstable; urgency=medium
 
