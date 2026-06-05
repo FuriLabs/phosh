@@ -134,11 +134,21 @@ void
 phosh_audio_manager_change_input (PhoshAudioManager *self, guint id)
 {
   GvcMixerUIDevice *device;
+  GvcMixerStream *stream;
+  const char *port;
 
   g_return_if_fail (PHOSH_IS_AUDIO_MANAGER (self));
 
   device = gvc_mixer_control_lookup_input_id (self->mixer_control, id);
   g_return_if_fail (device);
+
+  port = gvc_mixer_ui_device_get_port (device);
+  stream = gvc_mixer_control_get_default_source (self->mixer_control);
+
+  if (stream && port && *port) {
+    g_debug ("Changing input port to '%s'", port);
+    gvc_mixer_stream_change_port (stream, port);
+  }
 
   gvc_mixer_control_change_input (self->mixer_control, device);
 }
@@ -148,11 +158,21 @@ void
 phosh_audio_manager_change_output (PhoshAudioManager *self, guint id)
 {
   GvcMixerUIDevice *device;
+  GvcMixerStream *stream;
+  const char *port;
 
   g_return_if_fail (PHOSH_IS_AUDIO_MANAGER (self));
 
   device = gvc_mixer_control_lookup_output_id (self->mixer_control, id);
   g_return_if_fail (device);
+
+  port = gvc_mixer_ui_device_get_port (device);
+  stream = gvc_mixer_control_get_default_sink (self->mixer_control);
+
+  if (stream && port && *port) {
+    g_debug ("Changing output port to '%s'", port);
+    gvc_mixer_stream_change_port (stream, port);
+  }
 
   gvc_mixer_control_change_output (self->mixer_control, device);
 }
