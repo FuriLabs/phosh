@@ -371,6 +371,9 @@ phosh_audio_settings_init (PhoshAudioSettings *self)
                            G_CALLBACK (mixer_control_output_update_cb),
                            self,
                            G_CONNECT_DEFAULT);
+
+  mixer_control_output_update_cb (mixer_control, 0, self);
+
   g_signal_connect (self->output_vol_bar,
                     "value-changed",
                     G_CALLBACK (vol_bar_value_changed_cb),
