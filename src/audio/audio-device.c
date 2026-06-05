@@ -23,6 +23,7 @@ enum {
   PROP_ID,
   PROP_ICON_NAME,
   PROP_DESCRIPTION,
+  PROP_PORT,
   PROP_ACTIVE,
   PROP_LAST_PROP
 };
@@ -34,6 +35,7 @@ struct _PhoshAudioDevice {
   guint    id;
   char    *icon_name;
   char    *description;
+  char    *port;
   gboolean active;
 };
 G_DEFINE_TYPE (PhoshAudioDevice, phosh_audio_device, G_TYPE_OBJECT)
@@ -56,6 +58,9 @@ phosh_audio_device_set_property (GObject      *object,
     break;
   case PROP_DESCRIPTION:
     self->description = g_value_dup_string (value);
+    break;
+  case PROP_PORT:
+    self->port = g_value_dup_string (value);
     break;
   case PROP_ACTIVE:
     phosh_audio_device_set_active (self, g_value_get_boolean (value));
@@ -85,6 +90,9 @@ phosh_audio_device_get_property (GObject    *object,
   case PROP_DESCRIPTION:
     g_value_set_string (value, self->description);
     break;
+  case PROP_PORT:
+    g_value_set_string (value, self->port);
+    break;
   case PROP_ACTIVE:
     g_value_set_boolean (value, self->active);
     break;
@@ -102,6 +110,7 @@ phosh_audio_device_finalize (GObject *object)
 
   g_clear_pointer (&self->icon_name, g_free);
   g_clear_pointer (&self->description, g_free);
+  g_clear_pointer (&self->port, g_free);
 
   G_OBJECT_CLASS (phosh_audio_device_parent_class)->finalize (object);
 }
@@ -131,6 +140,11 @@ phosh_audio_device_class_init (PhoshAudioDeviceClass *klass)
                          NULL,
                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
 
+  props[PROP_PORT] =
+    g_param_spec_string ("port", "", "",
+                         NULL,
+                         G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS | G_PARAM_CONSTRUCT_ONLY);
+
   props[PROP_ACTIVE] =
     g_param_spec_boolean ("active", "", "",
                           FALSE,
@@ -147,12 +161,13 @@ phosh_audio_device_init (PhoshAudioDevice *self)
 
 
 PhoshAudioDevice *
-phosh_audio_device_new (guint id, const char *icon_name, const char *description)
+phosh_audio_device_new (guint id, const char *icon_name, const char *description, const char *port)
 {
   return g_object_new (PHOSH_TYPE_AUDIO_DEVICE,
                        "id", id,
                        "icon-name", icon_name,
                        "description", description,
+                       "port", port,
                        NULL);
 }
 
@@ -173,6 +188,16 @@ phosh_audio_device_get_id (PhoshAudioDevice *self)
 
   return self->id;
 }
+
+
+const char *
+phosh_audio_device_get_port (PhoshAudioDevice *self)
+{
+  g_return_val_if_fail (PHOSH_IS_AUDIO_DEVICE (self), NULL);
+
+  return self->port;
+}
+
 
 void
 phosh_audio_device_set_active (PhoshAudioDevice *self, gboolean active)

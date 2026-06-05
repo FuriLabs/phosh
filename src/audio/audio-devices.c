@@ -15,6 +15,7 @@
 #include "util.h"
 
 #include "gvc-mixer-control.h"
+#include "gvc-mixer-stream.h"
 
 #include <gmobile.h>
 
@@ -44,11 +45,82 @@ struct _PhoshAudioDevices {
   gboolean         is_input;
   gboolean         has_devices;
   GvcMixerControl *mixer_control;
+  GvcMixerStream  *stream;
+  guint            active_id;
 };
 
 static void phosh_list_model_iface_init (GListModelInterface *iface);
 G_DEFINE_TYPE_WITH_CODE (PhoshAudioDevices, phosh_audio_devices, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (G_TYPE_LIST_MODEL, phosh_list_model_iface_init))
+
+
+static GvcMixerStream *
+get_default_stream (PhoshAudioDevices *self)
+{
+  if (self->is_input)
+    return gvc_mixer_control_get_default_source (self->mixer_control);
+
+  return gvc_mixer_control_get_default_sink (self->mixer_control);
+}
+
+
+static void
+update_active_devices (PhoshAudioDevices *self)
+{
+  GvcMixerStream *stream;
+  const GvcMixerStreamPort *active_port = NULL;
+
+  stream = get_default_stream (self);
+  if (stream)
+    active_port = gvc_mixer_stream_get_port (stream);
+
+  for (int i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (self->devices)); i++) {
+    g_autoptr (PhoshAudioDevice) device = g_list_model_get_item (G_LIST_MODEL (self->devices), i);
+    const char *device_port = phosh_audio_device_get_port (device);
+    gboolean active;
+
+    if (active_port && device_port)
+      active = g_strcmp0 (active_port->port, device_port) == 0;
+    else
+      active = self->active_id == phosh_audio_device_get_id (device);
+
+    phosh_audio_device_set_active (device, active);
+  }
+}
+
+
+static void
+stream_notify_port_cb (GvcMixerStream *stream, GParamSpec *pspec, gpointer data)
+{
+  PhoshAudioDevices *self = PHOSH_AUDIO_DEVICES (data);
+
+  update_active_devices (self);
+}
+
+
+static void
+bind_stream_port_notify (PhoshAudioDevices *self)
+{
+  GvcMixerStream *stream;
+
+  stream = get_default_stream (self);
+  if (stream == self->stream)
+    return;
+
+  if (self->stream)
+    g_signal_handlers_disconnect_by_data (self->stream, self);
+
+  g_set_object (&self->stream, stream);
+
+  if (!self->stream)
+    return;
+
+  g_signal_connect_object (self->stream,
+                           "notify::port",
+                           G_CALLBACK (stream_notify_port_cb),
+                           self,
+                           0);
+}
 
 
 static void
@@ -175,8 +247,12 @@ on_device_added (PhoshAudioDevices *self, guint id)
   }
 
   icon_name = gvc_mixer_ui_device_get_icon_name (device);
-  audio_device = phosh_audio_device_new (id, icon_name, description);
+  audio_device = phosh_audio_device_new (id,
+                                         icon_name,
+                                         description,
+                                         gvc_mixer_ui_device_get_port (device));
   g_list_store_append (self->devices, audio_device);
+  update_active_devices (self);
 }
 
 
@@ -197,14 +273,12 @@ on_device_removed (PhoshAudioDevices *self, guint id)
 
 
 static void
-on_active_udpated (PhoshAudioDevices *self, guint id)
+on_active_updated (PhoshAudioDevices *self, guint id)
 {
-  for (int i = 0; i < g_list_model_get_n_items (G_LIST_MODEL (self->devices)); i++) {
-    g_autoptr (PhoshAudioDevice) device = g_list_model_get_item (G_LIST_MODEL (self->devices), i);
-    gboolean active = id == phosh_audio_device_get_id (device);
+  self->active_id = id;
 
-    phosh_audio_device_set_active (device, active);
-  }
+  bind_stream_port_notify (self);
+  update_active_devices (self);
 }
 
 
@@ -220,15 +294,18 @@ phosh_audio_devices_constructed (GObject *object)
     g_object_connect (self->mixer_control,
                       "swapped-object-signal::input-added", on_device_added, self,
                       "swapped-object-signal::input-removed", on_device_removed, self,
-                      "swapped-object-signal::active-input-update", on_active_udpated, self,
+                      "swapped-object-signal::active-input-update", on_active_updated, self,
                       NULL);
   } else {
     g_object_connect (self->mixer_control,
                       "swapped-object-signal::output-added", on_device_added, self,
                       "swapped-object-signal::output-removed", on_device_removed, self,
-                      "swapped-object-signal::active-output-update", on_active_udpated, self,
+                      "swapped-object-signal::active-output-update", on_active_updated, self,
                       NULL);
   }
+
+  bind_stream_port_notify (self);
+  update_active_devices (self);
 
   G_OBJECT_CLASS (phosh_audio_devices_parent_class)->constructed (object);
 }
@@ -241,6 +318,7 @@ phosh_audio_devices_dispose (GObject *object)
 
   if (self->mixer_control)
     g_signal_handlers_disconnect_by_data (self->mixer_control, self);
+  g_clear_object (&self->stream);
   g_clear_object (&self->mixer_control);
 
   G_OBJECT_CLASS (phosh_audio_devices_parent_class)->dispose (object);
@@ -321,6 +399,7 @@ static void
 phosh_audio_devices_init (PhoshAudioDevices *self)
 {
   self->devices = g_list_store_new (PHOSH_TYPE_AUDIO_DEVICE);
+  self->active_id = G_MAXUINT;
 
   g_signal_connect_swapped (self->devices, "items-changed", G_CALLBACK (on_items_changed), self);
 }

@@ -16,9 +16,11 @@ G_DECLARE_FINAL_TYPE (PhoshAudioDevice, phosh_audio_device, PHOSH, AUDIO_DEVICE,
 
 PhoshAudioDevice        *phosh_audio_device_new             (guint             id,
                                                              const char       *icon_name,
-                                                             const char       *description);
+                                                             const char       *description,
+                                                             const char       *port);
 guint                    phosh_audio_device_get_id          (PhoshAudioDevice *self);
 const char              *phosh_audio_device_get_description (PhoshAudioDevice *self);
+const char              *phosh_audio_device_get_port        (PhoshAudioDevice *self);
 void                     phosh_audio_device_set_active      (PhoshAudioDevice *self,
                                                              gboolean          active);
 
