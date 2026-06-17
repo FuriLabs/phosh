@@ -1,0 +1,2 @@
+/usr/share/phosh/systemd/gnome-session-wayland.target /etc/systemd/user/gnome-session-wayland.target
+/usr/share/phosh/systemd/gnome-session-wayland@.target /etc/systemd/user/gnome-session-wayland@.target
