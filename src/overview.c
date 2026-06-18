@@ -247,7 +247,6 @@ on_app_failed (PhoshOverview   *self,
     return;
 
   g_debug ("Activity '%s' failed to start, closing", g_app_info_get_id (info));
-  app_failed_noti (self, info);
   gtk_widget_destroy (GTK_WIDGET (activity));
 }
 
