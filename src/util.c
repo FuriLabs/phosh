@@ -71,7 +71,6 @@ phosh_get_desktop_app_info_from_gsettings (void)
 
   if (appid && *appid) {
     app_info = g_desktop_app_info_new (appid);
-    g_settings_set_string (settings, key, "");
     return app_info ? g_object_ref(app_info) : NULL;
   }
 
