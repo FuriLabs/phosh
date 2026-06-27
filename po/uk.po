@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2026-05-08 07:09+0000\n"
-"PO-Revision-Date: 2026-05-08 21:22+0300\n"
+"POT-Creation-Date: 2026-06-26 08:47+0000\n"
+"PO-Revision-Date: 2026-06-26 16:52+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -17,8 +17,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: Lokalize 23.04.3\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<"
+"=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
 #: data/mobi.phosh.Shell.desktop.in.in:3 data/wayland-sessions/phosh.desktop:3
 msgid "Phone Shell"
@@ -122,6 +122,22 @@ msgstr "Швидке налаштовування помідора"
 msgid "Simple Pomodoro Timer"
 msgstr "Простий таймер-помідор"
 
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:4
+msgid "Scaling Quick Setting"
+msgstr "Параметр масштабування"
+
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:6
+msgid "A quick setting for adjusting the display scaling."
+msgstr "Параметр для коригування масштабування дисплея."
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:4
+msgid "Syncthing Quick Setting"
+msgstr "Параметр Syncthing"
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:6
+msgid "A quick setting for Syncthing."
+msgstr "Параметр для Syncthing."
+
 #: plugins/ticket-box/ticket-box.desktop.in.in:3
 #: plugins/ticket-box/ticket-box.ui:17
 msgid "Ticket Box"
@@ -139,6 +155,14 @@ msgstr "Майбутні події"
 msgid "Show upcoming calendar events"
 msgstr "Показати майбутні події календаря"
 
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:4
+msgid "Wi-Fi Hotspot Quick Setting"
+msgstr "Параметри точки доступу Wi-Fi"
+
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:6
+msgid "Toggle Wi-Fi hotspot on/off"
+msgstr "Увімкнути або вимкнути точку доступу Wi-Fi"
+
 #: src/app-grid-button.c:144
 msgid "Add to Folder"
 msgstr "Додати до теки"
@@ -147,15 +171,38 @@ msgstr "Додати до теки"
 msgid "Create new folder"
 msgstr "Створити теку"
 
-#: src/app-grid-button.c:694 src/app-grid-button.c:748
+#: src/app-grid-button.c:399
+msgid "Can't uninstall application"
+msgstr "Не вдалося вилучити програму"
+
+#: src/app-grid-button.c:475
+#| msgid "Undocked"
+msgid "Undo"
+msgstr "Скасувати"
+
+#: src/app-grid-button.c:476
+msgid "Application is now permanently hidden and disabled"
+msgstr "Тепер програму остаточно приховано і вимкнено"
+
+#: src/app-grid-button.c:493
+#| msgid "Can't uninstall application"
+msgid "Failed to hide application"
+msgstr "Не вдалося приховати програму"
+
+#: src/app-grid-button.c:806 src/app-grid-button.c:860
 msgid "Application"
 msgstr "Програма"
 
-#: src/app-grid.c:264
+#: src/app-grid.c:159
+#, c-format
+msgid "%s folder is empty"
+msgstr "Тека %s порожня"
+
+#: src/app-grid.c:265
 msgid "Show All Apps"
 msgstr "Показати усі програми"
 
-#: src/app-grid.c:267
+#: src/app-grid.c:268
 msgid "Show Only Mobile Friendly Apps"
 msgstr "Показати лише програми для мобільних"
 
@@ -499,9 +546,9 @@ msgstr[0] "Майже %dр."
 msgstr[1] "Майже %dр."
 msgstr[2] "Майже %dр."
 
-#: src/overview.c:221
-msgid "Application failed to start"
-msgstr "Не вдалося запустити програму"
+#: src/overview.c:228
+msgid "Application is slow or failed to start"
+msgstr "Програма працює надто повільно або не вдалося запустити програму"
 
 #: src/polkit-auth-agent.c:275
 msgid "Authentication dialog was dismissed by the user"
@@ -581,9 +628,18 @@ msgstr "Пере_глянути подробиці"
 msgid "Uninstall"
 msgstr "Вилучити"
 
-#: src/ui/app-grid-button.ui:53
+#: src/ui/app-grid-button.ui:51
+#| msgid "Application"
+msgid "Hide Application"
+msgstr "Приховати програму"
+
+#: src/ui/app-grid-button.ui:58
 msgid "_Remove from Folder"
 msgstr "Вилучити з _теки"
+
+#: src/ui/app-grid-button.ui:65
+msgid "Manage Hidden Apps"
+msgstr "Керування прихованими програмами"
 
 #: src/ui/app-grid.ui:26
 msgid "Search apps…"
@@ -682,7 +738,7 @@ msgstr "Назад"
 msgid "Slide up to unlock"
 msgstr "Протягніть угору, щоб розблокувати"
 
-#: src/ui/lockscreen.ui:332
+#: src/ui/lockscreen.ui:334
 msgid "Unlock"
 msgstr "Розблокувати"
 
@@ -1290,17 +1346,14 @@ msgid "Syncthing"
 msgstr "Syncthing"
 
 #: plugins/syncthing-quick-setting/qs.ui:31
-#| msgid "Add to Folder"
 msgid "No folders"
 msgstr "Немає тек"
 
 #: plugins/syncthing-quick-setting/qs.ui:46
-#| msgid "Location Disabled"
 msgid "Syncthing is disabled"
 msgstr "Syncthing вимкнено"
 
 #: plugins/syncthing-quick-setting/qs.ui:57
-#| msgid "Enable Wi-Fi"
 msgid "Enable"
 msgstr "Увімкнути"
 
@@ -1404,9 +1457,6 @@ msgstr "Точку доступу вимкнено"
 
 #~ msgid "App"
 #~ msgstr "Програма"
-
-#~ msgid "Unknown application"
-#~ msgstr "Невідома програма"
 
 #~ msgid "Lock Screen"
 #~ msgstr "Заблокувати екран"
