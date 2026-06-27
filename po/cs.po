@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2026-05-08 07:09+0000\n"
-"PO-Revision-Date: 2026-05-11 13:54+0200\n"
+"POT-Creation-Date: 2026-06-26 08:47+0000\n"
+"PO-Revision-Date: 2026-06-26 13:06+0200\n"
 "Last-Translator: Daniel Rusek <mail@asciiwolf.com>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -120,6 +120,22 @@ msgstr "Rychlé nastavení Pomodoro"
 msgid "Simple Pomodoro Timer"
 msgstr "Jednoduchý časovač Pomodoro"
 
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:4
+msgid "Scaling Quick Setting"
+msgstr "Rychlé nastavení škálování"
+
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:6
+msgid "A quick setting for adjusting the display scaling."
+msgstr "Rychlé nastavení pro úpravu škálování obrazovky."
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:4
+msgid "Syncthing Quick Setting"
+msgstr "Rychlé nastavení Syncthing"
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:6
+msgid "A quick setting for Syncthing."
+msgstr "Rychlé nastavení Syncthing."
+
 #: plugins/ticket-box/ticket-box.desktop.in.in:3
 #: plugins/ticket-box/ticket-box.ui:17
 msgid "Ticket Box"
@@ -139,6 +155,14 @@ msgstr "Nadcházející události"
 msgid "Show upcoming calendar events"
 msgstr "Zobrazit nadcházející události kalendáře"
 
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:4
+msgid "Wi-Fi Hotspot Quick Setting"
+msgstr "Rychlé nastavení přístupového bodu Wi-Fi"
+
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:6
+msgid "Toggle Wi-Fi hotspot on/off"
+msgstr "Zapnutí/vypnutí přístupového bodu Wi-Fi"
+
 #: src/app-grid-button.c:144
 msgid "Add to Folder"
 msgstr "Přidat do složky"
@@ -147,15 +171,36 @@ msgstr "Přidat do složky"
 msgid "Create new folder"
 msgstr "Vytvořit novou složku"
 
-#: src/app-grid-button.c:694 src/app-grid-button.c:748
+#: src/app-grid-button.c:399
+msgid "Can't uninstall application"
+msgstr "Nelze odinstalovat aplikaci"
+
+#: src/app-grid-button.c:475
+msgid "Undo"
+msgstr "Zpět"
+
+#: src/app-grid-button.c:476
+msgid "Application is now permanently hidden and disabled"
+msgstr "Aplikace je nyní trvale skrytá a zakázaná"
+
+#: src/app-grid-button.c:493
+msgid "Failed to hide application"
+msgstr "Nezdařilo se skrýt aplikaci"
+
+#: src/app-grid-button.c:806 src/app-grid-button.c:860
 msgid "Application"
 msgstr "Aplikace"
 
-#: src/app-grid.c:264
+#: src/app-grid.c:159
+#, c-format
+msgid "%s folder is empty"
+msgstr "Složka %s je prázdná"
+
+#: src/app-grid.c:265
 msgid "Show All Apps"
 msgstr "Zobrazit všechny aplikace"
 
-#: src/app-grid.c:267
+#: src/app-grid.c:268
 msgid "Show Only Mobile Friendly Apps"
 msgstr "Zobrazit pouze optimalizované aplikace"
 
@@ -499,9 +544,9 @@ msgstr[0] "Téměř %d rok"
 msgstr[1] "Téměř %d roky"
 msgstr[2] "Téměř %d let"
 
-#: src/overview.c:221
-msgid "Application failed to start"
-msgstr "Spuštění aplikace se nezdařilo"
+#: src/overview.c:228
+msgid "Application is slow or failed to start"
+msgstr "Aplikace je pomalá nebo se spuštění nezdařilo"
 
 #: src/polkit-auth-agent.c:275
 msgid "Authentication dialog was dismissed by the user"
@@ -581,13 +626,21 @@ msgstr "Zobrazit po_drobnosti"
 msgid "Uninstall"
 msgstr "Odinstalovat"
 
-#: src/ui/app-grid-button.ui:53
+#: src/ui/app-grid-button.ui:51
+msgid "Hide Application"
+msgstr "Skrýt aplikaci"
+
+#: src/ui/app-grid-button.ui:58
 msgid "_Remove from Folder"
 msgstr "Odeb_rat ze složky"
 
+#: src/ui/app-grid-button.ui:65
+msgid "Manage Hidden Apps"
+msgstr "Spravovat skryté aplikace"
+
 #: src/ui/app-grid.ui:26
 msgid "Search apps…"
-msgstr "Hledat aplikace…"
+msgstr "hledat aplikace…"
 
 #: src/ui/audio-settings.ui:84
 msgid "Output Devices"
@@ -682,7 +735,7 @@ msgstr "Zpět"
 msgid "Slide up to unlock"
 msgstr "Táhnutím nahoru odemknete"
 
-#: src/ui/lockscreen.ui:332
+#: src/ui/lockscreen.ui:334
 msgid "Unlock"
 msgstr "Odemknout"
 
@@ -1294,7 +1347,6 @@ msgid "No folders"
 msgstr "Žádné složky"
 
 #: plugins/syncthing-quick-setting/qs.ui:46
-#| msgid "Location Disabled"
 msgid "Syncthing is disabled"
 msgstr "Syncthing je zakázán"
 
@@ -1402,9 +1454,6 @@ msgstr "Přístupový bod vypnut"
 
 #~ msgid "_Screenshot"
 #~ msgstr "_Snímek obrazovky"
-
-#~ msgid "Unknown application"
-#~ msgstr "Neznámá aplikace"
 
 #~ msgid "Lock Screen"
 #~ msgstr "Zamknout obrazovku"

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phosh master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/World/Phosh/phosh/issues\n"
-"POT-Creation-Date: 2026-05-08 07:09+0000\n"
-"PO-Revision-Date: 2026-05-08 10:29+0200\n"
+"POT-Creation-Date: 2026-06-26 08:47+0000\n"
+"PO-Revision-Date: 2026-06-26 11:28+0200\n"
 "Last-Translator: Antonio Marin <gnmer.6qxyg@slmail.me>\n"
 "Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 50.0\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Flags-xgettext: --add-comments\n"
 
@@ -123,6 +123,22 @@ msgstr "Opțiuni pentru Pomodoro"
 msgid "Simple Pomodoro Timer"
 msgstr "Cronometru Pomodoro"
 
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:4
+msgid "Scaling Quick Setting"
+msgstr "Opțiuni pentru Scară"
+
+#: plugins/scaling-quick-setting/scaling-quick-setting.desktop.in.in:6
+msgid "A quick setting for adjusting the display scaling."
+msgstr "O reglare rapidă pentru scara afișajului."
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:4
+msgid "Syncthing Quick Setting"
+msgstr "Opțiuni pentru Sincronizare"
+
+#: plugins/syncthing-quick-setting/syncthing-quick-setting.desktop.in.in:6
+msgid "A quick setting for Syncthing."
+msgstr "O reglare rapidă pentru Sincronizare."
+
 #: plugins/ticket-box/ticket-box.desktop.in.in:3
 #: plugins/ticket-box/ticket-box.ui:17
 msgid "Ticket Box"
@@ -141,6 +157,14 @@ msgstr "Evenimente viitoare"
 msgid "Show upcoming calendar events"
 msgstr "Arată evenimentele viitoare din calendar"
 
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:4
+msgid "Wi-Fi Hotspot Quick Setting"
+msgstr "Opțiuni Punct de acces Wi-Fi"
+
+#: plugins/wifi-hotspot-quick-setting/wifi-hotspot-quick-setting.desktop.in.in:6
+msgid "Toggle Wi-Fi hotspot on/off"
+msgstr "Punct de acces Wi-Fi Pornit/Oprit"
+
 #: src/app-grid-button.c:144
 msgid "Add to Folder"
 msgstr "Adaugă în dosar"
@@ -149,15 +173,36 @@ msgstr "Adaugă în dosar"
 msgid "Create new folder"
 msgstr "Creează un dosar nou"
 
-#: src/app-grid-button.c:694 src/app-grid-button.c:748
+#: src/app-grid-button.c:399
+msgid "Can't uninstall application"
+msgstr "Nu se poate dezinstala aplicația"
+
+#: src/app-grid-button.c:475
+msgid "Undo"
+msgstr "Anulează"
+
+#: src/app-grid-button.c:476
+msgid "Application is now permanently hidden and disabled"
+msgstr "Aplicația este acum ascunsă definitiv și dezactivată"
+
+#: src/app-grid-button.c:493
+msgid "Failed to hide application"
+msgstr "Nu s-a putut ascunde aplicația"
+
+#: src/app-grid-button.c:806 src/app-grid-button.c:860
 msgid "Application"
 msgstr "Aplicație"
 
-#: src/app-grid.c:264
+#: src/app-grid.c:159
+#, c-format
+msgid "%s folder is empty"
+msgstr "Dosarul %s este gol"
+
+#: src/app-grid.c:265
 msgid "Show All Apps"
 msgstr "Arată toate aplicațiile"
 
-#: src/app-grid.c:267
+#: src/app-grid.c:268
 msgid "Show Only Mobile Friendly Apps"
 msgstr "Arată numai aplicații pentru mobil"
 
@@ -501,9 +546,9 @@ msgstr[0] "Aproape %d an"
 msgstr[1] "Aproape %d ani"
 msgstr[2] "Aproape %d ani"
 
-#: src/overview.c:221
-msgid "Application failed to start"
-msgstr "Aplicația nu s-a deschis"
+#: src/overview.c:228
+msgid "Application is slow or failed to start"
+msgstr "Aplicația e lentă sau nu s-a putut deschide"
 
 #: src/polkit-auth-agent.c:275
 msgid "Authentication dialog was dismissed by the user"
@@ -583,9 +628,17 @@ msgstr "Arată _detalii"
 msgid "Uninstall"
 msgstr "Dezinstalează"
 
-#: src/ui/app-grid-button.ui:53
+#: src/ui/app-grid-button.ui:51
+msgid "Hide Application"
+msgstr "Ascunde aplicația"
+
+#: src/ui/app-grid-button.ui:58
 msgid "_Remove from Folder"
 msgstr "_Elimină din dosar"
+
+#: src/ui/app-grid-button.ui:65
+msgid "Manage Hidden Apps"
+msgstr "Gestionează aplicațiile ascunse"
 
 #: src/ui/app-grid.ui:26
 msgid "Search apps…"
@@ -684,7 +737,7 @@ msgstr "Înapoi"
 msgid "Slide up to unlock"
 msgstr "Trage în sus pentru a debloca"
 
-#: src/ui/lockscreen.ui:332
+#: src/ui/lockscreen.ui:334
 msgid "Unlock"
 msgstr "Deblochează"
 
