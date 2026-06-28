@@ -14,9 +14,7 @@ phosh (0.56~rc1-1) unstable; urgency=medium
         * Avoid Bluetooth quick setting getting disabled on output changes
         * Allow to rotate lock screen on tablets
         * Crash and leak fixes
-  * Rediff patches.
-    Add load-meter-status-icon-Install-icon-into-plugin-dir.patch: <REASON>
-    Add syncthing-quick-setting-Use-correct-icon-dir.patch: <REASON>
+  * New patches: Install icons in plugins dir
   * Update symbols
 
  -- Guido Günther <agx@sigxcpu.org>  Sat, 27 Jun 2026 23:07:38 +0200
