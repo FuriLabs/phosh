@@ -9,6 +9,7 @@ Build-Depends:
  debhelper-compat (= 13),
  gi-docgen <!nodoc>,
  libadwaita-1-dev,
+ libappstream-dev (>= 1.0.0),
  libcallaudio-dev,
  libevince-gtk3-dev,
  libgmobile-dev,
