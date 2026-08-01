@@ -85,6 +85,7 @@ Breaks:
  phosh-osk-stevia (<< 0.51~),
  phosh-osk-stub,
  gnome-settings-daemon (<< 49),
+Conflicts: xdg-desktop-portal-wlr
 Description: Pure Wayland shell for mobile devices
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
