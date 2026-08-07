@@ -262,6 +262,14 @@ static GtkWidget *
 create_audio_device_row (gpointer item, gpointer user_data)
 {
   PhoshAudioDevice *audio_device = PHOSH_AUDIO_DEVICE (item);
+  const char *description;
+
+  description = phosh_audio_device_get_description (audio_device);
+
+  if (g_strcmp0 (description, "Parking port") == 0 ||
+      g_strcmp0 (description, "Null Input") == 0 ||
+      g_strcmp0 (description, "Null Output") == 0)
+    return NULL;
 
   return GTK_WIDGET (phosh_audio_device_row_new (audio_device));
 }
