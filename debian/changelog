@@ -1,8 +1,12 @@
-phosh (0.57~rc1-1) UNRELEASED; urgency=medium
+phosh (0.57~rc1-1) unstable; urgency=medium
 
   * New upstream release
+    * Use two column top panel in landscape in the unlocked shell
+    * Add transition from running app to overview. This is disabled by
+      default as it will be improved in the 0.58 cycle.
+    * Multiple bug fixes
 
- -- Guido Günther <agx@sigxcpu.org>  Fri, 14 Aug 2026 11:23:28 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Fri, 14 Aug 2026 11:36:39 +0200
 
 phosh (0.56.0-1) unstable; urgency=medium
 
