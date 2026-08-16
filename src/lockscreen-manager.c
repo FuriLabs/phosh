@@ -61,6 +61,8 @@ struct _PhoshLockscreenManager {
   GPtrArray               *shields;        /* other outputs */
 
   GSettings               *bg_settings;
+  GSettings               *shell_settings;  /* io.furios.phosh.shell, may be NULL */
+  GSettings               *desktop_bg_settings;
   GFile                   *bg_file;
   GFileMonitor            *bg_file_monitor;
   GDesktopBackgroundStyle  bg_style;
@@ -69,6 +71,8 @@ struct _PhoshLockscreenManager {
 
   gboolean                 locked;
   gboolean                 locking;
+  guint                    watch_id;
+  gboolean                 blanked;
   gint64                   active_time;    /* when lock was activated (in us) */
 
   PhoshCallsManager       *calls_manager;  /* Calls DBus Interface */
@@ -176,6 +180,16 @@ on_picture_params_changed (PhoshLockscreenManager *self)
       g_str_has_prefix (uri, "file:///") &&
       style != G_DESKTOP_BACKGROUND_STYLE_NONE) {
     file = g_file_new_for_uri (uri);
+  }
+
+  /* The style can change on its own, with the same picture. Pushing it before
+   * the file comparison below matters: that comparison returns early when only
+   * the style moved, which is why picture-options had no effect on the lock
+   * screen at all. */
+  if (style != self->bg_style) {
+    self->bg_style = style;
+    if (self->lockscreen)
+      phosh_lockscreen_set_bg_style (self->lockscreen, style);
   }
 
   if (phosh_util_file_equal (self->bg_file, file))
@@ -329,6 +343,7 @@ lock_primary_monitor (PhoshLockscreenManager *self)
                     "swapped-object-signal::lockscreen-unlock", on_lockscreen_unlock, self,
                     "swapped-object-signal::wakeup-output", on_lockscreen_wakeup_output, self,
                     NULL);
+  phosh_lockscreen_set_bg_style (self->lockscreen, self->bg_style);
   phosh_lockscreen_set_bg_image (self->lockscreen, self->cached_bg_image);
 
   gtk_widget_set_visible (GTK_WIDGET (self->lockscreen), TRUE);
@@ -359,6 +374,247 @@ on_primary_monitor_changed (PhoshLockscreenManager *self,
 }
 
 
+#define DESKTOP_BG_SCHEMA_ID "org.gnome.desktop.background"
+#define DESKTOP_BG_KEY_URI      "picture-uri"
+#define DESKTOP_BG_KEY_URI_DARK "picture-uri-dark"
+
+/* The FuriOS schema is phosh's own, so the key is simply added to it. */
+#define PHOSH_FURIOS_SCHEMA_ID     "io.furios.phosh.shell"
+#define PHOSH_KEY_WALLPAPER_FOLDER "wallpaper-folder"
+
+
+static gboolean
+is_image_name (const char *name)
+{
+  static const char * const exts[] = { ".jpg", ".jpeg", ".png", ".webp", ".jxl", ".bmp", ".svg" };
+  g_autofree char *lower = g_ascii_strdown (name, -1);
+
+  for (guint i = 0; i < G_N_ELEMENTS (exts); i++) {
+    if (g_str_has_suffix (lower, exts[i]))
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+ * rotate_wallpaper:
+ * @self: The #PhoshLockscreenManager
+ *
+ * Move the wallpaper on to the next image in the configured folder.
+ *
+ * Called whenever the lock screen becomes visible: when the phone locks, and
+ * when the screen is woken while it is still locked. Deliberately not on
+ * unlock, so that what you unlock into is the wallpaper you were just looking
+ * at rather than one you never see.
+ */
+static void
+rotate_wallpaper (PhoshLockscreenManager *self)
+{
+  g_autofree char *folder = NULL;
+  g_autofree char *current = NULL;
+  g_autoptr (GDir) dir = NULL;
+  g_autoptr (GError) err = NULL;
+  g_autoptr (GPtrArray) names = NULL;
+  g_autofree char *path = NULL;
+  g_autofree char *uri = NULL;
+  const char *name;
+  guint next = 0;
+
+  if (self->shell_settings == NULL)
+    return;
+
+  folder = g_settings_get_string (self->shell_settings, PHOSH_KEY_WALLPAPER_FOLDER);
+  if (gm_str_is_null_or_empty (folder))
+    return;
+
+  dir = g_dir_open (folder, 0, &err);
+  if (dir == NULL) {
+    g_warning ("Cannot rotate the wallpaper through '%s': %s", folder, err->message);
+    return;
+  }
+
+  names = g_ptr_array_new_with_free_func (g_free);
+  while ((name = g_dir_read_name (dir))) {
+    if (is_image_name (name))
+      g_ptr_array_add (names, g_strdup (name));
+  }
+
+  if (names->len == 0) {
+    g_debug ("No images in '%s' to rotate through", folder);
+    return;
+  }
+
+  /* Filename order, so the sequence is predictable and stable */
+  g_ptr_array_sort_values (names, (GCompareFunc) g_strcmp0);
+
+  /* Take the one after whatever is in use. An unrecognised wallpaper -- one
+   * from outside the folder -- starts the sequence from the beginning. */
+  current = g_settings_get_string (self->desktop_bg_settings, DESKTOP_BG_KEY_URI);
+  if (!gm_str_is_null_or_empty (current)) {
+    g_autoptr (GFile) file = g_file_new_for_uri (current);
+    g_autofree char *base = g_file_get_basename (file);
+
+    for (guint i = 0; i < names->len; i++) {
+      if (g_strcmp0 (g_ptr_array_index (names, i), base) == 0) {
+        next = (i + 1) % names->len;
+        break;
+      }
+    }
+  }
+
+  path = g_build_filename (folder, g_ptr_array_index (names, next), NULL);
+  uri = g_filename_to_uri (path, NULL, &err);
+  if (uri == NULL) {
+    g_warning ("Cannot build a URI for '%s': %s", path, err->message);
+    return;
+  }
+
+  g_debug ("Rotating wallpaper to %s", uri);
+  /* Both colour schemes, so the rotation shows whichever one is in use */
+  g_settings_set_string (self->desktop_bg_settings, DESKTOP_BG_KEY_URI, uri);
+  g_settings_set_string (self->desktop_bg_settings, DESKTOP_BG_KEY_URI_DARK, uri);
+  /* And the lock screen, which has a wallpaper of its own in the screensaver
+   * schema rather than sharing the desktop's. Without this the rotation is
+   * invisible in the one place it was asked for. */
+  g_settings_set_string (self->bg_settings, KEY_PICTURE_URI, uri);
+}
+
+
+static void on_power_mode_changed     (PhoshLockscreenManager *self,
+                                       GParamSpec             *pspec,
+                                       PhoshMonitor           *monitor);
+static void on_shell_state_changed    (PhoshLockscreenManager *self,
+                                       GParamSpec             *pspec,
+                                       PhoshShell             *shell);
+static void on_primary_monitor_swapped (PhoshLockscreenManager *self,
+                                        GParamSpec             *pspec,
+                                        PhoshShell             *shell);
+
+/*
+ * Start watching the primary monitor for the screen turning on and off.
+ *
+ * From a timeout rather than from init(): the shell singleton is still being
+ * built while the manager is constructed, and so is its primary monitor, so
+ * this keeps trying until both exist. Giving up after one attempt would leave
+ * the screen unwatched for the rest of the session, with only locking left to
+ * rotate the wallpaper.
+ */
+static gboolean
+watch_power_mode (gpointer data)
+{
+  PhoshLockscreenManager *self = data;
+  PhoshShell *shell = phosh_shell_get_default ();
+  PhoshMonitor *monitor;
+  PhoshMonitorPowerSaveMode mode;
+
+  if (shell == NULL)
+    return G_SOURCE_CONTINUE;
+
+  monitor = phosh_shell_get_primary_monitor (shell);
+  if (monitor == NULL)
+    return G_SOURCE_CONTINUE;
+
+  self->watch_id = 0;
+
+  g_object_get (monitor, "power-mode", &mode, NULL);
+  self->blanked = (mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF);
+
+  g_signal_connect_object (monitor,
+                           "notify::power-mode",
+                           G_CALLBACK (on_power_mode_changed),
+                           self,
+                           G_CONNECT_SWAPPED);
+  g_signal_connect_object (shell,
+                           "notify::shell-state",
+                           G_CALLBACK (on_shell_state_changed),
+                           self,
+                           G_CONNECT_SWAPPED);
+  g_signal_connect_object (shell,
+                           "notify::primary-monitor",
+                           G_CALLBACK (on_primary_monitor_swapped),
+                           self,
+                           G_CONNECT_SWAPPED);
+
+  return G_SOURCE_REMOVE;
+}
+
+
+/*
+ * Both sources feed this, and either one is enough.
+ *
+ * The shell's PHOSH_STATE_BLANKED survives the primary monitor being replaced,
+ * which happens on output changes and leaves a signal attached to the old
+ * monitor object firing never again. The monitor's own power-mode is the more
+ * direct signal when it is there, but goes away with the monitor. Either one
+ * alone therefore has a blind spot: watch both and let the first to notice
+ * win -- the edge check below means a duplicate costs nothing.
+ */
+static void
+set_blanked (PhoshLockscreenManager *self, gboolean blanked)
+{
+  g_assert (PHOSH_IS_LOCKSCREEN_MANAGER (self));
+
+  /* The monitor's own power mode, rather than the shell's PHOSH_STATE_BLANKED.
+   * That flag lives in a flags property which notifies on any change in it, so
+   * it needs edge detection -- and a single missed blank leaves the remembered
+   * value stuck at "awake" for the rest of the session, after which no wake is
+   * ever seen as a transition and the wallpaper silently stops rotating until
+   * the shell restarts. Watching the monitor removes the guesswork: this
+   * signal fires only when the screen actually turns on or off. */
+  if (blanked == self->blanked)
+    return;
+
+  self->blanked = blanked;
+
+  /* Any wake, with no further condition.
+   *
+   * Not conditional on being locked, nor on a lock screen existing: pressing
+   * the power button blanks the screen without locking it, and
+   * org.gnome.desktop.screensaver lock-delay is 1800s by default, so either
+   * condition would advance the wallpaper only after half an hour asleep.
+   *
+   * Waking the phone is the moment the wallpaper is looked at again, whether
+   * it is the lock screen or the home screen that appears, so that is the
+   * trigger. */
+  if (blanked)
+    return;
+
+  rotate_wallpaper (self);
+}
+
+
+static void
+on_power_mode_changed (PhoshLockscreenManager *self, GParamSpec *pspec, PhoshMonitor *monitor)
+{
+  PhoshMonitorPowerSaveMode mode;
+
+  g_object_get (monitor, "power-mode", &mode, NULL);
+  set_blanked (self, mode == PHOSH_MONITOR_POWER_SAVE_MODE_OFF);
+}
+
+
+static void
+on_shell_state_changed (PhoshLockscreenManager *self, GParamSpec *pspec, PhoshShell *shell)
+{
+  set_blanked (self, !!(phosh_shell_get_state (shell) & PHOSH_STATE_BLANKED));
+}
+
+
+static void
+on_primary_monitor_swapped (PhoshLockscreenManager *self, GParamSpec *pspec, PhoshShell *shell)
+{
+  PhoshMonitor *monitor = phosh_shell_get_primary_monitor (shell);
+
+  /* A new monitor object needs its own connection; the old one is gone */
+  if (monitor == NULL)
+    return;
+
+  g_signal_connect_object (monitor, "notify::power-mode",
+                           G_CALLBACK (on_power_mode_changed), self, G_CONNECT_SWAPPED);
+}
+
+
 static void
 lockscreen_lock (PhoshLockscreenManager *self)
 {
@@ -374,6 +630,9 @@ lockscreen_lock (PhoshLockscreenManager *self)
 
   self->locking = TRUE;
   primary_monitor = phosh_shell_get_primary_monitor (shell);
+
+  /* A fresh wallpaper for the lock screen that is about to appear */
+  rotate_wallpaper (self);
 
   /* Listen for monitor changes */
   g_signal_connect_object (monitor_manager, "monitor-added",
@@ -487,7 +746,10 @@ phosh_lockscreen_manager_dispose (GObject *object)
 
   g_clear_object (&self->bg_file_monitor);
   g_clear_object (&self->bg_file);
+  g_clear_handle_id (&self->watch_id, g_source_remove);
   g_clear_object (&self->bg_settings);
+  g_clear_object (&self->desktop_bg_settings);
+  g_clear_object (&self->shell_settings);
   g_clear_object (&self->cached_bg_image);
 
   G_OBJECT_CLASS (phosh_lockscreen_manager_parent_class)->dispose (object);
@@ -558,7 +820,22 @@ phosh_lockscreen_manager_class_init (PhoshLockscreenManagerClass *klass)
 static void
 phosh_lockscreen_manager_init (PhoshLockscreenManager *self)
 {
+  GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
+  g_autoptr (GSettingsSchema) schema = NULL;
+
+  self->watch_id = g_timeout_add (1000, watch_power_mode, self);
+
   self->bg_settings = g_settings_new (SCREENSAVER_SETTINGS);
+  self->desktop_bg_settings = g_settings_new (DESKTOP_BG_SCHEMA_ID);
+
+  /* Wallpaper rotation is optional: the schema belongs to this fork, so check
+   * it is installed and carries the key before touching it. Asking GSettings
+   * for a key a schema does not have aborts the process. */
+  if (source)
+    schema = g_settings_schema_source_lookup (source, PHOSH_FURIOS_SCHEMA_ID, TRUE);
+
+  if (schema && g_settings_schema_has_key (schema, PHOSH_KEY_WALLPAPER_FOLDER))
+    self->shell_settings = g_settings_new (PHOSH_FURIOS_SCHEMA_ID);
 
   g_object_connect (self->bg_settings,
                     "swapped-object-signal::changed::" KEY_PICTURE_URI,
