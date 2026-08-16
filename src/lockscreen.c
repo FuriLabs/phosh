@@ -104,6 +104,7 @@ typedef struct {
   gint64 last_input;
   PhoshAuth          *auth;
   GSettings          *lockscreen_settings;
+  GSettings          *glass_settings;
 
   struct {
     GtkGesture *swipe_gesture;
@@ -564,6 +565,8 @@ wall_clock_notify_cb (PhoshLockscreen *self,
 }
 
 
+static void update_blur (PhoshLockscreen *self);
+
 static void
 carousel_position_notified_cb (PhoshLockscreen *self,
                                GParamSpec      *pspec,
@@ -602,6 +605,8 @@ carousel_page_changed_cb (PhoshLockscreen *self,
     gtk_widget_set_sensitive (priv->entry_pin, FALSE);
     clear_input (self, TRUE);
   }
+
+  update_blur (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), props[PROP_PAGE]);
 }
@@ -844,6 +849,35 @@ phosh_lockscreen_add_background (PhoshLockscreen *self)
 
 
 static void
+update_blur (PhoshLockscreen *self)
+{
+  PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+  PhoshLockscreenPage page;
+  gboolean glass;
+  guint radius;
+
+  /* Called from constructed() before the carousel exists, where the page is
+   * whatever the lock screen is about to open on */
+  page = priv->carousel ? phosh_lockscreen_get_page (self) : priv->default_page;
+  glass = g_settings_get_boolean (priv->glass_settings, PHOSH_GLASS_KEY_THEME);
+
+  if (page != PHOSH_LOCKSCREEN_PAGE_UNLOCK || !glass)
+    radius = 0;
+  else
+    radius = g_settings_get_uint (priv->glass_settings, PHOSH_GLASS_KEY_BLUR_RADIUS);
+
+  phosh_layer_surface_set_blur (PHOSH_LAYER_SURFACE (self), radius);
+
+  /* With lockscreen-tint off the info page shows the picture as it is */
+  if (page != PHOSH_LOCKSCREEN_PAGE_UNLOCK &&
+      !g_settings_get_boolean (priv->glass_settings, PHOSH_KEY_LOCKSCREEN_TINT))
+    gtk_style_context_add_class (gtk_widget_get_style_context (GTK_WIDGET (self)), "p-untinted");
+  else
+    gtk_style_context_remove_class (gtk_widget_get_style_context (GTK_WIDGET (self)), "p-untinted");
+}
+
+
+static void
 phosh_lockscreen_constructed (GObject *object)
 {
   PhoshLockscreen *self = PHOSH_LOCKSCREEN (object);
@@ -857,6 +891,21 @@ phosh_lockscreen_constructed (GObject *object)
   g_auto (GStrv) plugins = NULL;
 
   G_OBJECT_CLASS (phosh_lockscreen_parent_class)->constructed (object);
+
+  priv->glass_settings = g_settings_new (PHOSH_GLASS_SCHEMA_ID);
+  g_signal_connect_swapped (priv->glass_settings,
+                            "changed::" PHOSH_GLASS_KEY_BLUR_RADIUS,
+                            G_CALLBACK (update_blur),
+                            self);
+  g_signal_connect_swapped (priv->glass_settings,
+                            "changed::" PHOSH_KEY_LOCKSCREEN_TINT,
+                            G_CALLBACK (update_blur),
+                            self);
+  g_signal_connect_swapped (priv->glass_settings,
+                            "changed::" PHOSH_GLASS_KEY_THEME,
+                            G_CALLBACK (update_blur),
+                            self);
+  update_blur (self);
 
   /* window properties */
   gtk_window_set_title (GTK_WINDOW (self), "phosh lockscreen");
@@ -986,6 +1035,7 @@ phosh_lockscreen_dispose (GObject *object)
   g_clear_object (&priv->calls_manager);
   g_clear_pointer (&priv->active, g_free);
   g_clear_object (&priv->lockscreen_settings);
+  g_clear_object (&priv->glass_settings);
 
   g_clear_pointer (&priv->background, phosh_cp_widget_destroy);
 
