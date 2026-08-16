@@ -211,6 +211,26 @@ show_fader (PhoshScreenshotManager *self)
 
 
 static void
+on_screenshot_notification_actioned (PhoshNotification *notification,
+                                     const char        *action,
+                                     gpointer           user_data)
+{
+  const char *filename = user_data;
+  g_autoptr (GError) err = NULL;
+  g_autofree char *uri = NULL;
+
+  uri = g_filename_to_uri (filename, NULL, &err);
+  if (uri == NULL) {
+    g_warning ("Cannot open '%s': %s", filename, err->message);
+    return;
+  }
+
+  if (!g_app_info_launch_default_for_uri (uri, NULL, &err))
+    g_warning ("Failed to open screenshot '%s': %s", filename, err->message);
+}
+
+
+static void
 screenshot_done (PhoshScreenshotManager *self, gboolean success)
 {
   /* Invocation via DBus API */
@@ -226,17 +246,24 @@ screenshot_done (PhoshScreenshotManager *self, gboolean success)
   /* Internal screenshot */
   if (self->frames->filename) {
     PhoshNotifyManager *nm = phosh_notify_manager_get_default ();
-    g_autoptr (GIcon) icon = g_themed_icon_new ("screenshot-portrait-symbolic");
+    g_autoptr (GIcon) icon = NULL;
     g_autoptr (PhoshNotification) noti = NULL;
     g_autofree char *msg = NULL;
 
     if (success) {
+      g_autoptr (GFile) file = g_file_new_for_path (self->frames->filename);
       g_autofree char *filename = NULL;
+
+      /* Show the shot itself rather than a generic glyph -- with several taken
+       * in a row the picture is the only thing that tells them apart. The file
+       * is on disk by this point, so it can simply be pointed at. */
+      icon = g_file_icon_new (file);
 
       filename = g_path_get_basename (self->frames->filename);
       /* Translators: '%s' is the filename of a screenshot */
       msg = g_strdup_printf (_("Screenshot saved to '%s'"), filename);
     } else {
+      icon = g_themed_icon_new ("screenshot-portrait-symbolic");
       msg = g_strdup (_("Failed to save screenshot"));
     }
 
@@ -245,6 +272,18 @@ screenshot_done (PhoshScreenshotManager *self, gboolean success)
                          "body", msg,
                          "image", icon,
                          NULL);
+
+    /* Tapping the notification opens the shot. The filename is copied into the
+     * closure because `frames` is disposed as soon as this function returns,
+     * long before the user gets a chance to act on it. */
+    if (success) {
+      g_signal_connect_data (noti,
+                             "actioned",
+                             G_CALLBACK (on_screenshot_notification_actioned),
+                             g_strdup (self->frames->filename),
+                             (GClosureNotify) g_free,
+                             0);
+    }
 
     phosh_notify_manager_add_shell_notification (nm, noti, 0, 5000);
     g_clear_pointer (&self->frames->filename, g_free);
