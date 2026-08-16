@@ -7,6 +7,7 @@ Uploaders:
  Guido Günther <agx@sigxcpu.org>,
 Build-Depends:
  debhelper-compat (= 13),
+ dh-sequence-gir,
  gir1.2-gcr-3-dev,
  gir1.2-gio-2.0-dev,
  gir1.2-gnomebluetooth-3.0-dev,
@@ -229,8 +230,11 @@ Architecture: any
 Section: libdevel
 Depends:
  libphosh-0.45-0 (= ${binary:Version}),
+ ${gir:Depends},
  ${misc:Depends},
  ${shlibs:Depends},
+Provides:
+ ${gir:Provides},
 Description: Pure Wayland shell for mobile devices - GObject introspection data
  Phosh is a graphical shell for Wayland compositors speaking the layer-surface
  protocol and aimed at mobile devices like smart phones and tablets using touch
