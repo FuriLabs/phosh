@@ -255,5 +255,154 @@
         Apps in this list will not appear in the launcher or app drawer.
       </description>
     </key>
+
+    <key name="glass-theme" type="b">
+      <default>false</default>
+      <summary>Use the FuriOS glass theme</summary>
+      <description>
+        Whether to style the shell as frosted glass. Off leaves phosh with
+        its own stylesheet untouched; on loads the FuriOS variant of it and
+        gives GTK4 applications a matching one. The keys below only take
+        effect while this is on.
+      </description>
+    </key>
+
+    <key name="accent-color-custom" type="s">
+      <default>''</default>
+      <summary>Custom accent colour</summary>
+      <description>
+        A free-form accent colour for the shell, as any colour GDK can parse,
+        for example '#3584e4'. When set this overrides the accent chosen in
+        Settings, so the shell is not limited to the nine preset swatches.
+        Empty means follow that setting. Note that GTK4 applications only
+        understand the presets, so a custom colour applies to the shell alone.
+      </description>
+    </key>
+
+    <key name="glass-text-color" type="s">
+      <default>''</default>
+      <summary>Shell text colour</summary>
+      <description>
+        A free-form colour for the shell's text and icons, as any colour GDK
+        can parse. Every piece of shell text follows this, including text
+        drawn on an accent fill. Empty follows the theme, which is near-white
+        on the dark variant and near-black on the light one.
+      </description>
+    </key>
+
+    <key name="glass-accent-text-color" type="s">
+      <default>''</default>
+      <summary>Colour of text drawn on the accent</summary>
+      <description>
+        The colour of labels and icons sitting on top of an accent fill -- a
+        selected quick setting, a pressed keypad key, a card. This is a
+        different question from the main text colour only if you want it to
+        be. Empty follows the main text colour, so all of the shell's text
+        matches unless this is set deliberately.
+      </description>
+    </key>
+
+    <key name="glass-text-shadow-color" type="s">
+      <default>''</default>
+      <summary>Colour of the drop shadow behind shell text</summary>
+      <description>
+        The colour of the small drop shadow carried by the shell's text and
+        icons, most visibly the lock screen clock, date and status labels,
+        which sit over a wallpaper the shell does not choose. Empty follows
+        the text colour in use and takes the opposite of it, so light text
+        gets a dark shadow and dark text a light one. Changing glass-text-color
+        is therefore enough on its own; this key is for the case where the
+        wallpaper wants a shadow that is neither.
+      </description>
+    </key>
+
+    <key name="glass-text-shadow" type="d">
+      <default>0.7</default>
+      <range min="0.0" max="1.0"/>
+      <summary>Strength of the drop shadow behind shell text</summary>
+      <description>
+        How opaque that shadow is. 0 turns it off entirely. The offset stays
+        small and fixed -- one to three pixels depending on the size of the
+        text, always more than the blur under it, because a blur wider than
+        its offset is a glow rather than a shadow. It is there to hold text
+        legible against an arbitrary wallpaper, not to be seen in its own
+        right.
+      </description>
+    </key>
+
+    <key name="glass-text-opacity" type="d">
+      <default>1.0</default>
+      <range min="0.2" max="1.0"/>
+      <summary>Shell text opacity</summary>
+      <description>
+        How opaque the shell's text and icons are. Lower values let the
+        frosted backdrop show through the text itself. The floor is deliberate:
+        text that can be turned fully invisible is a way to make the shell
+        unusable with no obvious way back.
+      </description>
+    </key>
+
+    <key name="lockscreen-tint" type="b">
+      <default>true</default>
+      <summary>Tint the wallpaper behind the lock screen clock</summary>
+      <description>
+        Whether the lock screen lays its translucent sheet over the wallpaper
+        on the page showing the clock and date. On, the wallpaper is dimmed and
+        the clock stays legible over a bright or busy picture. Off, the picture
+        is shown as it is.
+
+        The keypad page keeps its sheet either way: the keys and the passcode
+        entry need a surface to sit on.
+      </description>
+    </key>
+
+    <key name="glass-blur-radius" type="u">
+      <default>100</default>
+      <range min="0" max="200"/>
+      <summary>Background blur radius</summary>
+      <description>
+        How strongly the compositor blurs what is behind the shell's glass
+        surfaces: the top panel, the settings drawer and the lock screen.
+        0 turns the blur off. Needs a compositor that supports background
+        blur; without one this has no effect.
+      </description>
+    </key>
+
+    <key name="glass-opacity" type="d">
+      <default>0.15</default>
+      <range min="0.0" max="1.0"/>
+      <summary>Glass opacity</summary>
+      <description>
+        How solid the shell's glass surfaces are. 0.0 is fully transparent
+        and 1.0 is opaque, hiding the blur behind it entirely. Other glass
+        surfaces are scaled from this, keeping their relative weights.
+        Application windows keep a small minimum whatever this is set to,
+        since a window with no background at all leaves its text floating on
+        the wallpaper.
+      </description>
+    </key>
+
+    <key name="glass-lightness" type="d">
+      <default>0.15</default>
+      <range min="0.0" max="1.0"/>
+      <summary>Glass lightness</summary>
+      <description>
+        How much white is mixed into the glass, for a frostier and paler
+        look. 0.0 keeps the theme's own background colour.
+      </description>
+    </key>
+
+    <key name="glass-accent-wash" type="d">
+      <default>0.15</default>
+      <range min="0.0" max="1.0"/>
+      <summary>Accent wash strength</summary>
+      <description>
+        How much of the accent colour is washed into the glass surfaces, so
+        that the drawer, lock screen and overview carry the accent chosen in
+        Settings. 0.0 leaves them neutral. The light theme uses a lower
+        proportion of this, since a tint reads more strongly against a pale
+        background.
+      </description>
+    </key>
   </schema>
 </schemalist>
