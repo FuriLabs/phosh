@@ -1426,3 +1426,19 @@ phosh_lockscreen_set_bg_image (PhoshLockscreen *self, PhoshBackgroundImage *imag
 
   phosh_lockscreen_bg_set_image (priv->background, image);
 }
+
+
+/**
+ * phosh_lockscreen_set_bg_style:
+ * @self: The lockscreen
+ * @style: How to fit the background image to the screen
+ */
+void
+phosh_lockscreen_set_bg_style (PhoshLockscreen *self, GDesktopBackgroundStyle style)
+{
+  PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+
+  g_return_if_fail (PHOSH_IS_LOCKSCREEN (self));
+
+  phosh_lockscreen_bg_set_style (priv->background, style);
+}
