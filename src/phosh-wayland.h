@@ -11,6 +11,7 @@
 #include "virtual-keyboard-unstable-v1-client-protocol.h"
 #include "phoc-device-state-unstable-v1-client-protocol.h"
 #include "phoc-layer-shell-effects-unstable-v1-client-protocol.h"
+#include "phoc-furios-layer-shell-effects-unstable-v1-client-protocol.h"
 #include "wlr-foreign-toplevel-management-unstable-v1-client-protocol.h"
 #include "wlr-layer-shell-unstable-v1-client-protocol.h"
 #include "wlr-gamma-control-unstable-v1-client-protocol.h"
@@ -76,5 +77,6 @@ struct zwp_virtual_keyboard_manager_v1 *phosh_wayland_get_zwp_virtual_keyboard_m
 void                                  phosh_wayland_roundtrip (PhoshWayland *self);
 PhoshWaylandSeatCapabilities          phosh_wayland_get_seat_capabilities (PhoshWayland *self);
 struct zphoc_layer_shell_effects_v1  *phosh_wayland_get_zphoc_layer_shell_effects_v1 (PhoshWayland *self);
+struct zphoc_furios_layer_shell_effects_v1 *phosh_wayland_get_zphoc_furios_layer_shell_effects_v1 (PhoshWayland *self);
 struct zphoc_device_state_v1         *phosh_wayland_get_zphoc_device_state_v1 (PhoshWayland *self);
 G_END_DECLS
