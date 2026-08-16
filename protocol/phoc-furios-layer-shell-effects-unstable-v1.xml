@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="phoc_furios_layer_shell_effects_unstable_v1">
+  <copyright>
+    Copyright © 2026 FuriLabs
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+
+  <interface name="zphoc_furios_layer_shell_effects_v1" version="1">
+    <description summary="FuriOS additions to layer surface effects">
+      Assigns FuriOS specific features to layer surfaces.
+
+      This is deliberately a protocol of its own rather than additions to
+      zphoc_layer_shell_effects_v1, which phoc owns: extending that interface
+      here would collide with any version phoc adds upstream, and a client
+      could not then tell the two apart.
+
+      Warning! The protocol described in this file is experimental and
+      backward incompatible changes may be made. Backward compatible changes
+      may be added together with the corresponding interface version bump.
+      Backward incompatible changes are done by bumping the version number in
+      the protocol and interface names and resetting the interface version.
+      Once the protocol is to be declared stable, the 'z' prefix and the
+      version number in the protocol and interface names are removed and the
+      interface version number is reset.
+    </description>
+
+    <enum name="error">
+      <entry name="bad_surface" value="0" summary="layer surface is not committed"/>
+    </enum>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the effects object">
+        This doesn't destroy the objects created via this interface.
+      </description>
+    </request>
+
+    <request name="get_blur_layer_surface">
+      <description summary="Blur the background behind a layer_surface">
+        Requests that the compositor blurs the content rendered beneath
+        the layer surface so that translucent parts of the surface appear
+        frosted.
+      </description>
+      <arg name="id" type="new_id" interface="zphoc_furios_blur_layer_surface_v1"/>
+      <arg name="layer_surface" type="object" interface="zwlr_layer_surface_v1"/>
+    </request>
+  </interface>
+
+  <interface name="zphoc_furios_blur_layer_surface_v1" version="1">
+    <description summary="A layer surface with a blurred backdrop">
+      This interface gives a layer surface a blurred backdrop. The blur is
+      only visible through the translucent parts of the surface.
+    </description>
+
+    <request name="set_blur">
+      <description summary="Set the blur strength">
+        Set the strength of the blur applied to the content beneath the
+        surface. A value of 0 disables blur; higher values increase the
+        blur radius. The compositor maps the value onto its blur
+        implementation; useful values are in the range 0 to 100.
+
+        Blur is double-buffered, see wl_surface.commit.
+      </description>
+      <arg name="radius" type="uint"/>
+    </request>
+
+    <request name="destroy" type="destructor">
+      <description summary="destroy the blur_layer_surface">
+        This request destroys the blur layer surface and removes the
+        blur from the underlying surface.
+      </description>
+    </request>
+  </interface>
+</protocol>
