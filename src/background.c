@@ -32,6 +32,8 @@
 #include <math.h>
 #include <string.h>
 
+#define IS_FURIOS 1
+
 #define COLOR_TO_PIXEL(color)     ((((int)(color->red   * 255)) << 24) | \
                                    (((int)(color->green * 255)) << 16) | \
                                    (((int)(color->blue  * 255)) << 8)  | \
@@ -122,6 +124,29 @@ phosh_background_get_property (GObject    *object,
 }
 
 
+#if IS_FURIOS
+
+static GdkPixbuf *
+image_background (PhoshBackgroundImage    *image,
+                  guint                    width,
+                  guint                    height,
+                  GDesktopBackgroundStyle  style,
+                  GdkRGBA                 *color)
+{
+  if (image == NULL) {
+    g_debug ("No image, using 'none' desktop style");
+    return NULL;
+  }
+
+  if (style == G_DESKTOP_BACKGROUND_STYLE_NONE)
+    return NULL;
+
+  return phosh_utils_pixbuf_for_style (phosh_background_image_get_pixbuf (image),
+                                       width, height, style, color);
+}
+
+#else
+
 static GdkPixbuf *
 pb_scale_to_fit (GdkPixbuf *src, int width, int height, GdkRGBA *color)
 {
@@ -196,6 +221,8 @@ image_background (PhoshBackgroundImage    *image,
 
   return scaled_bg;
 }
+
+#endif
 
 
 static gboolean
