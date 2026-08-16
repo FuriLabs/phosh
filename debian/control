@@ -7,7 +7,6 @@ Uploaders:
  Guido Günther <agx@sigxcpu.org>,
 Build-Depends:
  debhelper-compat (= 13),
- gi-docgen <!nodoc>,
  libadwaita-1-dev,
  libappstream-dev (>= 1.0.0),
  libcallaudio-dev,
@@ -52,6 +51,8 @@ Build-Depends:
  xauth <!nocheck>,
  xmlstarlet <!nocheck>,
  xvfb <!nocheck>,
+Build-Depends-Indep:
+ gi-docgen <!nodoc>,
 Standards-Version: 4.7.2
 Homepage: https://phosh.mobi/
 Vcs-Browser: https://salsa.debian.org/DebianOnMobile-team/phosh
