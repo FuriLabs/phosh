@@ -34,6 +34,10 @@ struct _PhoshAppGridButtonPrivate {
 
   gulong favorite_changed_watcher;
 
+  /* Icon pre-warming, see warm_icon() */
+  GCancellable          *icon_cancel;
+  guint                  icon_warm_id;
+
   GtkWidget             *icon;
   GtkWidget             *popover;
   GtkGesture            *long_gesture;
@@ -115,11 +119,132 @@ phosh_app_grid_button_get_property (GObject    *object,
 }
 
 
+/*
+ * Decode the icon before the button is first drawn.
+ *
+ * gtk_image_set_from_gicon() defers the load to the first draw, and a
+ * GtkFlowBox recycles nothing, so without this the first scroll through the
+ * grid decodes an icon per row it reveals, on the main thread.
+ *
+ * Warming GtkIconTheme instead does not work -- every lookup returns a fresh
+ * GtkIconInfo, so nothing that a load produced is reused. The decoded pixbuf
+ * has to be kept, which means putting it on the image.
+ */
+static void
+on_icon_loaded (GObject *source, GAsyncResult *res, gpointer data)
+{
+  GtkIconInfo *icon_info = GTK_ICON_INFO (source);
+  PhoshAppGridButton *self = data;
+  PhoshAppGridButtonPrivate *priv = phosh_app_grid_button_get_instance_private (self);
+  g_autoptr (GdkPixbuf) pixbuf = NULL;
+  g_autoptr (GError) err = NULL;
+  cairo_surface_t *surface;
+
+  pixbuf = gtk_icon_info_load_icon_finish (icon_info, res, &err);
+  if (pixbuf == NULL) {
+    if (!g_error_matches (err, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+      g_debug ("Could not pre-load icon: %s", err->message);
+    /* The GIcon is still on the image, so GTK falls back to decoding at draw */
+    goto out;
+  }
+
+  /* A surface, not the pixbuf: the device scale travels with it */
+  surface = gdk_cairo_surface_create_from_pixbuf (pixbuf,
+                                                  gtk_widget_get_scale_factor (GTK_WIDGET (self)),
+                                                  gtk_widget_get_window (GTK_WIDGET (self)));
+  gtk_image_set_from_surface (GTK_IMAGE (priv->icon), surface);
+  cairo_surface_destroy (surface);
+
+ out:
+  g_object_unref (self);
+}
+
+
+static gboolean
+warm_icon (gpointer data)
+{
+  PhoshAppGridButton *self = data;
+  PhoshAppGridButtonPrivate *priv = phosh_app_grid_button_get_instance_private (self);
+  g_autoptr (GtkIconInfo) icon_info = NULL;
+  GIcon *icon;
+  int size, scale;
+
+  priv->icon_warm_id = 0;
+
+  if (priv->info == NULL)
+    return G_SOURCE_REMOVE;
+
+  icon = g_app_info_get_icon (priv->info);
+  if (icon == NULL)
+    return G_SOURCE_REMOVE;
+
+  size = gtk_image_get_pixel_size (GTK_IMAGE (priv->icon));
+  scale = gtk_widget_get_scale_factor (GTK_WIDGET (self));
+
+  icon_info = gtk_icon_theme_lookup_by_gicon_for_scale (gtk_icon_theme_get_default (),
+                                                        icon,
+                                                        size,
+                                                        scale,
+                                                        GTK_ICON_LOOKUP_FORCE_SIZE);
+  if (icon_info == NULL)
+    return G_SOURCE_REMOVE;
+
+  g_cancellable_cancel (priv->icon_cancel);
+  g_clear_object (&priv->icon_cancel);
+  priv->icon_cancel = g_cancellable_new ();
+
+  /* Hold a reference: a decode already in a thread cannot be taken back */
+  gtk_icon_info_load_icon_async (icon_info,
+                                 priv->icon_cancel,
+                                 on_icon_loaded,
+                                 g_object_ref (self));
+
+  return G_SOURCE_REMOVE;
+}
+
+
+static void
+schedule_icon_warm (PhoshAppGridButton *self)
+{
+  PhoshAppGridButtonPrivate *priv = phosh_app_grid_button_get_instance_private (self);
+
+  if (priv->icon_warm_id)
+    return;
+
+  /* Low priority: the grid is built while the shell is still starting. The
+   * buttons are created in display order, so the idles queue that way too. */
+  priv->icon_warm_id = g_idle_add_full (G_PRIORITY_LOW, warm_icon, self, NULL);
+  g_source_set_name_by_id (priv->icon_warm_id, "[phosh] app icon pre-warm");
+}
+
+
+static void
+on_icon_theme_changed (PhoshAppGridButton *self)
+{
+  PhoshAppGridButtonPrivate *priv = phosh_app_grid_button_get_instance_private (self);
+  GIcon *icon;
+
+  if (priv->info == NULL)
+    return;
+
+  /* The image is holding a surface, which GTK cannot re-resolve itself */
+  icon = g_app_info_get_icon (priv->info);
+  if (icon)
+    gtk_image_set_from_gicon (GTK_IMAGE (priv->icon), icon, -1);
+
+  schedule_icon_warm (self);
+}
+
+
 static void
 phosh_app_grid_button_finalize (GObject *object)
 {
   PhoshAppGridButton *self = PHOSH_APP_GRID_BUTTON (object);
   PhoshAppGridButtonPrivate *priv = phosh_app_grid_button_get_instance_private (self);
+
+  g_clear_handle_id (&priv->icon_warm_id, g_source_remove);
+  g_cancellable_cancel (priv->icon_cancel);
+  g_clear_object (&priv->icon_cancel);
 
   g_clear_object (&priv->info);
   g_clear_object (&priv->menu);
@@ -549,6 +674,17 @@ phosh_app_grid_button_init (PhoshAppGridButton *self)
 
   gtk_widget_init_template (GTK_WIDGET (self));
 
+  /* Both invalidate the surface handed to the image */
+  g_signal_connect_object (gtk_icon_theme_get_default (),
+                           "changed",
+                           G_CALLBACK (on_icon_theme_changed),
+                           self,
+                           G_CONNECT_SWAPPED);
+  g_signal_connect (self,
+                    "notify::scale-factor",
+                    G_CALLBACK (on_icon_theme_changed),
+                    NULL);
+
   gtk_popover_bind_model (GTK_POPOVER (priv->popover),
                           G_MENU_MODEL (priv->menu),
                           NULL);
@@ -654,6 +790,9 @@ phosh_app_grid_button_set_app_info (PhoshAppGridButton *self,
       }
       gtk_image_set_from_gicon (GTK_IMAGE (priv->icon), icon, -1);
     }
+
+    /* See warm_icon() */
+    schedule_icon_warm (self);
 
     gtk_widget_set_sensitive (GTK_WIDGET (self), TRUE);
 
