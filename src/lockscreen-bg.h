@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include <gdesktop-enums.h>
 #include "layersurface-priv.h"
 #include "background-image.h"
 
@@ -22,5 +23,7 @@ PhoshLockscreenBg *     phosh_lockscreen_bg_new (struct zwlr_layer_shell_v1 *lay
                                                  struct wl_output           *wl_output);
 void                    phosh_lockscreen_bg_set_image (PhoshLockscreenBg    *self,
                                                        PhoshBackgroundImage *image);
+void                    phosh_lockscreen_bg_set_style (PhoshLockscreenBg      *self,
+                                                       GDesktopBackgroundStyle style);
 
 G_END_DECLS
