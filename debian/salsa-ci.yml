@@ -5,3 +5,12 @@ include:
 
 variables:
   SALSA_CI_DISABLE_REPROTEST: 1
+  SALSA_CI_ENABLE_BUILD_PACKAGE_PROFILES: 1
+
+test-build-profiles:
+  extends: .test-build-package-profiles
+  parallel:
+    matrix:
+      - BUILD_PROFILES:
+        - nocheck
+        - nodoc
