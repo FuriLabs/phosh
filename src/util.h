@@ -14,6 +14,25 @@
 
 G_BEGIN_DECLS
 
+/* FuriOS glass look: whether it is used at all, how strong the background
+ * blur is, how solid and how accent-tinted the glass surfaces are, and an
+ * optional free-form accent colour that overrides the nine-swatch choice in
+ * Settings. Shared by the style manager, which turns them into colours, and
+ * by the surfaces that ask the compositor for blur. */
+#define PHOSH_GLASS_SCHEMA_ID         "io.furios.phosh.shell"
+#define PHOSH_GLASS_KEY_THEME         "glass-theme"
+#define PHOSH_GLASS_KEY_BLUR_RADIUS   "glass-blur-radius"
+#define PHOSH_KEY_LOCKSCREEN_TINT     "lockscreen-tint"
+#define PHOSH_GLASS_KEY_OPACITY       "glass-opacity"
+#define PHOSH_GLASS_KEY_LIGHTNESS     "glass-lightness"
+#define PHOSH_GLASS_KEY_ACCENT_WASH   "glass-accent-wash"
+#define PHOSH_GLASS_KEY_ACCENT_CUSTOM "accent-color-custom"
+#define PHOSH_GLASS_KEY_TEXT_COLOR    "glass-text-color"
+#define PHOSH_GLASS_KEY_TEXT_OPACITY  "glass-text-opacity"
+#define PHOSH_GLASS_KEY_ACCENT_TEXT   "glass-accent-text-color"
+#define PHOSH_GLASS_KEY_TEXT_SHADOW   "glass-text-shadow"
+#define PHOSH_GLASS_KEY_SHADOW_COLOR  "glass-text-shadow-color"
+
 #define phosh_async_error_warn(err, ...) \
   phosh_error_warnv (G_LOG_DOMAIN, err, G_IO_ERROR, G_IO_ERROR_CANCELLED, __VA_ARGS__)
 
