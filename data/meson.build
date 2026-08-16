@@ -105,6 +105,14 @@ copy_schema = custom_target(
   output: 'mobi.phosh.shell.gschema.xml',
   command: ['cp', '@INPUT@', '@OUTPUT@'],
 )
+# A device workaround rather than a shell setting, but this is the package that
+# already carries FuriOS's system-wide defaults, and it has to reach the
+# session environment to have any effect.
+install_data(
+  '90-gst-video-decoders.conf',
+  install_dir: join_paths(prefix, 'lib', 'environment.d'),
+)
+
 schemas = ['mobi.phosh.shell.gschema.xml']
 compiled_schemas = custom_target(
   'glib-compile-schemas',
