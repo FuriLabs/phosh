@@ -102,6 +102,7 @@ typedef struct _PhoshTopPanel {
   GnomeXkbInfo *xkbinfo;
   GSettings *input_settings;
   GSettings *interface_settings;
+  GSettings *glass_settings;
   GdkSeat *seat;
 
   GSimpleActionGroup *actions;
@@ -659,6 +660,21 @@ static GActionEntry entries[] = {
 
 
 static void
+on_blur_radius_changed (PhoshTopPanel *self)
+{
+  guint radius = 0;
+
+  /* The blur is what makes the glass panel read as glass. Without the theme
+   * the panel is opaque, so asking for it would buy nothing and still cost
+   * the compositor a pass over the frame. */
+  if (g_settings_get_boolean (self->glass_settings, PHOSH_GLASS_KEY_THEME))
+    radius = g_settings_get_uint (self->glass_settings, PHOSH_GLASS_KEY_BLUR_RADIUS);
+
+  phosh_layer_surface_set_blur (PHOSH_LAYER_SURFACE (self), radius);
+}
+
+
+static void
 phosh_top_panel_constructed (GObject *object)
 {
   PhoshTopPanel *self = PHOSH_TOP_PANEL (object);
@@ -670,6 +686,18 @@ phosh_top_panel_constructed (GObject *object)
   g_autoptr (GSettings) phosh_settings = g_settings_new ("sm.puri.phosh");
 
   G_OBJECT_CLASS (phosh_top_panel_parent_class)->constructed (object);
+
+  /* Frosted glass: let the compositor blur what's behind the panel */
+  self->glass_settings = g_settings_new (PHOSH_GLASS_SCHEMA_ID);
+  g_signal_connect_swapped (self->glass_settings,
+                            "changed::" PHOSH_GLASS_KEY_BLUR_RADIUS,
+                            G_CALLBACK (on_blur_radius_changed),
+                            self);
+  g_signal_connect_swapped (self->glass_settings,
+                            "changed::" PHOSH_GLASS_KEY_THEME,
+                            G_CALLBACK (on_blur_radius_changed),
+                            self);
+  on_blur_radius_changed (self);
 
   g_object_bind_property (phosh_shell_get_default (), "locked",
                           self, "on-lockscreen",
@@ -784,6 +812,7 @@ phosh_top_panel_dispose (GObject *object)
   g_clear_object (&self->xkbinfo);
   g_clear_object (&self->input_settings);
   g_clear_object (&self->interface_settings);
+  g_clear_object (&self->glass_settings);
   g_clear_object (&self->actions);
   g_clear_pointer (&self->action_names, g_strfreev);
   if (self->seat) {
