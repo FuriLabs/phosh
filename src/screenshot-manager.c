@@ -100,6 +100,11 @@ typedef struct _PhoshScreenshotManager {
   GStrv                              action_names;
   GSettings                         *settings;
 
+  /* Delayed screenshot, armed from the quick settings */
+  guint                              countdown_id;
+  int                                countdown_left;
+  PhoshNotification                 *countdown_noti;
+
   GCancellable                      *cancel;
 } PhoshScreenshotManager;
 
@@ -1357,6 +1362,9 @@ phosh_screenshot_manager_dispose (GObject *object)
   g_clear_handle_id (&self->opaque_id, g_source_remove);
   g_clear_pointer (&self->fader, phosh_cp_widget_destroy);
 
+  g_clear_handle_id (&self->countdown_id, g_source_remove);
+  g_clear_object (&self->countdown_noti);
+
   g_clear_pointer (&self->action_names, g_strfreev);
   g_clear_object (&self->settings);
 
@@ -1418,4 +1426,128 @@ phosh_screenshot_manager_take_screenshot (PhoshScreenshotManager *self,
   self->frames->copy_to_clipboard = copy_to_clipboard;
 
   return ret;
+}
+
+
+/* Long enough for the countdown notification to have actually left the screen
+ * before the shutter, short enough not to feel like a stall. The banner is a
+ * layer surface like any other, so a shot taken too promptly after closing it
+ * catches it on the way out. */
+#define COUNTDOWN_SETTLE_MS 350
+
+
+static void
+on_countdown_notification_closed (PhoshScreenshotManager *self)
+{
+  g_clear_object (&self->countdown_noti);
+}
+
+
+static void
+countdown_notify (PhoshScreenshotManager *self)
+{
+  PhoshNotifyManager *nm = phosh_notify_manager_get_default ();
+  g_autofree char *body = NULL;
+
+  body = g_strdup_printf (ngettext ("Taking a screenshot in %d second",
+                                    "Taking a screenshot in %d seconds",
+                                    self->countdown_left),
+                          self->countdown_left);
+
+  if (self->countdown_noti) {
+    phosh_notification_set_body (self->countdown_noti, body);
+    return;
+  }
+
+  self->countdown_noti = g_object_new (PHOSH_TYPE_NOTIFICATION,
+                                       "summary", _("Screenshot"),
+                                       "body", body,
+                                       NULL);
+  g_object_connect (self->countdown_noti,
+                    "swapped-object-signal::closed", on_countdown_notification_closed, self,
+                    NULL);
+
+  /* No expiry: this notification is retracted by the countdown itself, and one
+   * that expired early would leave the user with nothing to look at while the
+   * shot is still pending. */
+  phosh_notify_manager_add_shell_notification (nm, self->countdown_noti, 0, 0);
+  phosh_notification_set_transient (self->countdown_noti, TRUE);
+  phosh_notification_set_profile (self->countdown_noti, "silent");
+}
+
+
+static void
+countdown_clear (PhoshScreenshotManager *self)
+{
+  g_clear_handle_id (&self->countdown_id, g_source_remove);
+
+  /* Closing emits "closed", which drops the manager's own reference */
+  if (self->countdown_noti)
+    phosh_notification_close (self->countdown_noti, PHOSH_NOTIFICATION_REASON_CLOSED);
+}
+
+
+static gboolean
+on_countdown_shutter (gpointer data)
+{
+  PhoshScreenshotManager *self = PHOSH_SCREENSHOT_MANAGER (data);
+
+  self->countdown_id = 0;
+  phosh_screenshot_manager_take_screenshot (self, NULL, NULL, TRUE, FALSE);
+
+  return G_SOURCE_REMOVE;
+}
+
+
+static gboolean
+on_countdown_tick (gpointer data)
+{
+  PhoshScreenshotManager *self = PHOSH_SCREENSHOT_MANAGER (data);
+
+  self->countdown_left--;
+
+  if (self->countdown_left > 0) {
+    countdown_notify (self);
+    return G_SOURCE_CONTINUE;
+  }
+
+  /* Take the banner away first, then shoot once it has gone */
+  countdown_clear (self);
+  self->countdown_id = g_timeout_add (COUNTDOWN_SETTLE_MS, on_countdown_shutter, self);
+  g_source_set_name_by_id (self->countdown_id, "[phosh] screenshot shutter");
+
+  return G_SOURCE_REMOVE;
+}
+
+
+/**
+ * phosh_screenshot_manager_take_screenshot_delayed:
+ * @self: The screenshot manager
+ * @seconds: How long to wait before capturing
+ *
+ * Take a screenshot of all outputs after a delay, counting down on screen as
+ * it goes.
+ *
+ * The timer belongs to the manager rather than to whatever asked for the shot,
+ * so arming one from the settings drawer and then closing the drawer -- which
+ * is the whole point of the delay -- does not cancel it. Arming a second shot
+ * while one is pending replaces it rather than queueing.
+ */
+void
+phosh_screenshot_manager_take_screenshot_delayed (PhoshScreenshotManager *self, int seconds)
+{
+  g_return_if_fail (PHOSH_IS_SCREENSHOT_MANAGER (self));
+
+  countdown_clear (self);
+
+  if (seconds <= 0) {
+    phosh_screenshot_manager_take_screenshot (self, NULL, NULL, TRUE, FALSE);
+    return;
+  }
+
+  self->countdown_left = seconds;
+  countdown_notify (self);
+
+  self->countdown_id = g_timeout_add_seconds (1, on_countdown_tick, self);
+  g_source_set_name_by_id (self->countdown_id, "[phosh] screenshot countdown");
 }
