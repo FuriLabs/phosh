@@ -56,6 +56,7 @@ typedef struct {
   struct wl_surface            *wl_surface;
   struct zwlr_layer_surface_v1 *layer_surface;
   struct zphoc_alpha_layer_surface_v1 *alpha_surface;
+  struct zphoc_furios_blur_layer_surface_v1 *blur_surface;
   struct zphoc_stacked_layer_surface_v1 *stacked_surface;
 
   /* Properties */
@@ -72,6 +73,8 @@ typedef struct {
   struct wl_output             *wl_output;
   /* alpha_layer_surface_v1 */
   double                        alpha;
+  /* blur_layer_surface_v1 */
+  guint                         blur_radius;
   /* stacked_layer_surface_v1 */
   PhoshLayerSurface            *stack_target;
   gboolean                      stack_above;
@@ -149,6 +152,21 @@ set_alpha (PhoshLayerSurface *self, double alpha)
     return;
 
   zphoc_alpha_layer_surface_v1_set_alpha (priv->alpha_surface, wl_fixed_from_double (alpha));
+  wl_surface_commit (priv->wl_surface);
+}
+
+
+static void
+set_blur (PhoshLayerSurface *self, guint radius)
+{
+  PhoshLayerSurfacePrivate *priv = phosh_layer_surface_get_instance_private (self);
+
+  priv->blur_radius = radius;
+
+  if (!priv->blur_surface)
+    return;
+
+  zphoc_furios_blur_layer_surface_v1_set_blur (priv->blur_surface, radius);
   wl_surface_commit (priv->wl_surface);
 }
 
@@ -354,6 +372,7 @@ phosh_layer_surface_map (GtkWidget *widget)
   PhoshLayerSurfacePrivate *priv = phosh_layer_surface_get_instance_private (self);
   PhoshWayland *wl = phosh_wayland_get_default ();
   struct zphoc_layer_shell_effects_v1 *layer_shell_effects;
+  struct zphoc_furios_layer_shell_effects_v1 *furios_layer_shell_effects;
 
   GTK_WIDGET_CLASS (phosh_layer_surface_parent_class)->map (widget);
 
@@ -396,10 +415,22 @@ phosh_layer_surface_map (GtkWidget *widget)
   priv->stacked_surface =
     zphoc_layer_shell_effects_v1_get_stacked_layer_surface (layer_shell_effects,
                                                             priv->layer_surface);
+  /* Blur is ours rather than phoc's, so it comes from a global of its own. A
+   * compositor without it leaves blur_surface NULL and set_blur() does nothing. */
+  furios_layer_shell_effects = phosh_wayland_get_zphoc_furios_layer_shell_effects_v1 (wl);
+  if (furios_layer_shell_effects) {
+    priv->blur_surface =
+      zphoc_furios_layer_shell_effects_v1_get_blur_layer_surface (furios_layer_shell_effects,
+                                                                  priv->layer_surface);
+  }
 
   /* Catch up with alpha values set before map */
   if (!G_APPROX_VALUE (priv->alpha, 1.0, FLT_EPSILON))
     set_alpha (self, priv->alpha);
+
+  /* Catch up with blur values set before map */
+  if (priv->blur_radius > 0)
+    set_blur (self, priv->blur_radius);
 
   /* Catch up with stackings set before map */
   if (priv->stacked_surface)
@@ -414,6 +445,7 @@ phosh_layer_surface_unmap (GtkWidget *widget)
   PhoshLayerSurfacePrivate *priv = phosh_layer_surface_get_instance_private (self);
 
   g_clear_pointer (&priv->alpha_surface, zphoc_alpha_layer_surface_v1_destroy);
+  g_clear_pointer (&priv->blur_surface, zphoc_furios_blur_layer_surface_v1_destroy);
   g_clear_pointer (&priv->stacked_surface, zphoc_stacked_layer_surface_v1_destroy);
   g_clear_pointer (&priv->layer_surface, zwlr_layer_surface_v1_destroy);
   priv->wl_surface = NULL;
@@ -437,6 +469,7 @@ phosh_layer_surface_dispose (GObject *object)
 
   phosh_layer_surface_set_stacked (self, NULL, FALSE);
   g_clear_pointer (&priv->alpha_surface, zphoc_alpha_layer_surface_v1_destroy);
+  g_clear_pointer (&priv->blur_surface, zphoc_furios_blur_layer_surface_v1_destroy);
   g_clear_pointer (&priv->stacked_surface, zphoc_stacked_layer_surface_v1_destroy);
   g_clear_pointer (&priv->layer_surface, zwlr_layer_surface_v1_destroy);
   g_clear_pointer (&priv->namespace, g_free);
@@ -966,6 +999,29 @@ phosh_layer_surface_set_alpha (PhoshLayerSurface *self, double alpha)
     return;
 
   set_alpha (self, alpha);
+}
+
+/**
+ * phosh_layer_surface_set_blur:
+ * @self: The layer surface
+ * @radius: The blur radius, 0 disables blur
+ *
+ * Requests that the compositor blurs the content behind the surface
+ * so translucent parts appear frosted. Needs a compositor supporting
+ * the blur layer surface protocol, otherwise it has no effect.
+ */
+void
+phosh_layer_surface_set_blur (PhoshLayerSurface *self, guint radius)
+{
+  PhoshLayerSurfacePrivate *priv;
+
+  g_return_if_fail (PHOSH_IS_LAYER_SURFACE (self));
+  priv = phosh_layer_surface_get_instance_private (self);
+
+  if (priv->blur_radius == radius)
+    return;
+
+  set_blur (self, radius);
 }
 
 /**
