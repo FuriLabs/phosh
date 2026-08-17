@@ -53,6 +53,7 @@
     <file compressed="true">stylesheet/adwaita-dark.css</file>
     <file compressed="true">stylesheet/adwaita-dark-furios.css</file>
     <file compressed="true">stylesheet/adwaita-hc-light.css</file>
+    <file compressed="true">stylesheet/adwaita-light-furios.css</file>
     <file compressed="true">stylesheet/common.css</file>
     <file compressed="true">stylesheet/common-furios.css</file>
   </gresource>
