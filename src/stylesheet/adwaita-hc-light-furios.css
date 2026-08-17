@@ -1,0 +1,121 @@
+/* HighContrast theme variant, kept solid.
+ *
+ * Loaded in place of adwaita-hc-light.css when the glass theme is on. It
+ * imports the glass geometry like the other variants, then puts every
+ * translucent surface back to opaque. */
+
+@define-color phosh_fg_base_color black;
+@define-color phosh_fg_color @phosh_fg_base_color;
+@define-color phosh_bg_color white;
+
+/* No shadow in high contrast: crisp glyph edges on a solid background are the
+   whole point of the variant, and a shadow only softens them. */
+@define-color phosh_text_shadow_color transparent;
+
+@define-color phosh_borders_color alpha(@phosh_fg_color,.1);
+
+/* High contrast keeps solid, untinted surfaces and plain foreground text.
+   style-manager never generates the glass colours for this theme, so these
+   are the values that apply. */
+@define-color phosh_glass_bg_color @phosh_bg_color;
+
+@define-color phosh_glass_sheet_color  @phosh_bg_color;
+@define-color phosh_glass_tint_color   @phosh_bg_color;
+@define-color phosh_glass_lock_color   @phosh_bg_color;
+@define-color phosh_glass_field_color  @phosh_button_bg_color;
+@define-color phosh_glass_button_color @phosh_button_bg_color;
+
+@define-color phosh_activity_bg_color #e5e5e5;
+@define-color phosh_notification_bg_color #e0e0e0;
+@define-color phosh_action_bg_color #787878;
+@define-color phosh_splash_bg_color @theme_bg_color;
+@define-color phosh_splash_fg_color @theme_fg_color;
+
+/* Button Colors */
+@define-color phosh_button_bg_color #e0e0e0;
+@define-color phosh_button_hover_bg_color shade(@phosh_button_bg_color, 1.05);
+@define-color phosh_button_active_bg_color shade(@phosh_button_bg_color, 1.1);
+
+@define-color phosh_emergency_button_bg_color #e01b24;
+@define-color phosh_emergency_button_fg_color #ffffff;
+
+@import url("resource:///mobi/phosh/stylesheet/common-furios.css");
+
+/* High contrast wants solid surfaces, no glass */
+phosh-top-panel-bg,
+.p-solid,
+widget.phosh-settings-menu > scrolledwindow,
+.phosh-settings-menu {
+  background-color: @phosh_bg_color;
+}
+
+phosh-lockscreen-bg {
+  background-image: none;
+}
+
+/* No glass sheet over the lock screen here; the background is already solid */
+phosh-lockscreen {
+  background-color: transparent;
+}
+
+#top-bar, #home-bar {
+  box-shadow: inset 0 0 0 1px @phosh_borders_color;
+}
+
+.phosh-quick-setting,
+button {
+  box-shadow: inset 0 0 0 2px @phosh_borders_color;
+}
+
+button:hover {
+  box-shadow: inset 0 0 0 2px @phosh_fg_color;
+}
+
+button:disabled {
+  box-shadow: inset 0 0 0 2px alpha(@phosh_borders_color, 0.5);
+}
+
+.emergency-button:hover {
+  box-shadow: inset 0 0 2px 0 shade(@phosh_emergency_button_bg_color, .6);
+}
+.emergency-button:focus {
+  box-shadow: inset 0 0 2px 0 shade(@phosh_emergency_button_bg_color, .4);
+}
+
+#top-bar-bin:not(.p-solid) #top-bar label,
+#phosh-lockscreen-clock,
+#phosh-lockscreen-date,
+.phosh-lockscreen-arrow + label,
+.phosh-lockscreen-pin,
+.phosh-lockscreen-pin:disabled,
+.phosh-lockscreen-pin:focus,
+.phosh-lockscreen-unlocker > label,
+phosh-keypad label.digit,
+phosh-lockscreen cui-call-display label
+ {
+  text-shadow: none;
+}
+
+#top-bar-bin:not(.p-solid) #top-bar image,
+phosh-keypad image {
+  -gtk-icon-shadow: none;
+}
+
+.phosh-search-bar {
+  background-color: @phosh_button_bg_color;
+}
+
+/* Keep the keypad neutral here; accent-filled discs are the opposite of what
+   high contrast is for */
+phosh-keypad button {
+  background: @phosh_button_bg_color;
+  color: @phosh_fg_color;
+  box-shadow: inset 0 0 0 2px @phosh_borders_color;
+}
+
+phosh-keypad button:active,
+phosh-keypad button:hover,
+phosh-keypad button:hover:active,
+phosh-keypad button:focus {
+  background: @phosh_button_active_bg_color;
+}
