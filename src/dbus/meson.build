@@ -138,6 +138,13 @@ dbus_client_protos = [
 dbus_server_protos = [
   # Sorted by xml filename:
   [
+    'furios-shell-dbus',
+    'io.furios.Shell.xml',
+    'io',
+    false,
+    false,
+  ],
+  [
     'phosh-dbus-debug-control',
     'mobi.phosh.Shell.DebugControl.xml',
     'mobi.phosh.Shell',

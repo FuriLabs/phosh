@@ -19,6 +19,7 @@
 #include "wl-buffer.h"
 
 #include "dbus/phosh-screenshot-dbus.h"
+#include "dbus/furios-shell-dbus.h"
 
 #include <gmobile.h>
 
@@ -86,6 +87,7 @@ typedef struct _PhoshScreenshotManager {
   PhoshDBusScreenshotSkeleton        parent;
 
   int                                dbus_name_id;
+  PhoshDBusFuriosShell              *furios_iface;
   struct zwlr_screencopy_manager_v1 *wl_scm;
   ScreencopyFrames                  *frames;
   SlurpArea                         *slurp;
@@ -1300,6 +1302,29 @@ on_name_lost (GDBusConnection *connection,
 }
 
 
+
+static gboolean
+handle_screenshot_delayed (PhoshDBusFuriosShell  *object,
+                           GDBusMethodInvocation *invocation,
+                           guint                  arg_delay,
+                           gpointer               user_data)
+{
+  PhoshScreenshotManager *self = PHOSH_SCREENSHOT_MANAGER (user_data);
+
+  g_debug ("DBus call %s, delay: %u", __func__, arg_delay);
+
+  /* Fold first: the delay only buys time for the drawer to get out of the
+   * way, so nothing here should wait for the user to close it themselves. */
+  phosh_shell_fold_top_panel (phosh_shell_get_default ());
+
+  phosh_screenshot_manager_take_screenshot_delayed (self, arg_delay);
+
+  phosh_dbus_furios_shell_complete_screenshot_delayed (object, invocation);
+
+  return TRUE;
+}
+
+
 static void
 on_bus_acquired (GDBusConnection *connection,
                  const char      *name,
@@ -1315,6 +1340,21 @@ on_bus_acquired (GDBusConnection *connection,
     g_warning ("Failed to export screensaver interface skeleton: %s", err->message);
   }
 
+  /* A second interface on the same object, for the FuriOS-specific requests
+   * that GNOME's interfaces do not cover. Same bus name and path, so a caller
+   * needs no extra lookup to reach it. */
+  self->furios_iface = phosh_dbus_furios_shell_skeleton_new ();
+  g_signal_connect (self->furios_iface,
+                    "handle-screenshot-delayed",
+                    G_CALLBACK (handle_screenshot_delayed),
+                    self);
+
+  if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (self->furios_iface),
+                                         connection,
+                                         OBJECT_PATH,
+                                         &err)) {
+    g_warning ("Failed to export FuriOS shell interface skeleton: %s", err->message);
+  }
 }
 
 
@@ -1353,6 +1393,11 @@ phosh_screenshot_manager_dispose (GObject *object)
 
   if (g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (self)))
     g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (self));
+
+  if (self->furios_iface &&
+      g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (self->furios_iface)))
+    g_dbus_interface_skeleton_unexport (G_DBUS_INTERFACE_SKELETON (self->furios_iface));
+  g_clear_object (&self->furios_iface);
 
   g_clear_pointer (&self->frames, screencopy_frames_dispose);
   g_clear_object (&self->for_clipboard);
