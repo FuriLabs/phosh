@@ -773,10 +773,7 @@ maybe_screencopy_done (PhoshScreenshotManager *self)
 
   /* With a failure no need to merge pixbufs */
   if (failed) {
-    phosh_dbus_screenshot_complete_screenshot (PHOSH_DBUS_SCREENSHOT (self),
-                                               self->frames->invocation,
-                                               FALSE,
-                                               self->frames->filename ?: "");
+    screenshot_done (self, FALSE);
     return;
   }
 
