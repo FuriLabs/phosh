@@ -23,5 +23,7 @@ gboolean                phosh_screenshot_manager_take_screenshot (PhoshScreensho
                                                                   const char             *filename,
                                                                   gboolean                copy_to_clipboard,
                                                                   gboolean                include_cursor);
+void                    phosh_screenshot_manager_take_screenshot_delayed (PhoshScreenshotManager *self,
+                                                                  int                     seconds);
 
 G_END_DECLS

@@ -49,6 +49,7 @@ void        phosh_shell_get_usable_area     (PhoshShell *self,
                                              int        *height);
 
 void        phosh_shell_fade_out            (PhoshShell *self, guint timeout);
+void        phosh_shell_fold_top_panel      (PhoshShell *self);
 
 /* Created by the shell on startup */
 PhoshLockscreenManager *phosh_shell_get_lockscreen_manager (PhoshShell *self);

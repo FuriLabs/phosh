@@ -1,0 +1,44 @@
+<!DOCTYPE node PUBLIC
+"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
+"http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node>
+
+  <!--
+      io.furios.Shell:
+      @short_description: FuriOS additions to the shell
+
+      Shell requests that are specific to FuriOS and so have no home on an
+      upstream interface. One interface for all of them, so that later
+      additions need no new interface and no new export.
+
+      A separate interface rather than extra methods on the GNOME ones:
+      those are defined upstream and are not ours to add to.
+  -->
+  <interface name="io.furios.Shell">
+
+    <!--
+        ScreenshotDelayed:
+        @delay: How many seconds to wait before shooting
+
+        Fold the settings drawer away and take a screenshot @delay seconds
+        later.
+
+        This exists for the screenshot quick setting, which lives inside the
+        very drawer that has to close for the shot to be worth taking: taken
+        immediately it would only ever be a picture of the drawer. The wait
+        also buys time to bring up whatever was meant to be captured, and is
+        counted down in a transient notification.
+
+        The timer belongs to the shell rather than to the caller, because a
+        quick setting is destroyed with the drawer it sits in and a timer
+        owned by a widget that is going away may never fire.
+
+        Returns as soon as the countdown has started, not when the
+        screenshot has been written.
+    -->
+    <method name="ScreenshotDelayed">
+      <arg type="u" direction="in" name="delay"/>
+    </method>
+
+  </interface>
+</node>

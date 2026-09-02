@@ -2446,6 +2446,32 @@ phosh_shell_get_default (void)
   return instance;
 }
 
+/**
+ * phosh_shell_fold_top_panel:
+ * @self: The shell
+ *
+ * Fold the settings drawer away, as if the user had swiped it up.
+ *
+ * The shell already does this on lock; this exposes it so that a quick
+ * setting whose whole point is to act on what is behind the drawer -- taking a
+ * screenshot, say -- can get the drawer out of the picture first. Safe to call
+ * when the drawer is already folded, or before the panel exists.
+ */
+void
+phosh_shell_fold_top_panel (PhoshShell *self)
+{
+  PhoshShellPrivate *priv;
+
+  g_return_if_fail (PHOSH_IS_SHELL (self));
+  priv = phosh_shell_get_instance_private (self);
+
+  if (priv->top_panel == NULL)
+    return;
+
+  phosh_top_panel_fold (PHOSH_TOP_PANEL (priv->top_panel));
+}
+
+
 void
 phosh_shell_fade_out (PhoshShell *self, guint timeout)
 {

@@ -255,5 +255,108 @@
         Apps in this list will not appear in the launcher or app drawer.
       </description>
     </key>
+
+    <key name="screen-recorder-framerate" type="i">
+      <default>0</default>
+      <range min="0" max="240"/>
+      <summary>Screen recording frame rate</summary>
+      <description>
+        Frames per second to record at. 0 means let the compositor's own frame
+        timing decide, which is the only setting that produces a file whose
+        timestamps are true: a forced rate is stamped on the frames whatever
+        rate they actually arrived at, so any difference between the two shows
+        up as playback running fast or slow. The fixed rates are here for the
+        cases where a constant-rate file is needed by something downstream.
+      </description>
+    </key>
+
+    <key name="screenshot-delay" type="i">
+      <default>3</default>
+      <range min="1" max="5"/>
+      <summary>Screenshot delay in seconds</summary>
+      <description>
+        How long to wait between arming a screenshot from the quick settings
+        and taking it. The wait is what makes the shot useful at all from
+        there: the drawer has to be folded away first or it is the only thing
+        in the picture.
+
+        Whatever was picked last is stored here and offered as the default next
+        time, so the common case is two taps rather than a decision.
+      </description>
+    </key>
+
+    <key name="screen-recorder-speed" type="d">
+      <default>1.0</default>
+      <range min="0.25" max="16.0"/>
+      <summary>Screen recording playback speed</summary>
+      <description>
+        How much faster than real time the finished recording plays. 1.0 is
+        real time; 2.0 plays twice as fast.
+
+        This is applied after recording, by rescaling the timestamps and
+        copying the streams through untouched, so it is exact and costs a
+        fraction of a second whatever the length. Doing it instead by forcing
+        a capture frame rate would only ever be approximate: the speed-up
+        would be the ratio of the forced rate to the rate frames really
+        arrived at, and that rate varies with what is on screen.
+      </description>
+    </key>
+
+    <key name="screen-recorder-codec" type="s">
+      <default>'libx264'</default>
+      <summary>Screen recording video codec</summary>
+      <description>
+        The ffmpeg encoder to use. This device has no VAAPI -- the Mali G68 and
+        the MediaTek encoder are both unusable through wf-recorder here -- so
+        every workable choice is a software encoder and libx264 at a fast
+        preset is the one measured to keep up with the display.
+
+        Settings offers libx264 and libvpx-vp9. libx265 is not offered: measured
+        at 1078x2410 it encodes about five frames a second even at
+        preset=ultrafast, so a recording made with it is a handful of frames.
+      </description>
+    </key>
+
+    <key name="screen-recorder-bitrate" type="s">
+      <default>''</default>
+      <summary>Screen recording bit rate</summary>
+      <description>
+        Target bit rate, as an ffmpeg value such as '8M'. Empty lets the codec
+        choose its own quality target, which for libx264 means constant
+        quality rather than constant rate and generally gives a smaller file
+        for the same picture.
+      </description>
+    </key>
+
+    <key name="screen-recorder-audio" type="b">
+      <default>false</default>
+      <summary>Record audio</summary>
+      <description>
+        Whether to record sound alongside the picture. Off records no audio at
+        all rather than a silent track.
+      </description>
+    </key>
+
+    <key name="screen-recorder-audio-source" type="s">
+      <default>''</default>
+      <summary>Audio source to record from</summary>
+      <description>
+        The PulseAudio/PipeWire source name to capture. A monitor source
+        records what the phone is playing; an input source records the
+        microphone. Empty uses the system default input. Ignored unless audio
+        recording is on.
+      </description>
+    </key>
+
+    <key name="screen-recorder-touches" type="b">
+      <default>true</default>
+      <summary>Show touches while recording</summary>
+      <description>
+        Draw a marker wherever the screen is touched, for as long as a
+        recording is running, so that a recording explains itself. This is the
+        compositor's own touch-point overlay, switched on when recording starts
+        and off again when it stops.
+      </description>
+    </key>
   </schema>
 </schemalist>
