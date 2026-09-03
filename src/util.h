@@ -9,6 +9,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
+#include <gdesktop-enums.h>
 #include <gio/gdesktopappinfo.h>
 #include <wayland-client-protocol.h>
 
@@ -81,6 +82,8 @@ const char      *phosh_util_get_icon_by_wifi_strength (guint strength, gboolean 
 gboolean         phosh_util_file_equal (GFile *file1, GFile *file2);
 GdkPixbuf       *phosh_util_data_uri_to_pixbuf (const char *uri, GError **error);
 GdkPixbuf *      phosh_utils_pixbuf_scale_to_min (GdkPixbuf *src, int min_width, int min_height);
+GdkPixbuf *      phosh_utils_pixbuf_for_style (GdkPixbuf *src, int width, int height,
+                                               GDesktopBackgroundStyle style, GdkRGBA *color);
 gboolean         phosh_util_matches_app_info (GAppInfo *info, const char *search);
 GStrv            phosh_util_append_to_strv (GStrv array, const char *element);
 GStrv            phosh_util_remove_from_strv (GStrv array, const char *element);

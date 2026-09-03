@@ -255,5 +255,19 @@
         Apps in this list will not appear in the launcher or app drawer.
       </description>
     </key>
+
+    <key name="wallpaper-folder" type="s">
+      <default>''</default>
+      <summary>Folder to rotate the wallpaper through</summary>
+      <description>
+        A folder of images. Each time the lock screen appears -- when the phone
+        locks, and whenever the screen is woken while it is still locked -- the
+        next image in the folder becomes the wallpaper, in filename order.
+        Empty turns this off and leaves the wallpaper alone.
+
+        Both the light and the dark wallpaper are set, so the rotation is
+        visible whichever colour scheme is in use.
+      </description>
+    </key>
   </schema>
 </schemalist>
