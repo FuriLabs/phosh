@@ -5,6 +5,7 @@ Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-list
 Uploaders:
  Arnaud Ferraris <aferraris@debian.org>,
  Guido Günther <agx@sigxcpu.org>,
+XS-FuriOS-Force-Staging: yes
 Build-Depends:
  debhelper-compat (= 13),
  gi-docgen <!nodoc>,
