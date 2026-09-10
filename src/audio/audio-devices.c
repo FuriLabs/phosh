@@ -210,6 +210,7 @@ on_device_added (PhoshAudioDevices *self, guint id)
   GvcMixerUIDevice *device = NULL;
   GvcMixerStream *stream = NULL;
   g_autofree char *description = NULL;
+  const char *device_description;
   const char *icon_name;
   const char *origin;
   g_autoptr (PhoshAudioDevice) audio_device = NULL;
@@ -226,6 +227,10 @@ on_device_added (PhoshAudioDevices *self, guint id)
     return;
   }
 
+  device_description = gvc_mixer_ui_device_get_description (device);
+  if (g_strcmp0 (device_description, "Parking port") == 0 || g_strcmp0 (device_description, "Input from voice call") == 0)
+    return;
+
   stream_id = gvc_mixer_ui_device_get_stream_id (device);
   stream = gvc_mixer_control_lookup_stream_id (self->mixer_control, stream_id);
   if (stream) {
@@ -234,6 +239,9 @@ on_device_added (PhoshAudioDevices *self, guint id)
     name = gvc_mixer_stream_get_name (stream);
     /* Don't add role loopbacks as switching to them is not useful */
     if (g_str_has_prefix (name, "input.loopback.sink.role."))
+      return;
+    /* Ignore the fake SCO input/output streams */
+    if (g_strcmp0 (name, "source.fake.sco") == 0 || g_strcmp0 (name, "sink.fake.sco") == 0)
       return;
   }
 
