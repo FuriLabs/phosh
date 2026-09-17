@@ -625,6 +625,45 @@ update_active_call (PhoshLockscreen *self, const char *path)
   cui_call_display_set_call (priv->call_display, CUI_CALL (call));
 }
 
+static int
+call_rank (PhoshCall *call)
+{
+  if (!call)
+    return -1;
+
+  switch (cui_call_get_state (CUI_CALL (call))) {
+  case CUI_CALL_STATE_ACTIVE:
+    return 10;
+  case CUI_CALL_STATE_CALLING:
+    return 8;
+  case CUI_CALL_STATE_INCOMING:
+    return 5;
+  case CUI_CALL_STATE_HELD:
+    return 1;
+  case CUI_CALL_STATE_DISCONNECTED:
+  case CUI_CALL_STATE_UNKNOWN:
+  default:
+    return 0;
+  }
+}
+
+
+static void
+on_call_state_changed (PhoshLockscreen *self, GParamSpec *pspec, PhoshCall *call)
+{
+  PhoshLockscreenPrivate *priv = phosh_lockscreen_get_instance_private (self);
+  PhoshCall *featured = priv->active ?
+    phosh_calls_manager_get_call (priv->calls_manager, priv->active) : NULL;
+  const char *path = g_object_get_data (G_OBJECT (call), "phosh-call-path");
+
+  if (!path || call_rank (call) <= call_rank (featured))
+    return;
+
+  update_active_call (self, path);
+}
+
+
+
 
 static void
 on_calls_call_added (PhoshLockscreen *self, const char *path)
@@ -635,7 +674,22 @@ on_calls_call_added (PhoshLockscreen *self, const char *path)
   priv = phosh_lockscreen_get_instance_private (self);
   g_return_if_fail (PHOSH_IS_CALLS_MANAGER (priv->calls_manager));
 
-  update_active_call (self, path);
+  {
+    PhoshCall *added = phosh_calls_manager_get_call (priv->calls_manager, path);
+    PhoshCall *featured = priv->active ?
+      phosh_calls_manager_get_call (priv->calls_manager, priv->active) : NULL;
+
+    if (added) {
+      g_object_set_data_full (G_OBJECT (added), "phosh-call-path",
+                              g_strdup (path), g_free);
+      g_signal_connect_object (added, "notify::state",
+                               G_CALLBACK (on_call_state_changed), self,
+                               G_CONNECT_SWAPPED);
+    }
+
+    if (call_rank (added) > call_rank (featured))
+      update_active_call (self, path);
+  }
 
   hdy_deck_set_visible_child (priv->deck, GTK_WIDGET (priv->box_call_display));
 }
