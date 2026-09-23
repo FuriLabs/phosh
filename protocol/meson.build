@@ -12,6 +12,7 @@ wl_protos = [
   [wl_protocol_dir, 'unstable/xdg-output/xdg-output-unstable-v1.xml'],
   ['input-method-unstable-v2.xml'],
   ['phoc-device-state-unstable-v1.xml'],
+  ['phoc-furios-layer-shell-effects-unstable-v1.xml'],
   ['phoc-layer-shell-effects-unstable-v1.xml'],
   ['phosh-private.xml'],
   ['virtual-keyboard-unstable-v1.xml'],

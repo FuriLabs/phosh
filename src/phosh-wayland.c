@@ -56,6 +56,7 @@ struct _PhoshWayland {
   struct zxdg_output_manager_v1           *zxdg_output_manager_v1;
   struct zwlr_screencopy_manager_v1       *zwlr_screencopy_manager_v1;
   struct zphoc_layer_shell_effects_v1     *zphoc_layer_shell_effects_v1;
+  struct zphoc_furios_layer_shell_effects_v1 *zphoc_furios_layer_shell_effects_v1;
   struct zphoc_device_state_v1            *zphoc_device_state_v1;
   struct wl_shm                           *wl_shm;
   GHashTable                              *wl_outputs;
@@ -86,6 +87,11 @@ registry_handle_global (void               *data,
                                                            name,
                                                            &zphoc_layer_shell_effects_v1_interface,
                                                            MIN (3, version));
+  } else if (!strcmp (interface, zphoc_furios_layer_shell_effects_v1_interface.name)) {
+    /* Optional: a compositor without the FuriOS effects simply gets no blur */
+    self->zphoc_furios_layer_shell_effects_v1 =
+      wl_registry_bind (registry, name, &zphoc_furios_layer_shell_effects_v1_interface,
+                        MIN (1, version));
   } else if (!strcmp (interface, zphoc_device_state_v1_interface.name)) {
     self->zphoc_device_state_v1 = wl_registry_bind (registry,
                                                     name,
@@ -325,6 +331,8 @@ phosh_wayland_dispose (GObject *object)
   g_clear_pointer (&self->zwlr_screencopy_manager_v1, zwlr_screencopy_manager_v1_destroy);
   g_clear_pointer (&self->zwp_virtual_keyboard_manager_v1, zwp_virtual_keyboard_manager_v1_destroy);
   g_clear_pointer (&self->zxdg_output_manager_v1, zxdg_output_manager_v1_destroy);
+  g_clear_pointer (&self->zphoc_furios_layer_shell_effects_v1,
+                   zphoc_furios_layer_shell_effects_v1_destroy);
   g_clear_pointer (&self->zphoc_layer_shell_effects_v1, zphoc_layer_shell_effects_v1_destroy);
   g_clear_pointer (&self->zphoc_device_state_v1, zphoc_device_state_v1_destroy);
 
@@ -569,6 +577,22 @@ phosh_wayland_get_seat_capabilities (PhoshWayland *self)
   g_return_val_if_fail (PHOSH_IS_WAYLAND (self), PHOSH_WAYLAND_SEAT_CAPABILITY_NONE);
 
   return self->seat_capabilities;
+}
+
+
+/**
+ * phosh_wayland_get_zphoc_furios_layer_shell_effects_v1:
+ * @self: The #PhoshWayland singleton
+ *
+ * Returns: (transfer none) (nullable): the FuriOS layer shell effects global,
+ *   or %NULL when the compositor does not implement it.
+ */
+struct zphoc_furios_layer_shell_effects_v1 *
+phosh_wayland_get_zphoc_furios_layer_shell_effects_v1 (PhoshWayland *self)
+{
+  g_return_val_if_fail (PHOSH_IS_WAYLAND (self), NULL);
+
+  return self->zphoc_furios_layer_shell_effects_v1;
 }
 
 
