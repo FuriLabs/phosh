@@ -35,6 +35,7 @@ struct _PhoshLockscreenBg {
 
   gboolean              configured;
   gboolean              use_background;
+  GDesktopBackgroundStyle style;
 };
 G_DEFINE_TYPE (PhoshLockscreenBg, phosh_lockscreen_bg, PHOSH_TYPE_LAYER_SURFACE)
 
@@ -60,7 +61,11 @@ update_image (PhoshLockscreenBg *self)
   g_clear_object (&self->pixbuf);
   if (self->bg_image) {
     GdkPixbuf *pixbuf = phosh_background_image_get_pixbuf (self->bg_image);
-    self->pixbuf = phosh_utils_pixbuf_scale_to_min (pixbuf, width * scale, height * scale);
+    /* Transparent where the image does not reach, so the lock screen's own
+     * background shows through rather than a colour picked here. Sized in
+     * device pixels, as upstream's scale_to_min call was. */
+    self->pixbuf = phosh_utils_pixbuf_for_style (pixbuf, width * scale, height * scale,
+                                                 self->style, NULL);
   }
 
   gtk_widget_queue_draw (GTK_WIDGET (self));
@@ -158,6 +163,8 @@ phosh_lockscreen_bg_init (PhoshLockscreenBg *self)
 {
   PhoshStyleManager *style_manager;
 
+  self->style = G_DESKTOP_BACKGROUND_STYLE_ZOOM;
+
   style_manager = phosh_shell_get_style_manager (phosh_shell_get_default ());
   self->use_background = !phosh_style_manager_is_high_contrast (style_manager);
   g_signal_connect_object (style_manager,
@@ -183,6 +190,19 @@ phosh_lockscreen_bg_new (struct zwlr_layer_shell_v1 *layer_shell, struct wl_outp
                        "exclusive-zone", -1,
                        "namespace", "phosh lockscreen background",
                        NULL);
+}
+
+
+void
+phosh_lockscreen_bg_set_style (PhoshLockscreenBg *self, GDesktopBackgroundStyle style)
+{
+  g_return_if_fail (PHOSH_IS_LOCKSCREEN_BG (self));
+
+  if (self->style == style)
+    return;
+
+  self->style = style;
+  update_image (self);
 }
 
 

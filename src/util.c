@@ -655,6 +655,111 @@ phosh_util_file_equal (GFile *file1, GFile *file2)
   return FALSE;
 }
 
+
+/**
+ * phosh_utils_pixbuf_for_style:
+ * @src: The image
+ * @width: Target width
+ * @height: Target height
+ * @style: How to fit the image to the target
+ * @color: (nullable): Colour for any area the image does not cover, or %NULL
+ *   for transparent
+ *
+ * Fit @src to @width x @height according to @style.
+ *
+ * Every style produces a pixbuf of exactly the target size, so callers can draw
+ * the result at the origin without knowing which style was used. Where the
+ * image does not reach -- the bars either side of a fitted image, the margins
+ * around a centred one -- @color is used, or transparency when it is %NULL, so
+ * that whatever the widget draws underneath shows through.
+ *
+ * Returns: (transfer full): The fitted image
+ */
+GdkPixbuf *
+phosh_utils_pixbuf_for_style (GdkPixbuf               *src,
+                              int                      width,
+                              int                      height,
+                              GDesktopBackgroundStyle  style,
+                              GdkRGBA                 *color)
+{
+  int src_width, src_height;
+  GdkPixbuf *dest;
+  guint32 fill;
+
+  g_return_val_if_fail (GDK_IS_PIXBUF (src), NULL);
+  g_return_val_if_fail (width > 0 && height > 0, NULL);
+
+  src_width = gdk_pixbuf_get_width (src);
+  src_height = gdk_pixbuf_get_height (src);
+
+  /* Cover the target: no gaps, so no canvas needed */
+  if (style == G_DESKTOP_BACKGROUND_STYLE_ZOOM ||
+      style == G_DESKTOP_BACKGROUND_STYLE_SPANNED)
+    return phosh_utils_pixbuf_scale_to_min (src, width, height);
+
+  if (style == G_DESKTOP_BACKGROUND_STYLE_STRETCHED)
+    return gdk_pixbuf_scale_simple (src, width, height, GDK_INTERP_BILINEAR);
+
+  fill = color ? ((((guint32) (CLAMP (color->red,   0, 1) * 255)) << 24) |
+                  (((guint32) (CLAMP (color->green, 0, 1) * 255)) << 16) |
+                  (((guint32) (CLAMP (color->blue,  0, 1) * 255)) << 8)  |
+                  0xff)
+               : 0x00000000;
+
+  dest = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, width, height);
+  if (dest == NULL)
+    return NULL;
+  gdk_pixbuf_fill (dest, fill);
+
+  switch (style) {
+  case G_DESKTOP_BACKGROUND_STYLE_WALLPAPER: {
+    /* Tile from the top left, clipping the last row and column */
+    for (int y = 0; y < height; y += src_height) {
+      for (int x = 0; x < width; x += src_width) {
+        gdk_pixbuf_copy_area (src, 0, 0,
+                              MIN (src_width, width - x), MIN (src_height, height - y),
+                              dest, x, y);
+      }
+    }
+    break;
+  }
+  case G_DESKTOP_BACKGROUND_STYLE_CENTERED: {
+    /* Original size, centred, cropped where it overflows */
+    int off_x = (width - src_width) / 2;
+    int off_y = (height - src_height) / 2;
+    int copy_w = MIN (src_width, width);
+    int copy_h = MIN (src_height, height);
+
+    gdk_pixbuf_copy_area (src,
+                          off_x < 0 ? -off_x : 0,
+                          off_y < 0 ? -off_y : 0,
+                          copy_w, copy_h,
+                          dest,
+                          off_x < 0 ? 0 : off_x,
+                          off_y < 0 ? 0 : off_y);
+    break;
+  }
+  case G_DESKTOP_BACKGROUND_STYLE_SCALED:
+  default: {
+    /* All of the image, aspect kept, centred in the target */
+    double ratio = MIN (width / (double) src_width, height / (double) src_height);
+    int final_width = floor (src_width * ratio + 0.5);
+    int final_height = floor (src_height * ratio + 0.5);
+
+    gdk_pixbuf_composite (src, dest,
+                          (width - final_width) / 2, (height - final_height) / 2,
+                          final_width, final_height,
+                          (width - final_width) / 2, (height - final_height) / 2,
+                          ratio, ratio,
+                          GDK_INTERP_BILINEAR, 255);
+    break;
+  }
+  }
+
+  return dest;
+}
+
+
 /**
  * phosh_util_data_uri_to_pixbuf:
  * @uri: The data URI
