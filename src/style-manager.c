@@ -595,12 +595,10 @@ update_stylesheet (PhoshStyleManager *self)
   prefer_dark = g_settings_get_enum (self->interface_settings, IF_KEY_COLOR_SCHEME) ==
                 G_DESKTOP_COLOR_SCHEME_PREFER_DARK;
 
-  /* Only the glass variants come in both schemes, so only they follow the
-   * colour scheme; without them phosh is left with the single look it has. */
-  if (glass) {
-    g_object_set (gtk_settings_get_default (),
-                  "gtk-application-prefer-dark-theme", prefer_dark, NULL);
-  }
+  g_object_set (gtk_settings_get_default (),
+                "gtk-application-prefer-dark-theme",
+                glass ? prefer_dark : TRUE,
+                NULL);
 
   if (self->css_provider) {
     gtk_style_context_remove_provider_for_screen (gdk_screen_get_default (),
