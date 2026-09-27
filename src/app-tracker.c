@@ -29,7 +29,7 @@
 /* Startup timeout when we don't track the spawning process */
 #define STARTUP_TIMEOUT 5
 /* Startup timeout when we track the spawning process */
-#define STARTUP_TRACKED_TIMEOUT (APP_TRACKER_MAX_INITIAL_TOPLEVEL_TIMEOUT * 0.9)
+#define STARTUP_TRACKED_TIMEOUT 5
 /* Startup timeout for debugging activation issues */
 #define DEBUG_STARTUP_TIMEOUT 30
 
