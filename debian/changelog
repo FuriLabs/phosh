@@ -1,8 +1,16 @@
-phosh (0.58.0-1) UNRELEASED; urgency=medium
+phosh (0.58.0-1) unstable; urgency=medium
 
   * New upstream release
+    * caffeine quick setting: Allow to configure what should be inhibited
+    * screenhots: Improve notification so one can open the screenshot
+      image or the containing folder
+    * Improve startup tracking for flatpaks and apps that own a DBus name
+    * ticket-box: Several bug fixes
+  * Update symbols
+  * Revert "quick-settings: Open mobile settings". Debian doesn't embed
+    these panels.
 
- -- Guido Günther <agx@sigxcpu.org>  Sun, 04 Oct 2026 14:16:40 +0200
+ -- Guido Günther <agx@sigxcpu.org>  Sun, 04 Oct 2026 14:59:19 +0200
 
 phosh (0.57.0-1) unstable; urgency=medium
 
