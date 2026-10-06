@@ -1,0 +1,94 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Tue, 6 Oct 2026 22:49:11 +0200
+Subject: Revert "quick-settings: Open mobile settings"
+
+Debian doesn't embed the panels.
+
+Forwarded: not-needed
+This reverts commit da1c0ea13e3ab04286fea46e4e7d89c07eb6ab73.
+---
+ src/ui/audio-settings.ui   | 2 +-
+ src/ui/bt-status-page.ui   | 2 +-
+ src/ui/quick-settings.ui   | 8 ++++----
+ src/ui/wifi-status-page.ui | 2 +-
+ 4 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/src/ui/audio-settings.ui b/src/ui/audio-settings.ui
+index cbb7ec9..efb5243 100644
+--- a/src/ui/audio-settings.ui
++++ b/src/ui/audio-settings.ui
+@@ -128,7 +128,7 @@
+                 <child>
+                   <object class="GtkButton">
+                     <property name="visible">1</property>
+-                    <property name="action-name">panel.launch-mobile-panel</property>
++                    <property name="action-name">panel.launch-panel</property>
+                     <property name="action-target">(&quot;sound&quot;, [&lt;&quot;&quot;&gt;])</property>
+                     <child>
+                       <object class="GtkLabel">
+diff --git a/src/ui/bt-status-page.ui b/src/ui/bt-status-page.ui
+index 5bb7776..8eb94ea 100644
+--- a/src/ui/bt-status-page.ui
++++ b/src/ui/bt-status-page.ui
+@@ -44,7 +44,7 @@
+   <object class="GtkButton" id="footer">
+     <property name="visible">1</property>
+     <property name="hexpand">1</property>
+-    <property name="action-name">panel.launch-mobile-panel</property>
++    <property name="action-name">panel.launch-panel</property>
+     <property name="action-target">(&quot;bluetooth&quot;, [&lt;&quot;&quot;&gt;])</property>
+     <property name="focus-on-click">0</property>
+     <child>
+diff --git a/src/ui/quick-settings.ui b/src/ui/quick-settings.ui
+index 3427915..f35bf14 100644
+--- a/src/ui/quick-settings.ui
++++ b/src/ui/quick-settings.ui
+@@ -12,7 +12,7 @@
+             <property name="visible">1</property>
+             <property name="sensitive" bind-source="wwaninfo" bind-property="present" bind-flags="sync-create"/>
+             <property name="status-icon">wwaninfo</property>
+-            <property name="long-press-action-name">panel.launch-mobile-panel</property>
++            <property name="long-press-action-name">panel.launch-panel</property>
+             <property name="long-press-action-target">(&quot;wwan&quot;, [&lt;&quot;&quot;&gt;])</property>
+             <signal name="clicked" handler="on_wwan_clicked" object="PhoshQuickSettings" swapped="yes"/>
+           </object>
+@@ -23,7 +23,7 @@
+             <property name="sensitive" bind-source="wifiinfo" bind-property="present" bind-flags="sync-create"/>
+             <property name="status-icon">wifiinfo</property>
+             <property name="status-page">wifi_status_page</property>
+-            <property name="long-press-action-name">panel.launch-mobile-panel</property>
++            <property name="long-press-action-name">panel.launch-panel</property>
+             <property name="long-press-action-target">(&quot;wifi&quot;, [&lt;&quot;&quot;&gt;])</property>
+             <signal name="clicked" handler="on_wifi_clicked" object="PhoshQuickSettings" swapped="yes"/>
+           </object>
+@@ -34,7 +34,7 @@
+             <property name="sensitive" bind-source="btinfo" bind-property="present" bind-flags="sync-create"/>
+             <property name="status-icon">btinfo</property>
+             <property name="status-page">bt_status_page</property>
+-            <property name="long-press-action-name">panel.launch-mobile-panel</property>
++            <property name="long-press-action-name">panel.launch-panel</property>
+             <property name="long-press-action-target">(&quot;bluetooth&quot;, [&lt;&quot;&quot;&gt;])</property>
+             <signal name="clicked" handler="on_bt_clicked" object="PhoshQuickSettings" swapped="yes"/>
+           </object>
+@@ -90,7 +90,7 @@
+           <object class="PhoshQuickSetting">
+             <property name="visible" bind-source="vpninfo" bind-property="present" bind-flags="sync-create"/>
+             <property name="status-icon">vpninfo</property>
+-            <property name="long-press-action-name">panel.launch-mobile-panel</property>
++            <property name="long-press-action-name">panel.launch-panel</property>
+             <property name="long-press-action-target">(&quot;network&quot;, [&lt;&quot;&quot;&gt;])</property>
+             <signal name="clicked" handler="on_vpn_clicked" object="PhoshQuickSettings" swapped="yes"/>
+           </object>
+diff --git a/src/ui/wifi-status-page.ui b/src/ui/wifi-status-page.ui
+index dc3621e..49cba64 100644
+--- a/src/ui/wifi-status-page.ui
++++ b/src/ui/wifi-status-page.ui
+@@ -80,7 +80,7 @@
+     <property name="visible">1</property>
+     <property name="hexpand">1</property>
+     <property name="focus-on-click">0</property>
+-    <property name="action-name">panel.launch-mobile-panel</property>
++    <property name="action-name">panel.launch-panel</property>
+     <property name="action-target">(&quot;wifi&quot;, [&lt;&quot;&quot;&gt;])</property>
+     <child>
+       <object class="GtkLabel">
