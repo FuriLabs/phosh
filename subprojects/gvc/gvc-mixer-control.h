@@ -71,6 +71,12 @@ typedef struct
                                         guint            id);
         void (*stream_removed)         (GvcMixerControl *control,
                                         guint            id);
+#ifdef WITH_DROIDIAN_EXTENSIONS
+        void (*phone_stream_added)     (GvcMixerControl *control,
+                                        guint            id);
+        void (*phone_stream_removed)   (GvcMixerControl *control,
+                                        guint            id);
+#endif /* WITH_DROIDIAN_EXTENSIONS */
         void (*card_added)             (GvcMixerControl *control,
                                         guint            id);
         void (*card_removed)           (GvcMixerControl *control,
