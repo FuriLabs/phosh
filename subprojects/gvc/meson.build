@@ -77,6 +77,11 @@ if enable_introspection
   c_args += '-DWITH_INTROSPECTION'
 endif
 
+with_droidian_extensions = get_option('with-droidian-extensions')
+if with_droidian_extensions
+  c_args += '-DWITH_DROIDIAN_EXTENSIONS'
+endif
+
 if enable_static
   libgvc_static = static_library('gvc',
     sources: libgvc_gir_sources + libgvc_no_gir_sources + libgvc_enums,
