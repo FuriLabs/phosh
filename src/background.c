@@ -229,15 +229,12 @@ static gboolean
 phosh_background_draw (GtkWidget *widget, cairo_t *cr)
 {
   PhoshBackground *self = PHOSH_BACKGROUND (widget);
-  int x = 0, y = 0, width, height;
+  int width, height;
 
   g_return_val_if_fail (PHOSH_IS_BACKGROUND (self), GDK_EVENT_PROPAGATE);
 
   if (!self->configured)
     return GDK_EVENT_PROPAGATE;
-
-  if (self->primary)
-    phosh_shell_get_usable_area (phosh_shell_get_default (), &x, &y, NULL, NULL);
 
   cairo_save (cr);
   if (self->primary) {
@@ -257,7 +254,7 @@ phosh_background_draw (GtkWidget *widget, cairo_t *cr)
     double scale = gtk_widget_get_scale_factor (GTK_WIDGET (self));
 
     cairo_scale (cr, 1.0 / scale, 1.0 / scale);
-    gdk_cairo_set_source_pixbuf (cr, self->pixbuf, x * scale, y * scale);
+    gdk_cairo_set_source_pixbuf (cr, self->pixbuf, 0, 0);
 
     cairo_paint (cr);
   }
@@ -276,12 +273,8 @@ update_image (PhoshBackground *self)
   if (!self->configured)
     return;
 
-  if (self->primary) {
-    phosh_shell_get_usable_area (phosh_shell_get_default (), NULL, NULL, &width, &height);
-  } else {
-    width = phosh_layer_surface_get_configured_width (PHOSH_LAYER_SURFACE (self));
-    height = phosh_layer_surface_get_configured_height (PHOSH_LAYER_SURFACE (self));
-  }
+  width = phosh_layer_surface_get_configured_width (PHOSH_LAYER_SURFACE (self));
+  height = phosh_layer_surface_get_configured_height (PHOSH_LAYER_SURFACE (self));
 
   g_return_if_fail (width > 0 && height > 0);
 
