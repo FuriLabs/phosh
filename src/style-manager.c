@@ -270,9 +270,11 @@ update_app_stylesheet (PhoshStyleManager *self,
                        const char        *fg_hex,
                        const char        *accent_fg_hex,
                        double             opacity,
-                       double             text_opacity)
+                       double             text_opacity,
+                       gboolean           custom_accent)
 {
   g_autofree char *css = NULL;
+  g_autofree char *accent_css = NULL;
   g_autofree char *c_window = NULL, *c_header = NULL, *c_view = NULL;
   g_autofree char *c_popover = NULL, *c_dialog = NULL, *c_card = NULL;
   g_autofree char *c_text = NULL, *c_accent = NULL;
@@ -296,12 +298,21 @@ update_app_stylesheet (PhoshStyleManager *self,
   c_window  = rgba_css (glass, opacity * 1.222);           /* ref .55 */
   c_header  = rgba_css (glass, opacity * 0.889);           /* ref .40 */
   c_view    = rgba_css (glass, opacity * 0.778);           /* ref .35 */
-  c_card    = rgba_css (&accent_rgba, opacity * 0.267);    /* ref .12 */
+  if (custom_accent)
+    c_card  = rgba_css (&accent_rgba, opacity * 0.267);    /* ref .12 */
+  else
+    c_card  = g_strdup_printf ("alpha(@accent_bg_color,%.3f)",
+                               CLAMP (opacity * 0.267, 0.0, 1.0));
   /* Transient surfaces stay readable whatever the glass is set to */
   c_popover = rgba_css (glass, MAX (opacity * 1.5, 0.9));
   c_dialog  = rgba_css (glass, MAX (opacity * 1.5, 0.9));
   c_text    = rgba_css (&fg, text_opacity);
   c_accent  = rgba_css (&accent_rgba, 1.0);
+
+  if (custom_accent)
+    accent_css = g_strdup_printf ("@define-color accent_bg_color %s;\n"
+                                  "@define-color accent_color %s;\n",
+                                  c_accent, c_accent);
 
   css = g_strdup_printf (
     APP_CSS_MARKER "\n"
@@ -335,14 +346,13 @@ update_app_stylesheet (PhoshStyleManager *self,
     "@define-color thumbnail_bg_color %s;\n"
     "@define-color theme_fg_color %s;\n"
     "@define-color theme_text_color %s;\n"
-    "@define-color accent_bg_color %s;\n"
-    "@define-color accent_color %s;\n"
+    "%s"
     "@define-color accent_fg_color %s;\n",
     c_window, c_header, c_window, c_header, c_window, c_header,
     c_view, c_card, c_popover, c_dialog,
     c_text, c_text, c_text, c_text, c_text, c_text, c_text, c_text, c_text,
     c_view, c_text, c_text,
-    c_accent, c_accent, accent_fg_hex);
+    accent_css ? accent_css : "", accent_fg_hex);
 
   schedule_app_stylesheet (self, g_steal_pointer (&css));
 }
@@ -577,10 +587,10 @@ on_accent_color_changed (PhoshStyleManager *self)
                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
   g_set_object (&self->accent_css_provider, provider);
 
-  /* Keep applications in step with the shell. They only pick this up when
-   * they next start, which is the best GTK4 allows. */
+  /* Keep applications in step with the shell. A custom accent only reaches
+   * them when they next start. */
   update_app_stylesheet (self, color, &glass, fg_hex, accent_fg, opacity,
-                         CLAMP (text_opacity, 0.2, 1.0));
+                         CLAMP (text_opacity, 0.2, 1.0), custom_hex != NULL);
 }
 
 
