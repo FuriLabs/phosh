@@ -2,6 +2,7 @@ Source: phosh
 Section: x11
 Priority: optional
 Maintainer: DebianOnMobile Maintainers <debian-on-mobile-maintainers@alioth-lists.debian.net>
+XS-FuriOS-Force-Staging: yes
 Uploaders:
  Arnaud Ferraris <aferraris@debian.org>,
  Guido Günther <agx@sigxcpu.org>,
