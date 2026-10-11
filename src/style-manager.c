@@ -50,7 +50,8 @@
 #define GLASS_RATIO_FIELD       1.333   /* search bar,               ref .60 */
 #define GLASS_RATIO_BUTTON      0.889   /* app grid buttons,         ref .40 */
 
-/* Accent colors from gnome-shell src/st/st-theme-context.c */
+/* Accent colors from gnome-shell src/st/st-theme-context.c, except slate,
+ * which FuriOS makes black with white text on it */
 #define ACCENT_COLOR_BLUE       "#3584e4"
 #define ACCENT_COLOR_TEAL       "#2190a4"
 #define ACCENT_COLOR_GREEN      "#3a944a"
@@ -59,7 +60,7 @@
 #define ACCENT_COLOR_RED        "#e62d42"
 #define ACCENT_COLOR_PINK       "#d56199"
 #define ACCENT_COLOR_PURPLE     "#9141ac"
-#define ACCENT_COLOR_SLATE      "#6f8396"
+#define ACCENT_COLOR_SLATE      "#000000"
 #define ACCENT_COLOR_FOREGROUND "#ffffff"
 
 /**
@@ -229,6 +230,9 @@ remove_app_stylesheet (PhoshStyleManager *self)
  * Unlike the shell's own stylesheet this cannot be applied live. GTK4 reads
  * the user stylesheet once at startup and does not watch it, so apps pick
  * changes up the next time they are launched.
+ *
+ * The accent is written out only when libadwaita does not know it: a custom
+ * colour, or slate, whose libadwaita colour is not FuriOS's.
  */
 static void
 update_app_stylesheet (PhoshStyleManager *self,
@@ -238,7 +242,7 @@ update_app_stylesheet (PhoshStyleManager *self,
                        const char        *accent_fg_hex,
                        double             opacity,
                        double             text_opacity,
-                       gboolean           custom_accent)
+                       gboolean           pin_accent)
 {
   g_autofree char *css = NULL;
   g_autofree char *accent_css = NULL;
@@ -260,7 +264,7 @@ update_app_stylesheet (PhoshStyleManager *self,
   c_window  = rgba_css (glass, opacity * 1.222);           /* ref .55 */
   c_header  = rgba_css (glass, opacity * 0.889);           /* ref .40 */
   c_view    = rgba_css (glass, opacity * 0.778);           /* ref .35 */
-  if (custom_accent)
+  if (pin_accent)
     c_card  = rgba_css (&accent_rgba, opacity * 0.267);    /* ref .12 */
   else
     c_card  = g_strdup_printf ("alpha(@accent_bg_color,%.3f)",
@@ -271,10 +275,10 @@ update_app_stylesheet (PhoshStyleManager *self,
   c_text    = rgba_css (&fg, text_opacity);
   c_accent  = rgba_css (&accent_rgba, 1.0);
 
-  if (custom_accent)
-    accent_css = g_strdup_printf ("@define-color accent_bg_color %s;\n"
-                                  "@define-color accent_color %s;\n",
-                                  c_accent, c_accent);
+  /* accent_color, the accent as text, is left to libadwaita, which derives
+   * it from accent_bg_color: lighter in dark mode, so black stays readable */
+  if (pin_accent)
+    accent_css = g_strdup_printf ("@define-color accent_bg_color %s;\n", c_accent);
 
   css = g_strdup_printf (
     APP_CSS_MARKER "\n"
@@ -334,7 +338,7 @@ on_accent_color_changed (PhoshStyleManager *self)
   const char *shadow_css;
   GdkRGBA glass;
   double opacity, lightness, wash, text_opacity, text_shadow;
-  gboolean prefer_dark;
+  gboolean prefer_dark, slate = FALSE;
 
   if (self->accent_css_provider) {
     gtk_style_context_remove_provider_for_screen (gdk_screen_get_default (),
@@ -369,6 +373,7 @@ on_accent_color_changed (PhoshStyleManager *self)
     break;
   case G_DESKTOP_ACCENT_COLOR_SLATE:
     color = ACCENT_COLOR_SLATE;
+    slate = TRUE;
     break;
   case G_DESKTOP_ACCENT_COLOR_BLUE:
   default:
@@ -388,6 +393,7 @@ on_accent_color_changed (PhoshStyleManager *self)
                                     (int) (CLAMP (rgba.green, 0.0, 1.0) * 255.0 + 0.5),
                                     (int) (CLAMP (rgba.blue,  0.0, 1.0) * 255.0 + 0.5));
       color = custom_hex;
+      slate = FALSE;
     } else {
       g_warning ("Ignoring unparseable custom accent color '%s'", custom);
     }
@@ -463,8 +469,14 @@ on_accent_color_changed (PhoshStyleManager *self)
       g_warning ("Ignoring unparseable accent text color '%s'", accent_text_custom);
   }
 
-  accent_fg_css = accent_text_hex ? accent_text_hex : fg_css;
-  accent_fg = accent_text_hex ? accent_text_hex : fg_hex;
+  if (accent_text_hex) {
+    accent_fg_css = accent_fg = accent_text_hex;
+  } else if (slate) {
+    accent_fg_css = accent_fg = ACCENT_COLOR_FOREGROUND;
+  } else {
+    accent_fg_css = fg_css;
+    accent_fg = fg_hex;
+  }
 
   /* The drop shadow behind the shell's text. It matters most on the lock
    * screen, whose labels sit over a wallpaper the shell did not choose and
@@ -534,10 +546,10 @@ on_accent_color_changed (PhoshStyleManager *self)
                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
   g_set_object (&self->accent_css_provider, provider);
 
-  /* Keep applications in step with the shell. A custom accent only reaches
-   * them when they next start. */
+  /* Keep applications in step with the shell. A custom accent or slate only
+   * reaches them when they next start. */
   update_app_stylesheet (self, color, &glass, fg_hex, accent_fg, opacity,
-                         CLAMP (text_opacity, 0.2, 1.0), custom_hex != NULL);
+                         CLAMP (text_opacity, 0.2, 1.0), custom_hex != NULL || slate);
 }
 
 
