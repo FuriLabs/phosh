@@ -55,25 +55,13 @@ phosh-media-player button:active {
 }
 
 /*
- * common-furios.css casts every glass surface with a wide, heavily dark
- * rgba(0,0,0,.35) under 32px of blur on the drawer, .2-.25 under 12-24px on
- * the cards. Against a near-black base those are invisible and do the job of
- * separating one dark surface from another. Against a near-white base, and
- * over a bright wallpaper, the same 32px black spread around a pale panel is
- * a dark halo, so it is overridden here.
- *
- * Light-scheme elevation is a tight, faint shadow plus an edge you can see,
- * the shadow says "above", the hairline says "separate". The inset highlight
- * is white here rather than @phosh_fg_color, which in this scheme is a dark
- * line along the top edge of every card */
+ * The inset highlight is white here rather than @phosh_fg_color, which in
+ * this scheme is a dark line along the top edge of every card. The banner,
+ * OSD and modal dialog keep a tight, faint shadow, the drawer and the cards
+ * inside it have none, as their parents clip it */
 widget.phosh-settings-menu > scrolledwindow {
-  box-shadow: 0 1px 3px rgba(0,0,0,.06),
-              inset 0 1px 0 alpha(#ffffff,.55),
+  box-shadow: inset 0 1px 0 alpha(#ffffff,.55),
               inset 0 0 0 1px alpha(@phosh_fg_color,.06);
-}
-
-.phosh-settings-menu {
-  box-shadow: 0 2px 6px rgba(0,0,0,.07);
 }
 
 .phosh-settings-list-box,
@@ -81,8 +69,7 @@ widget.phosh-settings-menu > scrolledwindow {
 phosh-notification-frame .notification-container,
 phosh-call-notification,
 phosh-media-player {
-  box-shadow: 0 1px 3px rgba(0,0,0,.07),
-              inset 0 1px 0 alpha(#ffffff,.55),
+  box-shadow: inset 0 1px 0 alpha(#ffffff,.55),
               inset 0 0 0 1px alpha(@phosh_fg_color,.06);
 }
 
