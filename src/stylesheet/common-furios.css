@@ -83,8 +83,7 @@ widget.phosh-settings-menu > scrolledwindow {
     border-radius: 24px;
     margin-left: 6px;
     margin-right: 6px;
-    box-shadow: 0 4px 24px rgba(0,0,0,.3),
-                inset 0 1px 0 alpha(@phosh_fg_color,.06),
+    box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.06),
                 inset 0 0 0 1px alpha(@phosh_fg_color,.04);
 }
 
@@ -92,7 +91,6 @@ widget.phosh-settings-menu > scrolledwindow {
   background-color: @phosh_glass_tint_color;
   border-bottom-right-radius: 24px;
   border-bottom-left-radius: 24px;
-  box-shadow: 0 12px 32px rgba(0,0,0,.35);
 }
 
 .phosh-settings-menu button.circular:not(:hover):not(:active) {
@@ -211,8 +209,7 @@ button.phosh-settings-details:focus {
   padding: 12px;
   border: none;
   background-color: @phosh_notification_bg_color;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2),
-              inset 0 1px 0 alpha(@phosh_fg_color,.06),
+  box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.06),
               inset 0 0 0 1px alpha(@phosh_fg_color,.04);
 }
 
@@ -241,8 +238,7 @@ button.phosh-settings-details:focus {
   padding: 12px 12px 6px;
   border: none;
   background-color: @phosh_notification_bg_color;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2),
-              inset 0 1px 0 alpha(@phosh_fg_color,.06),
+  box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.06),
               inset 0 0 0 1px alpha(@phosh_fg_color,.04);
 }
 
@@ -1011,8 +1007,7 @@ phosh-notification-frame .notification-container {
   border-radius: 16px;
   border: none;
   background-color: @phosh_notification_bg_color;
-  box-shadow: 0 2px 12px rgba(0,0,0,.25),
-              inset 0 1px 0 alpha(@phosh_fg_color,.07),
+  box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.07),
               inset 0 0 0 1px alpha(@phosh_fg_color,.05);
 }
 
@@ -1070,8 +1065,7 @@ phosh-call-notification {
   border-radius: 16px;
   border: none;
   background-color: @phosh_notification_bg_color;
-  box-shadow: 0 2px 12px rgba(0,0,0,.25),
-              inset 0 1px 0 alpha(@phosh_fg_color,.07),
+  box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.07),
               inset 0 0 0 1px alpha(@phosh_fg_color,.05);
 }
 
@@ -1155,8 +1149,7 @@ phosh-media-player {
   color: @phosh_fg_color;
   border-radius: 16px;
   border:none;
-  box-shadow: 0 2px 12px rgba(0,0,0,.25),
-              inset 0 1px 0 alpha(@phosh_fg_color,.07),
+  box-shadow: inset 0 1px 0 alpha(@phosh_fg_color,.07),
               inset 0 0 0 1px alpha(@phosh_fg_color,.05);
   padding: 6px;
   padding-bottom: 0;
